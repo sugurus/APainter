@@ -11,6 +11,14 @@ import java.util.ArrayList;
  *
  */
 public class Color {
+	/**
+	 * 無色透明を表すargb値
+	 */
+	public static final int ClearColor = 0;
+	/**
+	 * 色がないという情報を表すargb値
+	 */
+	public static final int NotColor = 1;
 	private long colorlong=0;
 	private int colorint=0;
 
