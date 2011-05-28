@@ -11,11 +11,11 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class IntCompressedDataTest {
+public class CompressedIntPixelDataTest {
 
 	public static int w = 100,h = 100;
 	public static int[] i=new int[w*h];
-	public static IntPixelDataBuffer buffer;
+	public static PixelDataIntBuffer buffer;
 	public static CompressedIntPixelData compress;
 
 	@BeforeClass
@@ -24,7 +24,7 @@ public class IntCompressedDataTest {
 		for(int t=0;t<i.length;t++){
 			i[t] = r.nextInt();
 		}
-		buffer = new IntPixelDataBuffer(w, h, i);
+		buffer = new PixelDataIntBuffer(w, h, i);
 		compress = new CompressedIntPixelData(buffer);
 	}
 
@@ -43,7 +43,7 @@ public class IntCompressedDataTest {
 	@Test
 	public void testInflate() {
 		long time= System.currentTimeMillis();
-		IntPixelDataBuffer p = compress.inflate();
+		PixelDataIntBuffer p = compress.inflate();
 		System.out.println((System.currentTimeMillis()-time));
 		int[] ii = p.getData();
 		assertTrue(Arrays.equals(i, ii));

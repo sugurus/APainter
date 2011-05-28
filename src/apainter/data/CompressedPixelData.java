@@ -3,13 +3,40 @@ package apainter.data;
 
 public abstract class CompressedPixelData {
 
-	public CompressedPixelData compress(PixelDataBuffer p){
+	/**
+	 * 渡されたデータを圧縮します
+	 * @param p
+	 * @return
+	 */
+	public static CompressedPixelData compress(PixelDataBuffer p){
 		if(p==null)throw new NullPointerException("p");
-		if(p instanceof IntPixelDataBuffer){
-			return new CompressedIntPixelData((IntPixelDataBuffer)p);
+		if(p instanceof PixelDataIntBuffer){
+			return new CompressedIntPixelData((PixelDataIntBuffer)p);
 		}
-		else if(p instanceof BytePixelDataBuffer){
+		else if(p instanceof PixelDataByteBuffer){
+			return new CompressedBytePixelData((PixelDataByteBuffer)p);
+		}
 
+		throw new RuntimeException(String.format("この形式に対応していません:class %d",p.getClass().getName()));
+	}
+
+	/**
+	 * 渡されたデータの一部を圧縮します。
+	 * @param p
+	 * @param x
+	 * @param y
+	 * @param width
+	 * @param height
+	 * @return
+	 */
+	public static CompressedPixelData compress(PixelDataBuffer p,
+			int x,int y,int width,int height){
+		if(p==null)throw new NullPointerException("p");
+		if(p instanceof PixelDataIntBuffer){
+			return new CompressedIntPixelData((PixelDataIntBuffer)p,x,y,width,height);
+		}
+		else if(p instanceof PixelDataByteBuffer){
+			return new CompressedBytePixelData((PixelDataByteBuffer)p,x,y,width,height);
 		}
 
 		throw new RuntimeException(String.format("この形式に対応していません:class %d",p.getClass().getName()));

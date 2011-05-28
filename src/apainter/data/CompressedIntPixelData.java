@@ -1,26 +1,27 @@
 package apainter.data;
 
-import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
 import apainter.io.AOutPutStream;
 import apainter.io.SeekOutPutStream;
 
-class CompressedIntPixelData extends CompressedPixelData{
+public class CompressedIntPixelData extends CompressedPixelData{
 	private int size;
 
-	public CompressedIntPixelData(IntPixelDataBuffer p) {
+	public CompressedIntPixelData(PixelDataIntBuffer p) {
 		compress(p.getData(), p.width, p.height, 0, 0, p.width, p.height);
 	}
 
-	public CompressedIntPixelData(IntPixelDataBuffer p,int x,int y,int subw,int subh){
+	public CompressedIntPixelData(PixelDataIntBuffer p,int x,int y,int subw,int subh){
 		compress(p.getData(), p.width, p.height, x, y, subw, subh);
 	}
 
 
 
 	private void compress(int[] pixel,int width,int height,int x,int y,int subw,int subh){
+		if(x<0 || y<0||subw<=0||subh <=0)
+			throw new RuntimeException(String.format("x:%d,y:%d,subw:%d,subh:%d",x,y,subw,subh));
 		if(x+subw > width || y+subh > height)
 			throw new RuntimeException(String.format
 					("width=%d,x+subw=%d,  height=%d,y+subh=%d",width,x+subw,height,y+subh));
@@ -98,25 +99,18 @@ class CompressedIntPixelData extends CompressedPixelData{
 		}
 		deflater.end();
 
-		this.binary = oo.getBufferData();
+		this.binary = oo.toByteArray();
 		this.binarySize = oo.size();
 	}
 
 
 
-	private Inflater inf;
-	byte[] imp = new byte[2];
-	//infから2byte読み込む
-	private int read() throws DataFormatException{
-		inf.inflate(imp, 0, 2);
-		return ((imp[0]&0xff)<<8)|(imp[1]&0xff);
-	}
-
 	@Override
-	public synchronized IntPixelDataBuffer inflate() {
+	public synchronized PixelDataIntBuffer inflate() {
 		if(flushed)throw new RuntimeException("flushed");
 		try{
-			inf = new Inflater();
+			byte[] bytes = new byte[2];
+			Inflater inf = new Inflater();
 			inf.setInput(binary, 0, binarySize);
 			int[] data = new int[size];
 			int shift = 24;
@@ -126,14 +120,16 @@ class CompressedIntPixelData extends CompressedPixelData{
 				//1列目　横差分
 				imp = 0;
 				for(index=0;index<width;index++){
-					read = read();
+					inf.inflate(bytes, 0, 2);
+					read = ((bytes[0]&0xff)<<8)|(bytes[1]&0xff);
 					imp = imp-read+255;
 					data[index] |= imp<<shift;
 				}
 
 				//2列目以降　縦差分
 				while(index<size){
-					read = read();
+					inf.inflate(bytes, 0, 2);
+					read = ((bytes[0]&0xff)<<8)|(bytes[1]&0xff);
 					data[index] |= ((data[index-width]>>shift &0xff)-read+255)<<shift;
 					index++;
 				}
@@ -142,8 +138,7 @@ class CompressedIntPixelData extends CompressedPixelData{
 			}
 
 			inf.end();
-			inf = null;
-			IntPixelDataBuffer p = new IntPixelDataBuffer(width, height, data);
+			PixelDataIntBuffer p = new PixelDataIntBuffer(width, height, data);
 			return p;
 		}catch (Exception e) {
 			throw new Error();
