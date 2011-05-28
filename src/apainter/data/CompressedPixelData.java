@@ -1,12 +1,12 @@
 package apainter.data;
 
 
-public abstract class CompressedData {
+public abstract class CompressedPixelData {
 
-	public CompressedData compress(PixelDataBuffer p){
+	public CompressedPixelData compress(PixelDataBuffer p){
 		if(p==null)throw new NullPointerException("p");
 		if(p instanceof IntPixelDataBuffer){
-			return new IntCompressedData((IntPixelDataBuffer)p);
+			return new CompressedIntPixelData((IntPixelDataBuffer)p);
 		}
 		else if(p instanceof BytePixelDataBuffer){
 
@@ -18,6 +18,7 @@ public abstract class CompressedData {
 	protected int width,height;
 	protected byte[] binary;
 	protected int binarySize;
+	protected boolean flushed=false;
 
 	public int getWidth(){
 		return width;
@@ -32,5 +33,14 @@ public abstract class CompressedData {
 	 * @return
 	 */
 	abstract public PixelDataBuffer inflate();
+
+	/**
+	 * 保持しているデータを解放します。
+	 */
+	public void flush(){
+		binary = null;
+		width =height=binarySize= -1;
+		flushed = true;
+	}
 
 }

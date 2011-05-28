@@ -93,14 +93,14 @@ public class SeekOutPutStream extends OutputStream{
 
 	public void writeInt(int i){
 		imp[0] =(byte) (i>>>24);
-		imp[1] =(byte) (i>>16&0xff);
-		imp[2] =(byte) (i>>8&0xff);
+		imp[1] =(byte) (i>>>16&0xff);
+		imp[2] =(byte) (i>>>8&0xff);
 		imp[3] =(byte) (i&0xff);
 		write(imp,0,4);
 	}
 
 	public void writeShort(int i){
-		imp[0]=(byte) (i>>8&0xff);
+		imp[0]=(byte) (i>>>8&0xff);
 		imp[1]=(byte) (i&0xff);
 		write(imp,0,2);
 	}
@@ -110,13 +110,13 @@ public class SeekOutPutStream extends OutputStream{
 		write(imp,0,2);
 	}
 	public void writeLong(long l){
-		imp[0]=(byte) (l>>56&0xff);
-		imp[1]=(byte) (l>>48&0xff);
-		imp[2]=(byte) (l>>40&0xff);
-		imp[3]=(byte) (l>>32&0xff);
-		imp[4]=(byte) (l>>24&0xff);
-		imp[5]=(byte) (l>>16&0xff);
-		imp[6]=(byte) (l>>8&0xff);
+		imp[0]=(byte) (l>>>56&0xff);
+		imp[1]=(byte) (l>>>48&0xff);
+		imp[2]=(byte) (l>>>40&0xff);
+		imp[3]=(byte) (l>>>32&0xff);
+		imp[4]=(byte) (l>>>24&0xff);
+		imp[5]=(byte) (l>>>16&0xff);
+		imp[6]=(byte) (l>>>8&0xff);
 		imp[7]=(byte) (l&0xff);
 		write(imp,0,8);
 	}
