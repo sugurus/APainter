@@ -42,7 +42,7 @@ public class PixelDataIntBuffer extends PixelDataBuffer{
 
 
 	@Override
-	int[] getData() {
+	public int[] getData() {
 		return pixel;
 	}
 

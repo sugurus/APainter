@@ -35,6 +35,101 @@ public class Util {
 		return (data & t)==t;
 	}
 
+	public static int abs(int a){
+		return a < 0 ? -a:a;
+	}
+
+	/**
+	 * a mod b
+	 * @param a
+	 * @param b
+	 * @return 正数値
+	 */
+	public static int mod(int a,int b){
+		if(a < 0){
+			return a%b + b;
+		}else return a %b;
+	}
+
+	/**
+	 * a mod b
+	 * @param a
+	 * @param b
+	 * @return 正数値
+	 */
+	public static double mod(double a,int b){
+		if(a < 0){
+			return a %b +b;
+		}
+		else{
+			return a %b;
+		}
+	}
+
+
+	/**
+	 * 最大値とその場所を返します
+	 * @param arr 0番目に最大値、それ以降は最大値のあった場所を返します。
+	 * @return
+	 */
+	public static int[] max(int... arr){
+		int m = Integer.MIN_VALUE;
+		int t =0;
+		for(int a:arr)
+			if(a > m){
+				m = a;
+				t=0;
+			}else if(m==a){
+				t++;
+			}
+		int[] ret = new int[t+1];
+		ret[0] = m;
+		for(int i=0,l=1;i<ret.length;i++){
+			if(arr[i]==m)ret[l++]=i;
+		}
+		return ret;
+	}
+
+	/**
+	 * 最小値とその場所を返します
+	 * @param arr 0番目に最小値、それ以降は最小値のあった場所を返します。
+	 * @return
+	 */
+	public static int[] min(int... arr){
+		int m = Integer.MAX_VALUE;
+		int t =0;
+		for(int a:arr)
+			if(a < m){
+				m = a;
+				t=0;
+			}else if(m==a){
+				t++;
+			}
+		int[] ret = new int[t+1];
+		ret[0] = m;
+		for(int i=0,l=1;i<ret.length;i++){
+			if(arr[i]==m)ret[l++]=i;
+		}
+		return ret;
+	}
+
+	/**
+	 * 最大値と最小値を返します
+	 * @param arr 順に最大値、最小値
+	 * @return
+	 */
+	public static int[] max_min(int... arr){
+		int mi = Integer.MAX_VALUE,ma = Integer.MIN_VALUE;
+		for(int a:arr){
+			if(a > ma){
+				ma = a;
+			}else if(a < mi){
+				mi = a;
+			}
+		}
+		return new int[]{ma,mi};
+	}
+
 
 
 	/**

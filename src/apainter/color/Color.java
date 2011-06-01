@@ -1,6 +1,11 @@
 package apainter.color;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+
+import apainter.Util;
+import apainter.bind.annotation.BindProperty;
 
 /**
  * ARGBの順に格納されている。<br>
@@ -10,7 +15,7 @@ import java.util.ArrayList;
  * @author nodamushi
  *
  */
-public class Color {
+public class Color implements Cloneable{
 	/**
 	 * 無色透明を表すargb値
 	 */
@@ -22,23 +27,131 @@ public class Color {
 	private long colorlong=0;
 	private int colorint=0;
 
+	public static final String
+	/**
+	 * set16bitARGB が呼び出されたときに使われるプロパティー名
+	 */
+	propertyColorChangeLong="color_lnog",
+	/**
+	 * setARGBが呼び出されたときに使われるプロパティー名
+	 */
+	propertyColorChange="color_int";
 
-	private ArrayList<ColorListner> lis = new ArrayList<ColorListner>();
-
-	public void addColorListner(ColorListner l) {
-		if (!lis.contains(l))
-			lis.add(l);
+	public Color() {}
+	public Color(int argb){
+		setARGB(argb);
+	}
+	public Color(long argb){
+		set16bitARGB(argb);
+	}
+	public Color(Color c){
+		colorint = c.colorint;
+		colorlong = c.colorlong;
 	}
 
-	public void removeColorListner(ColorListner l) {
-		lis.remove(l);
+	public void setHSV(double[] hsv){
+		this.setHSV(hsv[0], hsv[1], hsv[2]);
 	}
+
+	/**
+	 * 正規化されたhsvデータから色を設定します。透明度は変わりません。
+	 * @param h
+	 * @param s
+	 * @param v
+	 */
+	public void setHSV(double h,double s,double v){
+		h = h*360;
+		double hmod =  Util.mod(h, 6);
+		int hi = (int)hmod;
+		double f = hmod-hi;
+		int p,q,t,V;
+		p = (int) (v*(1-s)*0xffff);
+		q = (int) (v*(1-f*s)*0xffff);
+		t = (int) (v*(1-(1-f)*s)*0xffff);
+		V = (int) (v*0xffff);
+		int r,g,b;
+		switch(hi){
+		case 0:
+			r = V;
+			g = t;
+			b = p;
+			break;
+		case 1:
+			r = q;
+			g = V;
+			b = p;
+			break;
+		case 2:
+			r =p;
+			g = V;
+			b = t;
+			break;
+		case 3:
+			r = p;
+			g = q;
+			b = V;
+			break;
+		case 4:
+			r = t;
+			g = p;
+			b = V;
+			break;
+		default:
+			r = V;
+			g = p;
+			b = q;
+		}
+		set16bitARGB(get16bitA(), r, g, b);
+	}
+
+	/**
+	 * 正規化されたhsvデータを返します。hも０～１
+	 * @see http://ja.wikipedia.org/wiki/HSV色空間
+	 * @return
+	 */
+	public double[] getHSV(){
+		double h,s,v;
+		int r,g,b;
+		int max,min,maxpos;
+		{
+			int[] m = Util.max_min(r=get16bitR(),g=get16bitG(),b=get16bitB());
+			max = m[0];min = m[1];
+			if(max==r)maxpos = 0;
+			else if(max==g)maxpos=1;
+			else maxpos = 2;
+		}
+		switch(maxpos){
+		case 0:
+			h = 60d*((g-b))/(max-min);
+			break;
+		case 1:
+			h = 60d*((b-r))/(max-min)+120d;
+			break;
+		default:
+			h = 60d*((r-g))/(max-min)+240d;
+			break;
+		}
+		h /= 360;
+		h = Util.mod(h, 1);
+		s = (double)(max-min)/max;
+		v = max/(double)0xffff;
+		return new double[]{h,s,v};
+	}
+
+	@Override
+	public Color clone() {
+		return new Color(this);
+	}
+
 
 	/**
 	 * 色要素の値が255の時のみ、16bitでの値を0xffffとし、それ以外の場合下位8bitは0になります。
 	 * @param argb
 	 */
+	@BindProperty(propertyColorChange)
 	public void setARGB(int argb){
+		if(colorint==argb)return;
+		int oldValue = colorint;
 		int a = argb>>>24;
 		if(a==0)argb = 0;
 		colorint = argb;
@@ -54,14 +167,17 @@ public class Color {
 		if(g==0xff00)g=0xffff;
 		if(b==0xff00)b=0xffff;
 		colorlong = (long)a << 48 | (long)r << 32 | g << 16 | b;
-		for(ColorListner l:lis)l.colorChanged(this);
+		firePropertyChange(propertyColorChange, oldValue, colorint);
 	}
 
 	public void setARGB(int a,int r,int g,int b){
 		setARGB(a<<24 | r << 16|g<<8|b);
 	}
 
+	@BindProperty(propertyColorChangeLong)
 	public void set16bitARGB(long argb){
+		if(argb == colorlong)return;
+		long oldValue = colorlong;
 		int a = (int) (argb>>>48);
 		if(a==0)argb = 0;
 		colorlong = argb;
@@ -73,7 +189,7 @@ public class Color {
 		g >>=8;
 		b >>=8;
 		colorint =a<<24 | r << 16|g<<8|b;
-		for(ColorListner l:lis)l.colorChanged(this);
+		firePropertyChange(propertyColorChangeLong, oldValue, colorlong);
 	}
 
 	public void set16bitARGB(int a,int r,int g,int b){
@@ -119,4 +235,24 @@ public class Color {
 	public java.awt.Color toAwtColor(){
 		return new java.awt.Color(colorint, true);
 	}
+
+
+	private ArrayList<PropertyChangeListener> propertylistener = new ArrayList<PropertyChangeListener>();
+
+	public void addPropertyChangeListener(PropertyChangeListener l) {
+		if (!propertylistener.contains(l))
+			propertylistener.add(l);
+	}
+
+	public void removePropertyChangeListener(PropertyChangeListener l) {
+		propertylistener.remove(l);
+	}
+
+	public void firePropertyChange(String name,Object oldValue,Object newValue){
+		PropertyChangeEvent e = new PropertyChangeEvent(this, name, oldValue, newValue);
+		for(PropertyChangeListener l:propertylistener){
+			l.propertyChange(e);
+		}
+	}
+
 }

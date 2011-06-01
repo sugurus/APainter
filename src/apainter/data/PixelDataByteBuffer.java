@@ -47,7 +47,7 @@ public class PixelDataByteBuffer extends PixelDataBuffer{
 
 
 	@Override
-	byte[] getData() {
+	public byte[] getData() {
 		return pixel;
 	}
 

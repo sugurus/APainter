@@ -1,5 +1,9 @@
 package apainter.data;
 
+import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.Rectangle;
+
 
 /**
  * 渡されたデータはコピーせずそのまま保持します。
@@ -50,11 +54,51 @@ public abstract class PixelDataBuffer {
 
 
 	public final int width,height;
+	private final Rectangle r = new Rectangle();
 
 	public PixelDataBuffer(int w,int h) {
 		if(w <=0 || h <= 0)throw new RuntimeException(String.format("size error w:%d,h%d",w,h));
 		width = w;
 		height =h;
+		r.height = h;
+		r.width = w;
 	}
+
+	public boolean contains(Rectangle rectangle){
+		return r.contains(rectangle);
+	}
+
+	public Rectangle crossRegion(Rectangle rectangle){
+		Rectangle ret = r.intersection(rectangle);
+		return ret;
+	}
+
+	public int getWidth(){
+		return width;
+	}
+	public int getHeight(){
+		return height;
+	}
+	public Dimension getSize(){
+		return new Dimension(width, height);
+	}
+
+	/**
+	 * 0,0,width,heightの矩形を返します
+	 * @return
+	 */
+	public Rectangle getBounds(){
+		return new Rectangle(0, 0, width, height);
+	}
+
+	/**
+	 * p.x,p.y,width,heightの矩形を返します
+	 * @param p
+	 * @return
+	 */
+	public Rectangle getBounds(Point p){
+		return new Rectangle(p.x,p.y,width,height);
+	}
+
 	abstract Object getData();
 }

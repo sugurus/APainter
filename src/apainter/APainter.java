@@ -11,6 +11,7 @@ import javax.swing.SwingUtilities;
 
 import apainter.gui.splash.Splash;
 
+
 public class APainter
 //extends JApplet
 {
