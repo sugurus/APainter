@@ -46,4 +46,13 @@ public class PixelDataIntBuffer extends PixelDataBuffer{
 		return pixel;
 	}
 
+	public void setData(int b,int x,int y){
+		if(!contains(x,y))return;
+		pixel[x+y*width]=b;
+	}
+	public int getData(int x,int y){
+		if(!contains(x,y))throw new OutBoundsException(getBounds(), x, y);
+		return pixel[x+y*width];
+	}
+
 }

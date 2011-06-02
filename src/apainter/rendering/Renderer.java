@@ -7,10 +7,6 @@ import apainter.color.Color;
 import apainter.data.PixelDataBuffer;
 
 public interface Renderer {
-	final int div255shift23 = 32896;//(1<<23)/255
-	final int div255shift24 = 65793;//(1<<24)/255
-	final int ClearColor = Color.ClearColor;
-	final int NullColor = Color.NotColor;
 	/**
 	 * baseにoverで与えられた画素をbase上の点pを左上（原点）の位置とし、
 	 * clipで与えられる範囲に描き込みます。<br>

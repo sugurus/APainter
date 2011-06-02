@@ -18,7 +18,7 @@ public class APainter
 	static private APainter apainter=null;
 	static public JComponent getContentPane(){
 		if(apainter.isApplet){
-			//TODO
+			//TODO applet
 			return null;
 		}else return (JComponent) apainter.frame.getContentPane();
 	}
@@ -62,7 +62,7 @@ public class APainter
 	}
 
 	public void init(String[] args){
-		//TODO
+		//TODO init
 		frame.setDefaultCloseOperation(3);
 
 	}

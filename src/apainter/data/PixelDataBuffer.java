@@ -3,6 +3,7 @@ package apainter.data;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.geom.Point2D;
 
 
 /**
@@ -62,6 +63,18 @@ public abstract class PixelDataBuffer {
 		height =h;
 		r.height = h;
 		r.width = w;
+	}
+
+	public boolean contains(Point2D p){
+		double x = p.getX(),y = p.getY();
+		return x >=0 && x < width && y>=0 && y <height;
+	}
+
+	public boolean contains(double x, double y) {
+		return x >=0 && x < width && y>=0 && y <height;
+	}
+	public boolean contains(int x, int y) {
+		return x >=0 && x < width && y>=0 && y <height;
 	}
 
 	public boolean contains(Rectangle rectangle){
