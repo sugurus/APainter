@@ -53,6 +53,7 @@ public class DefaultRenderer implements Renderer2{
 
 	private void rendering_mask(PixelDataIntBuffer base, PixelDataIntBuffer over, Point p,
 			Rectangle clip, RenderingOption option) {
+
 		final int base_width = base.width;
 		final int over_width = over.width;
 		final int[] basepixel = base.getData(),overpixel = over.getData();
@@ -79,7 +80,7 @@ public class DefaultRenderer implements Renderer2{
 				int fa = calca(a, oa);
 				if(a !=0){
 					int a1 = (255-oa > a)? a:255-oa;
-					int k = 65536/(a+oa);
+					int k = 65536/(a1+oa);
 					int t = oa + a1-1;
 					set(basepixel,
 							argb(fa,
@@ -115,8 +116,8 @@ public class DefaultRenderer implements Renderer2{
 				int g = g(c);
 				int b = b(c);
 
-				int oc = layeralph(pixel(overpixel,x-px,y-py,over_width),layer);
-				int oa = a(oc);
+				int oc = pixel(overpixel,x-px,y-py,over_width);
+				int oa = layeralph(a(oc),layer);
 				int or = r(oc);
 				int og = g(oc);
 				int ob = b(oc);
@@ -124,7 +125,7 @@ public class DefaultRenderer implements Renderer2{
 				int fa = calca(a, oa);
 				if(a !=0){
 					int a1 = (255-oa > a)? a:255-oa;
-					int k = 65536/(a+oa);
+					int k = 65536/(a1+oa);
 					int t = oa + a1-1;
 					set(basepixel,
 							argb(fa,
@@ -179,7 +180,7 @@ public class DefaultRenderer implements Renderer2{
 				if(a !=0){
 					if(fa!=0){
 						int a1 = (255-oa > a)? a:255-oa;
-						int k = 65536/(a+oa);
+						int k = 65536/(a1+oa);
 						int t = oa + a1-1;
 						r2 =val(r,or,a1,oa,t,k);
 						g2 =val(g,og,a1,oa,t,k);
@@ -199,7 +200,7 @@ public class DefaultRenderer implements Renderer2{
 				int fa2 = calca(a2, oa2);
 				if(a2 !=0){
 					int a1 = (255-oa2 > a2)? a2:255-oa2;
-					int k = 65536/(a2+oa2);
+					int k = 65536/(a1+oa2);
 					int t = oa2 + a1-1;
 					set(basepixel,
 							argb(fa2,
@@ -253,7 +254,7 @@ public class DefaultRenderer implements Renderer2{
 				if(a !=0){
 					if(fa!=0){
 						int a1 = (255-oa > a)? a:255-oa;
-						int k = 65536/(a+oa);
+						int k = 65536/(a1+oa);
 						int t = oa + a1-1;
 						r2 =val(r,or,a1,oa,t,k);
 						g2 =val(g,og,a1,oa,t,k);
@@ -273,7 +274,7 @@ public class DefaultRenderer implements Renderer2{
 				int fa2 = calca(a2, oa2);
 				if(a2 !=0){
 					int a1 = (255-oa2 > a2)? a2:255-oa2;
-					int k = 65536/(a2+oa2);
+					int k = 65536/(a1+oa2);
 					int t = oa2 + a1-1;
 					set(basepixel,
 							argb(fa2,
@@ -327,7 +328,7 @@ public class DefaultRenderer implements Renderer2{
 				if(a !=0){
 					if(fa!=0){
 						int a1 = (255-oa > a)? a:255-oa;
-						int k = 65536/(a+oa);
+						int k = 65536/(a1+oa);
 						int t = oa + a1-1;
 						r2 =val(r,or,a1,oa,t,k);
 						g2 =val(g,og,a1,oa,t,k);
@@ -347,7 +348,7 @@ public class DefaultRenderer implements Renderer2{
 				int fa2 = calca(a2, oa2);
 				if(a2 !=0){
 					int a1 = (255-oa2 > a2)? a2:255-oa2;
-					int k = 65536/(a2+oa2);
+					int k = 65536/(a1+oa2);
 					int t = oa2 + a1-1;
 					set(basepixel,
 							argb(fa2,
@@ -367,6 +368,7 @@ public class DefaultRenderer implements Renderer2{
 	private void rendering(PixelDataIntBuffer base, PixelDataIntBuffer over,
 			PixelDataIntBuffer over2, Point p, Rectangle clip,
 			RenderingOption option) {
+		System.out.println("kokoda");
 		final int base_width = base.width;
 		final int over_width = over.width;
 		final int over2_width = over2.width;
@@ -400,7 +402,7 @@ public class DefaultRenderer implements Renderer2{
 				if(a !=0){
 					if(fa!=0){
 						int a1 = (255-oa > a)? a:255-oa;
-						int k = 65536/(a+oa);
+						int k = 65536/(a1+oa);
 						int t = oa + a1-1;
 						r2 =val(r,or,a1,oa,t,k);
 						g2 =val(g,og,a1,oa,t,k);
@@ -420,7 +422,7 @@ public class DefaultRenderer implements Renderer2{
 				int fa2 = calca(a2, oa2);
 				if(a2 !=0){
 					int a1 = (255-oa2 > a2)? a2:255-oa2;
-					int k = 65536/(a2+oa2);
+					int k = 65536/(a1+oa2);
 					int t = oa2 + a1-1;
 					set(basepixel,
 							argb(fa2,

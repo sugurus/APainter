@@ -1,5 +1,8 @@
 package apainter.data;
 
+import java.awt.Rectangle;
+import java.util.Arrays;
+
 public class PixelDataIntBuffer extends PixelDataBuffer{
 
 	public static PixelDataIntBuffer create(int w,int h){
@@ -40,19 +43,60 @@ public class PixelDataIntBuffer extends PixelDataBuffer{
 		this.pixel = pixel;
 	}
 
+	public void setData(int b,Rectangle r){
+		r = getBounds().intersection(r);
+		for(int y=r.y,e = r.y+r.height,ex = r.x+r.width;y<e;y++){
+			for(int x=r.x;x<ex;x++){
+				pixel[x+y*width]=b;
+			}
+		}
+	}
+
+	public void fill(int b){
+		Arrays.fill(pixel, b);
+	}
+
+	public void setData(int[] b,Rectangle r){
+		if(b.length < r.width*r.height)throw new IllegalArgumentException(String.format("b.length(%d) < r.width(%d)*r.height(%d)!",b.length,r.width,r.height));
+		Rectangle r2 = intersection(r);
+		if(r2.isEmpty())return;
+		int xx = r2.x-r.x;
+		int yy = r2.y -r.y;
+		for(int y=0,ey=r2.height;y<ey;y++){
+			System.arraycopy(b, xx+(y+yy)*r.width, pixel, r2.x+(r2.y+y)*width, r2.width);
+		}
+	}
+
 
 	@Override
 	public int[] getData() {
 		return pixel;
 	}
 
-	public void setData(int b,int x,int y){
+	public final void setData(int b,int x,int y){
 		if(!contains(x,y))return;
 		pixel[x+y*width]=b;
 	}
 	public int getData(int x,int y){
 		if(!contains(x,y))throw new OutBoundsException(getBounds(), x, y);
 		return pixel[x+y*width];
+	}
+
+	public int[] copy(int[] distination){
+		if(distination ==null || distination.length < pixel.length)distination = new int[pixel.length];
+		System.arraycopy(pixel, 0, distination, 0, pixel.length);
+		return distination;
+	}
+
+	public int[] copy(int[] distination,Rectangle r){
+		if(distination==null ||distination.length < r.width*r.height){
+			distination = new int[r.width*r.height];
+		}
+		for(int y=r.y,ey=r.y+r.height,i=0;y<ey;y++){
+			System.arraycopy(pixel, y*width, distination, i, r.width);
+			i+=r.width;
+		}
+		return distination;
 	}
 
 }

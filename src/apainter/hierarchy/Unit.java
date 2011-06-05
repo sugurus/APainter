@@ -22,7 +22,7 @@ public class Unit<E> extends Element<E>{
 	}
 
 	@SuppressWarnings("unchecked")
-	public Collection<Element<E>> getElements() {
+	public ArrayList<Element<E>> getElements() {
 		return (ArrayList<Element<E>>)elements.clone();
 	}
 
@@ -81,14 +81,6 @@ public class Unit<E> extends Element<E>{
 	@Override
 	public boolean isUnit() {
 		return true;
-	}
-
-	public String ls(){
-		StringBuilder s = new StringBuilder();
-		for(Element<E> e:elements){
-			s.append(e).append("\n");
-		}
-		return s.toString();
 	}
 
 	void move(Element<E> e,int pos){

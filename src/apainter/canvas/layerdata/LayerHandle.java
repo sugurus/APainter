@@ -1,6 +1,6 @@
 package apainter.canvas.layerdata;
 
-public interface LayerHandle extends Renderable{
+public interface LayerHandle{
 	/**
 	 * レイヤーもしくはグループのオリジナルのIDを返します。<br>
 	 * 他のインスタンスとかぶってはいけません。
@@ -68,5 +68,8 @@ public interface LayerHandle extends Renderable{
 	public void createMask();
 
 	public boolean isPixelContainer();
-	public boolean isPixelDrawable();
+	public boolean isPixelSetable();
+
+	public boolean isGroup();
+	public boolean isLayer();
 }

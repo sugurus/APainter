@@ -1,8 +1,10 @@
 package apainter.rendering;
 
+import apainter.rendering.impl.cpu.*;
+
 
 public enum ColorMode {
-	Default(0,"default") ,Plus(1,"plus") ,
+	Default(0,"default",new DefaultRenderer()) ,Plus(1,"plus") ,
 	Subtractive(2,"subtractive") ,Multip(3,"multip") ,
 	Bright(4,"bright") ,Darken(5,"darken"),Burn(6,"burn"),
 	Dodge(7,"dodge"),SoftLight(8,"softlight"),
@@ -39,8 +41,19 @@ public enum ColorMode {
 
 	public final int num;
 	public final String config;
-	private ColorMode(int n) {num = n;config="unknown";}
-	private ColorMode(int n,String s){num = n;config=s;}
+	private final Renderer2 cpuRender;
+	private ColorMode(int n) {this(n,"unknown");}
+	private ColorMode(int n,String s){this(n,s,null);}
+
+	private ColorMode(int n,String s,Renderer2 cpuRender){
+		num = n;config=s;
+		this.cpuRender = cpuRender;
+	}
+
+	public Renderer2 getCPURenderer(){
+		return cpuRender;
+	}
+
 	static public ColorMode getEffects(int num){
 		for(ColorMode e : effects)if(num == e.num)return e;
 		return NULL;

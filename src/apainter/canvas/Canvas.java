@@ -4,9 +4,13 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 
+import javax.swing.JComponent;
+
 import apainter.Device;
 import apainter.bind.annotation.BindProperty;
 import apainter.canvas.event.PainterEvent;
+import apainter.canvas.layerdata.CPULayerData;
+import apainter.canvas.layerdata.LayerData;
 
 public class Canvas {
 
@@ -20,6 +24,7 @@ public class Canvas {
 	private String author,canvasname;
 	private long makeDay,workTime,actionCount;
 	private long createdTime;//このCanvasが作成された時間
+	private LayerData layerdata;
 	//-----------------------------------------------------------------
 
 	private CanvasThread thread;
@@ -70,6 +75,7 @@ public class Canvas {
 
 	private void initCPU(){
 		thread = new CPUThread();
+		layerdata = new CPULayerData(this);
 	}
 
 	private void initGPU(){
@@ -140,6 +146,11 @@ public class Canvas {
 		if(!old.equals(this.canvasname)){
 			firePropertyChange(canvasNameChangeProperty, old, this.canvasname);
 		}
+	}
+
+	//TODO TestMethod
+	public JComponent testMethod_getPanel(){
+		return layerdata.testMethod_createViewPanel();
 	}
 
 

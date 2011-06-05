@@ -2,7 +2,7 @@ package apainter.canvas.layerdata;
 
 import apainter.data.PixelDataBuffer;
 
-abstract class Mask implements PixelDrawable{
+abstract class Mask implements PixelSetable{
 
 	protected boolean enable=false;
 

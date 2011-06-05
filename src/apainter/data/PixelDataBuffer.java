@@ -81,11 +81,6 @@ public abstract class PixelDataBuffer {
 		return r.contains(rectangle);
 	}
 
-	public Rectangle crossRegion(Rectangle rectangle){
-		Rectangle ret = r.intersection(rectangle);
-		return ret;
-	}
-
 	public int getWidth(){
 		return width;
 	}
@@ -102,6 +97,10 @@ public abstract class PixelDataBuffer {
 	 */
 	public Rectangle getBounds(){
 		return new Rectangle(0, 0, width, height);
+	}
+
+	public Rectangle intersection(Rectangle r){
+		return new Rectangle(0, 0, width, height).intersection(r);
 	}
 
 	/**

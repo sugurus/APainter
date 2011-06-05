@@ -5,10 +5,11 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 
 import apainter.bind.annotation.BindProperty;
+import apainter.drawer.DrawAccepter;
 import apainter.rendering.ColorMode;
 
 import static apainter.canvas.CanvasConstant.*;
-abstract class DefaultLayer implements Layer,PixelDrawable,MaskContainer{
+abstract class DefaultLayer implements Layer,PixelSetable,MaskContainer,DrawAccepter{
 
 	private final int id;
 	private String name;
@@ -68,7 +69,7 @@ abstract class DefaultLayer implements Layer,PixelDrawable,MaskContainer{
 	}
 
 	@Override
-	public boolean isPixelDrawable() {
+	public boolean isPixelSetable() {
 		return true;
 	}
 
@@ -107,6 +108,15 @@ abstract class DefaultLayer implements Layer,PixelDrawable,MaskContainer{
 				ColorMode.Default
 
 		};
+	}
+
+	@Override
+	public boolean isLayer() {
+		return true;
+	}
+	@Override
+	public boolean isGroup() {
+		return false;
 	}
 
 	//propertychangelistener---------------------------------

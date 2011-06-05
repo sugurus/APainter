@@ -20,7 +20,7 @@ class UtilR {
 		return c>>>24;
 	}
 	static final int r(int c){
-		return c >> 18 &0xff;
+		return c >> 16 &0xff;
 	}
 	static final int g(int c){
 		return c >> 8 & 0xff;

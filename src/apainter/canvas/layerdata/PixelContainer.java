@@ -1,6 +1,6 @@
 package apainter.canvas.layerdata;
 
-public interface PixelContainer {
+interface PixelContainer {
 	/**
 	 * 点(x,y)の色を返します。
 	 * @param x

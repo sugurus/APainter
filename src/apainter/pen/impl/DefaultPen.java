@@ -2,6 +2,7 @@ package apainter.pen.impl;
 
 import java.awt.Dimension;
 
+import apainter.construct.DimensionDouble;
 import apainter.data.PixelDataBuffer;
 import apainter.pen.PenShape;
 
@@ -9,7 +10,7 @@ import apainter.pen.PenShape;
 public class DefaultPen implements PenShape{
 
 	@Override
-	public PixelDataBuffer getFootPring(double x, double y, double w, double h) {
+	public PixelDataBuffer getFootPrint(double x, double y, double w, double h) {
 
 		return null;
 	}
@@ -20,7 +21,7 @@ public class DefaultPen implements PenShape{
 	}
 
 	@Override
-	public Dimension getSize() {
+	public DimensionDouble getSize() {
 		return null;
 	}
 

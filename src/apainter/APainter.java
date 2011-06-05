@@ -19,17 +19,19 @@ public class APainter
 	static public JComponent getContentPane(){
 		if(apainter.isApplet){
 			//TODO applet
+			System.out.println("koko");
 			return null;
 		}else return (JComponent) apainter.frame.getContentPane();
 	}
 	public static synchronized void main(final String[] args) {
 		if(apainter!=null)return;
 		apainter = new APainter();
-		apainter.isApplet = true;
+		apainter.isApplet = false;
 		apainter.frame = new JFrame("APainter");
 		final Splash sw = new Splash();
 		sw.showSplashWindow();
 		apainter.init(args);
+		Main.main(apainter);
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 				sw.closeSplashWindow();

@@ -5,7 +5,7 @@ import java.awt.Rectangle;
 import apainter.data.PixelDataBuffer;
 import apainter.rendering.ColorMode;
 
-public interface Renderable {
+interface Renderable {
 	/**
 	 * destinationの原点にあわせてrの範囲をdestinationに描き込みます。
 	 * @param destination

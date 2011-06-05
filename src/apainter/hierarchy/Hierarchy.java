@@ -1,5 +1,7 @@
 package apainter.hierarchy;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -57,9 +59,31 @@ public class Hierarchy<E> {
 		}
 	}
 
+	/**
+	 * 要素を追加するときは必ずここを利用します<br>
+	 * ここをオーバーライドすれば、サブクラスは追加される要素を全て取得できます。<br>
+	 * かならず、super.addを呼び出してください
+	 * @param e
+	 */
+	protected void add(Element<E> e){
+		elements.add(e);
+	}
+
+	protected void addAll(Collection<Element<E>> e){
+		elements.addAll(e);
+	}
+
+	protected void remove(Element<E> e){
+		elements.remove(e);
+	}
+
+	protected void removeAll(Collection<Element<E>> e){
+		elements.removeAll(e);
+	}
+
 	public Element<E> addElement(E property){
 		Element<E> e = new Element<E>(property, this);
-		elements.add(e);
+		add(e);
 		toplevel.appendElement(e);
 		_create(e);
 		return e;
@@ -67,7 +91,7 @@ public class Hierarchy<E> {
 
 	public Unit<E> addUnit(E property){
 		Unit<E> e = new Unit<E>(property, this);
-		elements.add(e);
+		add(e);
 		toplevel.appendElement(e);
 		_create(e);
 		return e;
@@ -75,7 +99,7 @@ public class Hierarchy<E> {
 
 	public Element<E> addElementToCurrentUnit(E property){
 		Element<E> e = new Element<E>(property, this);
-		elements.add(e);
+		add(e);
 		currentunit.appendElement(e);
 		_create(e);
 		return e;
@@ -83,7 +107,7 @@ public class Hierarchy<E> {
 
 	public Unit<E> addUnitToCurrentUnit(E property){
 		Unit<E> e = new Unit<E>(property, this);
-		elements.add(e);
+		add(e);
 		currentunit.appendElement(e);
 		_create(e);
 		return e;
@@ -104,7 +128,7 @@ public class Hierarchy<E> {
 	public void removeElement(Element<E> e){
 		if(contains(e)){
 			e.getUnit().removeElement(e);
-			elements.remove(e);
+			remove(e);
 			ArrayList<Element<E>> lis = new ArrayList<Element<E>>();
 			if(e.isUnit()){
 				ArrayList<Element<E>> es = ((Unit<E>)e).elements;
@@ -112,7 +136,7 @@ public class Hierarchy<E> {
 				for(Element<E> ee:es){
 					if(e.isUnit())unitAdd(lis, (Unit<E>)ee);
 				}
-				elements.removeAll(lis);
+				removeAll(lis);
 			}
 			_delete(e,lis);
 		}
@@ -127,7 +151,7 @@ public class Hierarchy<E> {
 
 	public boolean reAddElement(Element<E> e){
 		if(!contains(e)&&e.getUnit()==null){
-			elements.add(e);
+			add(e);
 			toplevel.appendElement(e);
 			ArrayList<Element<E>> lis = new ArrayList<Element<E>>();
 			if(e.isUnit()){
@@ -136,7 +160,7 @@ public class Hierarchy<E> {
 				for(Element<E> ee:es){
 					if(e.isUnit())unitAdd(lis, (Unit<E>)ee);
 				}
-				elements.addAll(lis);
+				addAll(lis);
 			}
 			_readd(e,lis);
 			return true;
@@ -235,6 +259,17 @@ public class Hierarchy<E> {
 	public boolean contains(Element<E> e){
 		return elements.contains(e);
 	}
+
+
+	public boolean contains(E property){
+		for(Element<E> e:elements){
+			if(e.getProperty() == property){
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private boolean containsAll(Element<?>... e){
 		for(Element<?> ee:e){
 			if(!elements.contains(ee))return false;
@@ -243,7 +278,25 @@ public class Hierarchy<E> {
 	}
 
 
+	private ArrayList<PropertyChangeListener> propertylistener = new ArrayList<PropertyChangeListener>();
 
+	public void addPropertyChangeListener(PropertyChangeListener l) {
+		if (!propertylistener.contains(l))
+			propertylistener.add(l);
+	}
+
+	public void removePropertyChangeListener(PropertyChangeListener l) {
+		propertylistener.remove(l);
+	}
+
+	protected void firePropertyChange(String name, Object oldValue,
+			Object newValue) {
+		PropertyChangeEvent e = new PropertyChangeEvent(this, name, oldValue,
+				newValue);
+		for (PropertyChangeListener l : propertylistener) {
+			l.propertyChange(e);
+		}
+	}
 
 
 }
