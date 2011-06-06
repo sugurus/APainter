@@ -41,16 +41,16 @@ public enum ColorMode {
 
 	public final int num;
 	public final String config;
-	private final Renderer2 cpuRender;
+	private final Renderer cpuRender;
 	private ColorMode(int n) {this(n,"unknown");}
 	private ColorMode(int n,String s){this(n,s,null);}
 
-	private ColorMode(int n,String s,Renderer2 cpuRender){
+	private ColorMode(int n,String s,Renderer cpuRender){
 		num = n;config=s;
 		this.cpuRender = cpuRender;
 	}
 
-	public Renderer2 getCPURenderer(){
+	public Renderer getCPURenderer(){
 		return cpuRender;
 	}
 
