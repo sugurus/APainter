@@ -10,9 +10,16 @@ import java.awt.image.DirectColorModel;
 import java.awt.image.MemoryImageSource;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.swing.JComponent;
 
+import apainter.Util;
 import apainter.canvas.Canvas;
 import apainter.data.PixelDataIntBuffer;
 import apainter.drawer.DrawEvent;
@@ -25,6 +32,8 @@ public class CPULayerData extends LayerData{
 	private PixelDataIntBuffer renderingbuffer;
 	private Image renderingimage;
 	private MemoryImageSource imagesource;
+	private int core = Runtime.getRuntime().availableProcessors();
+	private ExecutorService pool = Executors.newFixedThreadPool(core);
 
 
 	public CPULayerData(Canvas canvas) {
@@ -54,9 +63,10 @@ public class CPULayerData extends LayerData{
 
 	int i=0;
 	@Override
-	protected Layer createLayer() {
+	protected Layer createLayer(int id) {
 		//TODO 名前決め
-		CPULayer l = new CPULayer(getNextLayerID(), "test", getWidth(), getHeight());
+		CPULayer l = new CPULayer(id, "test", getWidth(), getHeight());
+		//TODO 削除
 		if(i==0){
 			int[] colors = new int[400*200];
 			Arrays.fill(colors, 0xffff0000);
@@ -90,22 +100,51 @@ public class CPULayerData extends LayerData{
 		if(clip==null)return;
 		clip = rect().intersection(clip);
 		if(clip.isEmpty())return;
-		renderingbuffer.setData(0xffffffff, clip);
-		Unit<LayerHandler> unit =layerlist.getTopLevelUnit();
-
-		ArrayList<Element<LayerHandler>> elements = unit.getElements();
-
-
-
-
-		for(Element<LayerHandler> e:elements){
-			Layer l = e.getProperty().getLayer();
-			l.render(renderingbuffer, clip);
+		Rectangle[] rects = Util.partition(clip, core);
+		ArrayList<Runnable> runs = new ArrayList<Runnable>(core);
+		for(Rectangle r:rects){
+			if(r.isEmpty())continue;
+			runs.add(new _Rendering(r));
 		}
 
+		exec(runs);
+	}
 
-		imagesource.newPixels(clip.x, clip.y, clip.width, clip.height);
+	private void exec(Collection<Runnable> run){
+		@SuppressWarnings("rawtypes")
+		Future[] fs = new Future[run.size()];
+		int i=0;
+		for(Runnable r:run){
+			fs[i++] = pool.submit(r);
+		}
+		for(Future<?> f:fs){
+			try {
+				f.get();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
+	private class _Rendering implements Runnable{
+		Rectangle clip;
+		_Rendering(Rectangle clip) {this.clip = clip;}
+		public void run(){
+			renderingbuffer.setData(0xffffffff, clip);
+			Unit<LayerHandler> unit =layerlist.getTopLevelUnit();
+
+			ArrayList<Element<LayerHandler>> elements = unit.getElements();
+
+
+			for(Element<LayerHandler> e:elements){
+				Layer l = e.getProperty().getLayer();
+				l.render(renderingbuffer, clip);
+			}
+
+			imagesource.newPixels(clip.x, clip.y, clip.width, clip.height);
+		}
 	}
 
 

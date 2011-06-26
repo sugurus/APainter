@@ -9,7 +9,6 @@ import apainter.drawer.DrawEvent;
 
 abstract public class LayerData {
 	protected final Canvas canvas;
-	private int nextID=0;
 	protected LayerList layerlist = new LayerList();
 
 
@@ -18,9 +17,9 @@ abstract public class LayerData {
 		this.canvas = canvas;
 		layerlist = new LayerList();
 		LayerHandler lh;
-		layerlist.addElement(lh=makeLayer());
+		layerlist.addElement(lh=makeLayer(12));
 		lh.setTransparent(127);
-		layerlist.addElement(lh=makeLayer());
+		layerlist.addElement(lh=makeLayer(3));
 		lh.setTransparent(127);
 
 	}
@@ -33,20 +32,25 @@ abstract public class LayerData {
 		return canvas.getHeight();
 	}
 
-	public LayerHandler makeLayer(){
-		Layer l = createLayer();
+	private LayerHandler makeLayer(int id){
+		Layer l = createLayer(id);
 		return l.getHandler();
 	}
+	//TODO レイヤーの追加の外部関数
 
-	protected abstract Layer createLayer();
+	/**
+	 * @param id 作成するレイヤーに設定するid
+	 * @return
+	 */
+	protected abstract Layer createLayer(int id);
 
 	/*TODO Group作成
-	 * public LayerHandler makeGroup(){
-	 * Layer l = createGroup();
+	 * private LayerHandler makeGroup(int id){
+	 * Layer l = createGroup(id);
 	 * return l.getHandler();
 	 * }
 	 *
-	 * protected abstract Group  createGropu();
+	 * protected abstract Group  createGropu(int id);
 	 */
 
 	abstract void draw(DrawEvent e);
@@ -55,13 +59,5 @@ abstract public class LayerData {
 	abstract void rendering(Rectangle clip);
 
 	public abstract JComponent testMethod_createViewPanel();
-
-	/**
-	 * レイヤーが設定すべきIDを返します。
-	 * @return
-	 */
-	int getNextLayerID(){
-		return nextID++;
-	}
 
 }

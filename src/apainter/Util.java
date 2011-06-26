@@ -1,6 +1,11 @@
 package apainter;
 
+import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.Rectangle;
+import java.awt.image.ImageObserver;
 import java.io.File;
+import java.util.ArrayList;
 
 public class Util {
 
@@ -8,10 +13,19 @@ public class Util {
 		return (data&flag)!=0;
 	}
 
+	public static Dimension getImageSize(Image img){
+		return new Dimension(img.getWidth(null),img.getHeight(null));
+	}
+
+	public static Dimension getImageSize(Image img,ImageObserver ob){
+		return new Dimension(img.getWidth(ob),img.getHeight(null));
+	}
+
+
 	/**
 	 * 渡されたフラグの内どれかがたっていればtrue
 	 * @param data
-	 * @param flag
+	 * @param flags
 	 * @return
 	 */
 	public static boolean bitFlagsOr(int data,int... flag){
@@ -158,6 +172,55 @@ public class Util {
 		return getSuffix(f.toString());
 	}
 
+
+
+	//XXX 誰か教えて！うまい領域分割の方法
+	/**
+	 * m分割した領域を返します。
+	 * @param r
+	 * @param m
+	 * @return
+	 */
+	public static Rectangle[] partition(Rectangle r,int m){
+		if(m <1)return null;
+		if(r.height%m==0){
+			Rectangle[] ret = new Rectangle[m];
+			int h = r.height/m;
+			for(int i=0;i<m;i++){
+				ret[i] = new Rectangle(0,i*h,r.width,h);
+			}
+			return ret;
+		}else if(r.width%m ==0){
+			Rectangle[] ret = new Rectangle[m];
+			int w = r.width/m;
+			for(int i=0;i<m;i++){
+				ret[i] = new Rectangle(i*w,0,w,r.height);
+			}
+			return ret;
+		}else{
+
+			//ここひどいよなぁ。
+			Rectangle[] ret = new Rectangle[m];
+
+			if(r.width  < r.height){
+				int ii = 0;
+				for(int i=0;i<m;i++){
+					int i1 = (i+1)*r.height/m;
+					ret[i] = new Rectangle(0,ii,r.width,i1-ii);
+					ii = i1;
+				}
+			}else{
+				int ii = 0;
+				for(int i=0;i<m;i++){
+					int i1 = (i+1)*r.width/m;
+					ret[i] = new Rectangle(ii,0,i1-ii,r.height);
+					ii = i1;
+				}
+			}
+
+			return ret;
+		}
+	}
 
 
 

@@ -8,7 +8,7 @@ import apainter.data.PixelDataIntBuffer;
 import apainter.rendering.Renderer;
 import apainter.rendering.RenderingOption;
 
-import static apainter.rendering.impl.cpu.UtilR.*;
+import static apainter.Utility_PixelFunction.*;
 public class DefaultRenderer implements Renderer{
 
 	@Override

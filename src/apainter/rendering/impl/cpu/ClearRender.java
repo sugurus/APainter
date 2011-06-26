@@ -7,7 +7,7 @@ import apainter.data.PixelDataBuffer;
 import apainter.data.PixelDataIntBuffer;
 import apainter.rendering.Renderer;
 import apainter.rendering.RenderingOption;
-import static apainter.rendering.impl.cpu.UtilR.*;
+import static apainter.Utility_PixelFunction.*;
 /**
  * レンダリング中に生成されてしまう透明度０で色が０でない色を削除します
  * @author nodamushi

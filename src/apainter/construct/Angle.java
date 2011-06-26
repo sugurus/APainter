@@ -1,10 +1,26 @@
 package apainter.construct;
 
+import static java.lang.Math.*;
+
 import java.io.Serializable;
 
 public final class Angle implements Serializable{
 
 	private static final long serialVersionUID = -3757366464489953423L;
+
+	public static Angle getAngle(double x,double y){
+		if(x==0){
+			if(y>0)return new Angle(90);
+			else if(y<0)return new Angle(270);
+			else return new Angle();
+		}
+		double tan = y/x;
+		double atan = atan(tan)/2/PI;
+		if(x<0)atan+=0.5;
+		return new Angle(atan*360);
+	}
+
+
 	public static double degreesToRadian(double degree){
 		return degree*Math.PI/180;
 	}

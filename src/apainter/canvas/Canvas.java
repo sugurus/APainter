@@ -11,6 +11,8 @@ import apainter.bind.annotation.BindProperty;
 import apainter.canvas.event.PainterEvent;
 import apainter.canvas.layerdata.CPULayerData;
 import apainter.canvas.layerdata.LayerData;
+import apainter.gui.canvas.CPUCanvasPanel;
+import apainter.gui.canvas.CanvasView;
 
 public class Canvas {
 
@@ -28,6 +30,10 @@ public class Canvas {
 	//-----------------------------------------------------------------
 
 	private CanvasThread thread;
+	private CanvasView view;
+
+	private CPUCanvasPanel cpucanvas;
+
 
 	public Canvas(int width,int height,Device device){
 		this(width,height,device,null,null,0,0,0);
@@ -75,7 +81,11 @@ public class Canvas {
 
 	private void initCPU(){
 		thread = new CPUThread();
-		layerdata = new CPULayerData(this);
+		CPULayerData c = new CPULayerData(this);
+		layerdata = c;
+		cpucanvas = new CPUCanvasPanel(c.getImage());
+		view = new CanvasView(width, height, cpucanvas);
+		cpucanvas.setCanvasView(view);
 	}
 
 	private void initGPU(){
@@ -102,6 +112,10 @@ public class Canvas {
 
 	public boolean isGPUCanvas(){
 		return device==Device.GPU;
+	}
+
+	public CanvasView getCanvasView(){
+		return view;
 	}
 
 	public String getAuthor() {
