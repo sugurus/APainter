@@ -372,7 +372,8 @@ public class CanvasView extends JPanel{
 
 		try {
 			toComponent = toCanvas.createInverse();
-		} catch (NoninvertibleTransformException e) {//必ず逆行列は存在する。
+		} catch (NoninvertibleTransformException e) {
+			//必ず逆行列は存在する。
 			e.printStackTrace();
 		}
 	}
