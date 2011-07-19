@@ -5,6 +5,8 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.swing.event.EventListenerList;
+
 public class Hierarchy<E> {
 
 	private final ArrayList<HierarchyListener<E>> listener  = new ArrayList<HierarchyListener<E>>();
@@ -278,23 +280,27 @@ public class Hierarchy<E> {
 	}
 
 
-	private ArrayList<PropertyChangeListener> propertylistener = new ArrayList<PropertyChangeListener>();
+
+	private EventListenerList eventlistenerlist = new EventListenerList();
 
 	public void addPropertyChangeListener(PropertyChangeListener l) {
-		if (!propertylistener.contains(l))
-			propertylistener.add(l);
+		eventlistenerlist.remove(PropertyChangeListener.class, l);
+		eventlistenerlist.add(PropertyChangeListener.class, l);
 	}
 
 	public void removePropertyChangeListener(PropertyChangeListener l) {
-		propertylistener.remove(l);
+		eventlistenerlist.remove(PropertyChangeListener.class, l);
 	}
 
-	protected void firePropertyChange(String name, Object oldValue,
-			Object newValue) {
+	public void firePropertyChange(String name, Object oldValue, Object newValue) {
 		PropertyChangeEvent e = new PropertyChangeEvent(this, name, oldValue,
 				newValue);
-		for (PropertyChangeListener l : propertylistener) {
-			l.propertyChange(e);
+
+		Object[] listeners = eventlistenerlist.getListenerList();
+		for (int i = listeners.length - 2; i >= 0; i -= 2) {
+			if (listeners[i] == PropertyChangeListener.class) {
+				((PropertyChangeListener) listeners[i + 1]).propertyChange(e);
+			}
 		}
 	}
 

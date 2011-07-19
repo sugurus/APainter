@@ -9,6 +9,7 @@ import java.awt.image.MemoryImageSource;
 import java.util.Arrays;
 
 import apainter.Device;
+import apainter.canvas.Canvas;
 import apainter.color.Color;
 import apainter.data.PixelDataBuffer;
 import apainter.data.PixelDataByteBuffer;
@@ -23,18 +24,19 @@ import apainter.rendering.RenderingUtilities;
 class CPULayer extends DefaultLayer{
 
 	private PixelDataIntBuffer buffer;
+	private Canvas canvas;
 	private int[] pixel;
 	private CPUMask mask;
-	private CPULayerHandler handler = new CPULayerHandler(this);
+	private CPULayerHandler handler;
 	private MemoryImageSource imagesource;
 	private Image img;
 
-	public CPULayer(int id, String name,int width,int height) {
-		super(id, name);
+	public CPULayer(int id, String name,int width,int height,Canvas canvas) {
+		super(id, name,canvas);
 		buffer = PixelDataIntBuffer.create(width, height);
 		pixel = buffer.getData();
 		mask = new CPUMask(width, height);
-
+		handler = new CPULayerHandler(this,canvas);
 		imagesource = new MemoryImageSource(width, height,ColorModel.getRGBdefault(), pixel, 0, width);
 		imagesource.setAnimated(true);
 		img =Toolkit.getDefaultToolkit().createImage(imagesource);
@@ -194,10 +196,24 @@ class CPULayer extends DefaultLayer{
 	private static class CPULayerHandler extends LayerHandler{
 
 		private final CPULayer h;
+		private final Canvas canvas;
 
-		CPULayerHandler(CPULayer c) {
+		CPULayerHandler(CPULayer c,Canvas ca) {
+			canvas = ca;
 			h = c;
 		}
+
+		@Override
+		public boolean paint(DrawEvent e) {
+			return h.paint(e);
+		}
+
+
+		@Override
+		public Canvas getCanvas() {
+			return canvas;
+		}
+
 
 		@Override
 		Image getImage() {

@@ -1,5 +1,7 @@
 package apainter.canvas.layerdata;
 
+import apainter.canvas.Canvas;
+
 public interface LayerHandle{
 	/**
 	 * レイヤーもしくはグループのオリジナルのIDを返します。<br>
@@ -72,4 +74,7 @@ public interface LayerHandle{
 
 	public boolean isGroup();
 	public boolean isLayer();
+
+	public Canvas getCanvas();
+
 }

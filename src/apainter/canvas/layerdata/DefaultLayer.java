@@ -1,33 +1,42 @@
 package apainter.canvas.layerdata;
 
+import static apainter.canvas.CanvasConstant.*;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
+
+import javax.swing.event.EventListenerList;
 
 import apainter.bind.annotation.BindProperty;
+import apainter.canvas.Canvas;
 import apainter.drawer.DrawAccepter;
 import apainter.rendering.ColorMode;
-
-import static apainter.canvas.CanvasConstant.*;
-abstract class DefaultLayer implements Layer,PixelSetable,MaskContainer,DrawAccepter{
+abstract class DefaultLayer implements Layer,PixelSetable,MaskContainer{
 
 	private final int id;
 	private String name;
 	protected int transparent;
 	protected boolean visible;
 	protected ColorMode mode;
+	protected final Canvas canvas;
 
-	public DefaultLayer(int id,String name) {
+	public DefaultLayer(int id,String name,Canvas canvas) {
 		this.id = id;
 		this.name = name;
 		transparent = 256;
 		visible = true;
 		mode = ColorMode.Default;
+		this.canvas = canvas;
 	}
 
 	@Override
 	final public int getID() {
 		return id;
+	}
+
+	@Override
+	public Canvas getCanvas() {
+		return canvas;
 	}
 
 	@Override
@@ -121,22 +130,27 @@ abstract class DefaultLayer implements Layer,PixelSetable,MaskContainer,DrawAcce
 
 	//propertychangelistener---------------------------------
 
-	private ArrayList<PropertyChangeListener> propertylistener = new ArrayList<PropertyChangeListener>();
+
+	private EventListenerList listener = new EventListenerList();
 
 	public void addPropertyChangeListener(PropertyChangeListener l) {
-		if (!propertylistener.contains(l))
-			propertylistener.add(l);
+		listener.remove(PropertyChangeListener.class, l);
+		listener.add(PropertyChangeListener.class, l);
 	}
 
 	public void removePropertyChangeListener(PropertyChangeListener l) {
-		propertylistener.remove(l);
+		listener.remove(PropertyChangeListener.class, l);
 	}
 
-	protected void firePropertyChange(String name, Object oldValue, Object newValue) {
+	public void firePropertyChange(String name, Object oldValue, Object newValue) {
 		PropertyChangeEvent e = new PropertyChangeEvent(this, name, oldValue,
 				newValue);
-		for (PropertyChangeListener l : propertylistener) {
-			l.propertyChange(e);
+
+		Object[] listeners = this.listener.getListenerList();
+		for (int i = listeners.length - 2; i >= 0; i -= 2) {
+			if (listeners[i] == PropertyChangeListener.class) {
+				((PropertyChangeListener) listeners[i + 1]).propertyChange(e);
+			}
 		}
 	}
 }

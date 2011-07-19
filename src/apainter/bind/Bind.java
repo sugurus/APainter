@@ -40,22 +40,24 @@ public class Bind {
 
 	}
 
-	public void allUnbind(){
+	public Bind allUnbind(){
 		for(C c:list){
 			c.remove();
 		}
 		list.clear();
+		return this;
 	}
 
 
-	public void unbind(Object o){
+	public Bind unbind(Object o){
 		for(C c:list){
 			if(c.o == o){
 				list.remove(c);
 				c.remove();
-				return;
+				return this;
 			}
 		}
+		return this;
 	}
 	private void add(C c){
 		for(C cc:list){
@@ -65,7 +67,7 @@ public class Bind {
 	}
 
 
-	public void bind(Object o,String bindFunction,Class<?>... parameterTypes){
+	public Bind bind(Object o,String bindFunction,Class<?>... parameterTypes){
 		Class<?> clasz = o.getClass();
 		Method add,remove;
 		try {
@@ -86,9 +88,10 @@ public class Bind {
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		}
+		return this;
 	}
 
-	public void bind(Object o){
+	public Bind bind(Object o){
 		Class<?> clasz = o.getClass();
 		Method add,remove;
 		try {
@@ -122,6 +125,7 @@ public class Bind {
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		}
+		return this;
 	}
 
 

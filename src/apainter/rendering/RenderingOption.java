@@ -11,16 +11,29 @@ public class RenderingOption {
 	public Color
 		frontColor,
 		backColor;
+
+	public boolean alphaFixed=false;
+
 	public PixelDataByteBuffer
 	/**
 	 * overのマスクとして使われる。それ以外の意味を持たせても良い。<br>
 	 * overのマスクとして扱う場合、問答無用でoverと同じ大きさであるとして扱われる。
 	 */
 		mask;
+	/**
+	 * overの全体の透明度
+	 */
 	public int
 		overlayeralph;
 	public final HashMap<Object, Object> option = new HashMap<Object, Object>();
 
+	public void setAlphaFixed(boolean b){
+		alphaFixed = b;
+	}
+
+	public boolean getAlphaFixed(){
+		return alphaFixed;
+	}
 
 	public RenderingOption(int overalph) {
 		this(null,overalph);

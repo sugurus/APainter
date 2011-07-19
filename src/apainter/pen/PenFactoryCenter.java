@@ -1,10 +1,24 @@
 package apainter.pen;
 
+import java.net.URL;
 import java.util.ArrayList;
+
+import apainter.pen.impl.TestPenFactory;
+import apainter.pen.impl.URLPenFactory;
 
 public class PenFactoryCenter {
 
 	private ArrayList<PenShapeFactory> factory = new ArrayList<PenShapeFactory>();
+
+	private long nextid=0;
+
+	public PenFactoryCenter() {
+		PenShapeFactory f;
+		f = new TestPenFactory(id());
+		factory.add(f);
+
+	}
+
 
 	public String[] getAllPenShapeFacotryName(){
 		String[] s = new String[factory.size()];
@@ -29,12 +43,14 @@ public class PenFactoryCenter {
 		return null;
 	}
 
-	public void addPenShapeFactory(PenShapeFactory f){
-		if(!factory.contains(f))
-			factory.add(f);
+	public PenShapeFactory createNewPenShapeFactory(URL penshapeFile){
+		PenShapeFactory f = new URLPenFactory(id(), penshapeFile);
+		factory.add(f);
+		return f;
 	}
 
-	public void removePenShapeFactory(PenShapeFactory f){
-		factory.remove(f);
+	private synchronized long id(){
+		return nextid++;
 	}
+
 }

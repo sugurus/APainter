@@ -2,6 +2,7 @@ package apainter.canvas.layerdata;
 
 import java.awt.Image;
 
+import apainter.canvas.Canvas;
 import apainter.data.PixelDataBuffer;
 import apainter.drawer.DrawEvent;
 import apainter.rendering.ColorMode;
@@ -24,6 +25,8 @@ public abstract class LayerHandler implements LayerHandle,PixelSetable{
 	 * @return
 	 */
 	public abstract ColorMode[] getUsableModes();
+	public abstract Canvas getCanvas();
+
 
 	abstract Layer getLayer();
 	abstract PixelDataBuffer getOriginalData();

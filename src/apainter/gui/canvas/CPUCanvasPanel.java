@@ -13,7 +13,6 @@ import java.awt.GraphicsConfiguration;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
 import java.awt.image.VolatileImage;
 
 import javax.swing.JComponent;
@@ -22,7 +21,7 @@ import apainter.Util;
 import apainter.construct.Angle;
 
 
-public class CPUCanvasPanel extends JComponent{
+public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 
 	private Image renderingImage=null;
 	private VolatileImage zoomImage,rotImage;
@@ -38,19 +37,22 @@ public class CPUCanvasPanel extends JComponent{
 		parent = v;
 	}
 
-	@Override
-	public boolean imageUpdate(Image img, int infoflags, int x, int y, int w,int h) {
-		if(img!=renderingImage)return false;
-		Rectangle r = new Rectangle(x,y,w,h);
-		renderingZoomImage(r);
-		repaint();
-		return true;
-	}
+
 	/**
 	 * 全てをレンダリングし直します。
 	 */
-	public void fullRendering(){
+	public void rendering(){
 		renderingZoomImage(null);
+		repaint();
+	}
+
+	/**
+	 * 指定された範囲レンダリングします。
+	 * @param r
+	 */
+	public void rendering(Rectangle r){
+		renderingZoomImage(r);
+		repaint();
 	}
 
 	/**
@@ -66,7 +68,6 @@ public class CPUCanvasPanel extends JComponent{
 			initVolatile();
 			if(!initedVolatile)return;
 		}
-
 		if(checkVImage(zoomImage)!=0)renderingZoomImage(null);
 		else if(checkVImage(rotImage)!=0)renderingRotImage();
 		g.drawImage(rotImage,0,0,null);
@@ -203,6 +204,10 @@ public class CPUCanvasPanel extends JComponent{
 			AffineTransform af = AffineTransform.getTranslateInstance(width/2d, height/2d);
 			af.rotate(angle.radian);
 			af.translate(-l/2d, -l/2d);
+			if(parent.isReverse()){
+				af.scale(-1, 1);
+				af.translate(width, 0);
+			}
 
 			Graphics2D g = rotImage.createGraphics();
 			if(g==null){

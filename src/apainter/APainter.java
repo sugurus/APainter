@@ -9,29 +9,37 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+import apainter.annotation.Version;
 import apainter.gui.splash.Splash;
 
 
+@Version("0.1.0")
 public class APainter
 //extends JApplet
 {
 	static private APainter apainter=null;
+	static private Thread initThread;
+
+	static public boolean isInitThread(Thread t){
+		return initThread==null?false:initThread == t;
+	}
+
 	static public JComponent getContentPane(){
 		if(apainter.isApplet){
 			//TODO applet
-			System.out.println("koko");
 			return null;
 		}else return (JComponent) apainter.frame.getContentPane();
 	}
 	public static synchronized void main(final String[] args) {
 		if(apainter!=null)return;
+		initThread = Thread.currentThread();
 		apainter = new APainter();
 		apainter.isApplet = false;
 		apainter.frame = new JFrame("APainter");
 		final Splash sw = new Splash();
 		sw.showSplashWindow();
 		apainter.init(args);
-		Main.main(apainter);
+		System.out.println("ThreadName:"+Thread.currentThread().getName());
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 				sw.closeSplashWindow();
@@ -58,17 +66,21 @@ public class APainter
 	private JFrame frame;
 
 
-	public void init() {
-		apainter = this;
-		//TODO for JApplet
-	}
 
 	public void init(String[] args){
 		//TODO init
+		MainFunction.init(this);
 		frame.setDefaultCloseOperation(3);
 
 	}
 
+	public void init() {
+		if(apainter==null){
+			apainter = this;
+			initThread = Thread.currentThread();
+		//TODO for JApplet
+		}
+	}
 
 	public void start(){
 		//TODO for JApplet
@@ -76,6 +88,10 @@ public class APainter
 
 
 	public void stop(){
+		//TODO for JApplet
+	}
+
+	public void destroy(){
 		//TODO for JApplet
 	}
 

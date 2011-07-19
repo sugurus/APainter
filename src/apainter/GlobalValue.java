@@ -1,15 +1,157 @@
 package apainter;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.swing.event.EventListenerList;
+
+import apainter.bind.Bind;
+import apainter.canvas.Canvas;
+import apainter.color.Color;
+import apainter.drawer.painttool.Eraser;
+import apainter.drawer.painttool.Pen;
+import apainter.gui.canvas.CanvasMouseListener;
+import apainter.pen.PenFactoryCenter;
+import apainter.pen.PenShape;
+import apainter.pen.PenShapeFactory;
+import static apainter.GlobalBindKey.*;
+import static apainter.GlobalKey.*;
+/**
+ *初期化スレッド以外（AWTスレッドなど）からのインスタンスの取得はできないので、<br>
+ *必要ならば、mainスレッドから呼ばれる初期化時に取得しておくこと。
+ *
+ */
 public class GlobalValue extends HashMap<Object, Object>{
-	
-	public static final GlobalValue instance = new GlobalValue();
-	
-	
-	
-	private GlobalValue() {
+
+	static GlobalValue instance = new GlobalValue();
+
+	private Color front,back;
+
+
+
+	public static GlobalValue getInstance(){
+		if(cheack()){
+			return instance;
+		}else throw new RuntimeException("don't have a access right.");
 	}
-	
+
+	private static boolean cheack(){
+		return APainter.isInitThread(Thread.currentThread());
+	}
+
+
+	public Color getFrontColor(){
+		return front;
+	}
+
+	public Color getBackColor(){
+		return back;
+	}
+
+	public Bind getBind(GlobalBindKey key){
+		return (Bind)get(key);
+	}
+
+	public void bind(GlobalBindKey key,Object bindtarget){
+		Bind b = getBind(key);
+		b.bind(bindtarget);
+	}
+
+	public void addCanvas(Canvas canvas){
+		@SuppressWarnings("unchecked")
+		ArrayList<Canvas> l = (ArrayList<Canvas>)get(CanvasList);
+		if(!l.contains(canvas))l.add(canvas);
+	}
+
+	@Override
+	public Object put(Object key, Object value) {
+		IF:if(
+		(key instanceof GlobalBindKey && !((GlobalBindKey)key).change) ||
+		(key instanceof GlobalKey && !((GlobalKey)key).change)
+		){
+			Object o = get(key);
+			if(o==null){
+				break IF;
+			}
+			System.out.println("Can't put");
+			return null;
+		}
+		Object old= super.put(key, value);
+		firePropertyChange(key.toString(), old, value);
+		return old;
+	}
+
+
+	private GlobalValue() {
+		{//色
+			front = new Color(0xff000000);
+			back = new Color(0xffffffff);
+			super.put(FrontColor, front);
+			super.put(BackColor,back);
+			Bind f = new Bind(Color.propertyColorChange),
+			f16 = new Bind(Color.propertyColorChangeLong),
+			b = new Bind(Color.propertyColorChange),
+			b16 = new Bind(Color.propertyColorChangeLong);
+			f.bind(front);
+			f16.bind(front);
+			b.bind(back);
+			b16.bind(back);
+			super.put(FrontColorBIND,f);
+			super.put(FrontColor16bitBIND,f16);
+			super.put(BackColorBIND,b);
+			super.put(BackColor16bitBIND,b16);
+		}
+		{
+			ArrayList<Canvas> list = new ArrayList<Canvas>();
+			super.put(CanvasList,list);
+		}
+		{
+			PenFactoryCenter p = new PenFactoryCenter();
+			super.put(PenFactoryCenter, p);
+			Pen pen = new Pen(this);
+			Eraser era = new Eraser(this);
+			PenShapeFactory f = p.getPenShapeFactory(0);
+			f.load();
+			PenShape s = f.createPenShape(1, 1);
+			pen.setPen(s);
+			era.setPen(s);
+			super.put(CanvasHeadAction, pen);
+			super.put(CanvasTailAction,era);
+			ArrayList<CanvasMouseListener> list = new  ArrayList<CanvasMouseListener>();
+			list.add(pen);
+			list.add(era);
+			super.put(CanvasList, list);
+
+
+		}
+
+	}
+
+
+
+	private EventListenerList eventlistenerlist = new EventListenerList();
+
+	public void addPropertyChangeListener(PropertyChangeListener l) {
+		eventlistenerlist.remove(PropertyChangeListener.class, l);
+		eventlistenerlist.add(PropertyChangeListener.class, l);
+	}
+
+	public void removePropertyChangeListener(PropertyChangeListener l) {
+		eventlistenerlist.remove(PropertyChangeListener.class, l);
+	}
+
+	public void firePropertyChange(String name, Object oldValue, Object newValue) {
+		PropertyChangeEvent e = new PropertyChangeEvent(this, name, oldValue,
+				newValue);
+
+		Object[] listeners = eventlistenerlist.getListenerList();
+		for (int i = listeners.length - 2; i >= 0; i -= 2) {
+			if (listeners[i] == PropertyChangeListener.class) {
+				((PropertyChangeListener) listeners[i + 1]).propertyChange(e);
+			}
+		}
+	}
 
 }

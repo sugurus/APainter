@@ -4,9 +4,7 @@ import java.awt.Rectangle;
 
 import apainter.drawer.DrawAccepter;
 
-interface PixelSetable extends PixelContainer{
-	//TODO DrawEvent作ったらコメント解除
-	//void draw(DrawEvent d);
+interface PixelSetable extends PixelContainer,DrawAccepter{
 
 	public void setPixel(int color,int x,int y);
 	public void setPixels(int[] colors,int x,int y,int width,int height);

@@ -1,5 +1,7 @@
 package apainter.canvas.layerdata;
 
+import static apainter.Util.*;
+
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -18,6 +20,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 
 import apainter.Util;
 import apainter.canvas.Canvas;
@@ -35,6 +38,23 @@ public class CPULayerData extends LayerData{
 	private int core = Runtime.getRuntime().availableProcessors();
 	private ExecutorService pool = Executors.newFixedThreadPool(core);
 
+	//////////////////////////////FIXME debug
+	private JFrame f = new JFrame("Debug キャンバスの通常状態");
+	private JComponent j = new JComponent() {
+		public boolean imageUpdate(Image img, int infoflags, int x, int y, int w, int h) {
+			repaint();
+			return true;
+		}
+
+		protected void paintComponent(java.awt.Graphics g) {
+			g.drawImage(renderingimage,0,0,this);
+		}
+		public java.awt.Dimension getPreferredSize() {
+			return getImageSize(renderingimage);
+		}
+	};
+
+
 
 	public CPULayerData(Canvas canvas) {
 		super(canvas);
@@ -49,8 +69,16 @@ public class CPULayerData extends LayerData{
 			new DirectColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB), 32, 0xff0000, 0xff00, 0xff, 0xff000000, true, Transparency.OPAQUE);
 		imagesource = new MemoryImageSource(w,h,m,
 				renderingbuffer.getData(), 0, w);
+		imagesource.setAnimated(true);
 		renderingimage = Toolkit.getDefaultToolkit().createImage(imagesource);
+
 		rendering();
+
+		//FIXME debug
+		f.add(j);
+		f.pack();
+		f.setLocation(500, 200);
+		f.setVisible(true);
 	}
 
 	public Image getImage(){
@@ -65,7 +93,7 @@ public class CPULayerData extends LayerData{
 	@Override
 	protected Layer createLayer(int id) {
 		//TODO 名前決め
-		CPULayer l = new CPULayer(id, "test", getWidth(), getHeight());
+		CPULayer l = new CPULayer(id, "test", getWidth(), getHeight(),canvas);
 		//TODO 削除
 		if(i==0){
 			int[] colors = new int[400*200];
@@ -73,30 +101,22 @@ public class CPULayerData extends LayerData{
 			l.setPixels(colors, 0, 0, 400, 200);
 			i++;
 		}else if(i==1){
-			System.out.println("koko");
 			int[] colors = new int[400*200];
-			Arrays.fill(colors, 0xff00ff00);
+			Arrays.fill(colors, 0xff000000);
 			l.setPixels(colors, 200, 0, 200, 400);
 			i++;
 		}
 		return l;
 	}
 
-	@Override
-	void draw(DrawEvent e) {
-		LayerHandler l = e.getTarget();
-		if(!layerlist.contains(l) || !l.isDrawable())return;
-		Layer layer = l.getLayer();
-		layer.paint(e);
-	}
 
 	@Override
-	void rendering() {
+	public void rendering() {
 		rendering(rect());
 	}
 
 	@Override
-	void rendering(Rectangle clip) {
+ 	public void rendering(Rectangle clip) {
 		if(clip==null)return;
 		clip = rect().intersection(clip);
 		if(clip.isEmpty())return;
@@ -108,11 +128,11 @@ public class CPULayerData extends LayerData{
 		}
 
 		exec(runs);
+		imagesource.newPixels(clip.x, clip.y, clip.width, clip.height);
 	}
 
 	private void exec(Collection<Runnable> run){
-		@SuppressWarnings("rawtypes")
-		Future[] fs = new Future[run.size()];
+		Future<?>[] fs = new Future[run.size()];
 		int i=0;
 		for(Runnable r:run){
 			fs[i++] = pool.submit(r);

@@ -38,6 +38,13 @@ public class DrawEvent extends PainterEvent{
 		this.option = option;
 	}
 
+	public DrawEvent subsetEvent(Rectangle r){
+		if(!rect.contains(r)){
+			throw new RuntimeException("r isn't subset");
+		}
+		return new DrawEvent(id, getSource(), target, r, renderer, device, mapdata, option);
+	}
+
 	public boolean canUseDevice(Device d){
 		for(Device dd:device)
 			if(dd.equals(d))return true;

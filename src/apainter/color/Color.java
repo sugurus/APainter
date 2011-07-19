@@ -2,7 +2,8 @@ package apainter.color;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
+
+import javax.swing.event.EventListenerList;
 
 import apainter.Util;
 import apainter.bind.annotation.BindProperty;
@@ -290,22 +291,29 @@ public class Color implements Cloneable{
 	 }
 
 
-	 private ArrayList<PropertyChangeListener> propertylistener = new ArrayList<PropertyChangeListener>();
 
-	 public void addPropertyChangeListener(PropertyChangeListener l) {
-		 if (!propertylistener.contains(l))
-			 propertylistener.add(l);
-	 }
 
-	 public void removePropertyChangeListener(PropertyChangeListener l) {
-		 propertylistener.remove(l);
-	 }
+	private EventListenerList listener = new EventListenerList();
 
-	 public void firePropertyChange(String name,Object oldValue,Object newValue){
-		 PropertyChangeEvent e = new PropertyChangeEvent(this, name, oldValue, newValue);
-		 for(PropertyChangeListener l:propertylistener){
-			 l.propertyChange(e);
-		 }
-	 }
+	public void addPropertyChangeListener(PropertyChangeListener l) {
+		listener.remove(PropertyChangeListener.class, l);
+		listener.add(PropertyChangeListener.class, l);
+	}
+
+	public void removePropertyChangeListener(PropertyChangeListener l) {
+		listener.remove(PropertyChangeListener.class, l);
+	}
+
+	public void firePropertyChange(String name, Object oldValue, Object newValue) {
+		PropertyChangeEvent e = new PropertyChangeEvent(this, name, oldValue,
+				newValue);
+
+		Object[] listeners = this.listener.getListenerList();
+		for (int i = listeners.length - 2; i >= 0; i -= 2) {
+			if (listeners[i] == PropertyChangeListener.class) {
+				((PropertyChangeListener) listeners[i + 1]).propertyChange(e);
+			}
+		}
+	}
 
 }

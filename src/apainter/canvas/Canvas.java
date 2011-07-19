@@ -1,16 +1,21 @@
 package apainter.canvas;
 
+import java.awt.Rectangle;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 
 import javax.swing.JComponent;
+import javax.swing.event.EventListenerList;
 
 import apainter.Device;
+import apainter.GlobalValue;
 import apainter.bind.annotation.BindProperty;
 import apainter.canvas.event.PainterEvent;
 import apainter.canvas.layerdata.CPULayerData;
 import apainter.canvas.layerdata.LayerData;
+import apainter.canvas.layerdata.LayerHandler;
+import apainter.drawer.DrawEvent;
 import apainter.gui.canvas.CPUCanvasPanel;
 import apainter.gui.canvas.CanvasView;
 
@@ -29,25 +34,29 @@ public class Canvas {
 	private LayerData layerdata;
 	//-----------------------------------------------------------------
 
+
+	private GlobalValue global;
 	private CanvasThread thread;
 	private CanvasView view;
 
 	private CPUCanvasPanel cpucanvas;
 
 
-	public Canvas(int width,int height,Device device){
-		this(width,height,device,null,null,0,0,0);
+	public Canvas(int width,int height,Device device,GlobalValue globalvalue){
+		this(width,height,device,globalvalue,null,null,0,0,0);
 	}
 
-	public Canvas(int width,int height,Device device,
+	public Canvas(int width,int height,Device device,GlobalValue globalvalue,
 			String author,String canvasname,long makeDay,long workTime,long actionCount) {
 		if(width <=0 || height <= 0)
 			throw new IllegalArgumentException(String.format("width:%d,height:%d",width,height));
+		if(globalvalue ==null)throw new NullPointerException("GlobalValue");
 
 		//TODO GPU実装がもしいつかできたら外す
 		if(device==Device.GPU){
 			throw new RuntimeException("GPUデバイスには対応していません");
 		}
+		global = globalvalue;
 
 		if(makeDay<=0)makeDay = System.currentTimeMillis();
 		if(workTime <=0)workTime = 0;
@@ -80,22 +89,37 @@ public class Canvas {
 
 
 	private void initCPU(){
-		thread = new CPUThread();
+		thread = new CPUThread(global,this);
 		CPULayerData c = new CPULayerData(this);
 		layerdata = c;
 		cpucanvas = new CPUCanvasPanel(c.getImage());
-		view = new CanvasView(width, height, cpucanvas);
+		view = new CanvasView(width, height, cpucanvas,cpucanvas,global);
 		cpucanvas.setCanvasView(view);
+	}
+
+	public LayerHandler getSelectedLayerHandler(){
+		return layerdata.getSelectedLayerHandler();
 	}
 
 	private void initGPU(){
 		//TODO いつの日か実装したいね。
 	}
 
+	boolean paint(DrawEvent e){
+		return layerdata.paint(e);
+	}
 
 
 	public void dispatchEvent(PainterEvent e){
 		thread.dispatch(e);
+	}
+
+	public DrawEvent subsetEvent(DrawEvent e){
+		Rectangle r = e.getBounds();
+		Rectangle size = new Rectangle(0,0,width,height);
+		Rectangle k = size.intersection(r);
+		if(k.isEmpty())return null;
+		return e.subsetEvent(k);
 	}
 
 	public int getWidth() {
@@ -167,27 +191,36 @@ public class Canvas {
 		return layerdata.testMethod_createViewPanel();
 	}
 
+	public void rendering(Rectangle r){
+		layerdata.rendering();
+		view.rendering();
+
+	}
+
 
 	//propertychangelistener-----------------------------------------
 
-	private ArrayList<PropertyChangeListener> propertylistener = new ArrayList<PropertyChangeListener>();
 
-	public void addPropertyChangeListener(
-			PropertyChangeListener l) {
-		if (!propertylistener.contains(l))
-			propertylistener.add(l);
+	private EventListenerList eventlistenerlist = new EventListenerList();
+
+	public void addPropertyChangeListener(PropertyChangeListener l) {
+		eventlistenerlist.remove(PropertyChangeListener.class, l);
+		eventlistenerlist.add(PropertyChangeListener.class, l);
 	}
 
 	public void removePropertyChangeListener(PropertyChangeListener l) {
-		propertylistener.remove(l);
+		eventlistenerlist.remove(PropertyChangeListener.class, l);
 	}
 
-	public void firePropertyChange(
-			String name,Object oldValue,Object newValue) {
-		PropertyChangeEvent e =
-			new PropertyChangeEvent(this,name,oldValue,newValue);
-		for (PropertyChangeListener l : propertylistener) {
-			l.propertyChange(e);
+	public void firePropertyChange(String name, Object oldValue, Object newValue) {
+		PropertyChangeEvent e = new PropertyChangeEvent(this, name, oldValue,
+				newValue);
+
+		Object[] listeners = eventlistenerlist.getListenerList();
+		for (int i = listeners.length - 2; i >= 0; i -= 2) {
+			if (listeners[i] == PropertyChangeListener.class) {
+				((PropertyChangeListener) listeners[i + 1]).propertyChange(e);
+			}
 		}
 	}
 

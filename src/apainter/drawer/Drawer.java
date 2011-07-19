@@ -5,6 +5,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 
+import javax.swing.event.EventListenerList;
+
 import nodamushi.pentablet.PenTabletMouseEvent;
 import apainter.Device;
 import apainter.bind.annotation.BindProperty;
@@ -28,6 +30,16 @@ abstract public class Drawer {
 	private PenTabletMouseEvent before;
 	private double length;//length ペンを書くのに少なくともどれほどの距離が必要か
 	protected PenShape pen;
+
+
+	protected void postEvent(DrawEvent e){
+		e.getTarget().getCanvas().dispatchEvent(e);
+	}
+	protected void postEvent(DrawEvent[] events){
+		for(DrawEvent e:events){
+			postEvent(e);
+		}
+	}
 
 	protected DrawEvent start(PenTabletMouseEvent e,LayerHandler target){
 		before = e;
@@ -88,12 +100,13 @@ abstract public class Drawer {
 
 		ArrayList<DrawEvent> es = new ArrayList<DrawEvent>();
 		Device[] device = getUsableDevices();
-		while(dl < l){
+		while(l < dl){
 			double x = l*cos+bx,y = l*sin+by;
 			double pressure =k(Opressure,Ppressure,l,dl);
-			pensize = getPenSize(pensize.width, pensize.height, pressure, x, y);
-			PixelDataBuffer map = pen.getFootPrint(x, y, pensize.width, pensize.height);
-			Rectangle bounds = new Rectangle((int)x, (int)y, map.width, map.height);
+			DimensionDouble pensize2 = getPenSize(pensize.width, pensize.height, pressure, x, y);
+			PixelDataBuffer map = pen.getFootPrint(x, y, pensize2.width, pensize2.height);
+			Rectangle bounds = new Rectangle((int)x, (int)y,
+					map.width, map.height);
 			Color front =getFrontColor(e, pen),back = getBackColor(e, pen);
 			int dens =(int) ((((256-density_min)*pressure)+density_min)*density);
 			RenderingOption option = new RenderingOption(front, back, null, dens);
@@ -102,7 +115,7 @@ abstract public class Drawer {
 				new DrawEvent(EventConstant.ID_Paint, this, target,
 						bounds, renderer, device, map, option);
 			es.add(de);
-			double d = pen.getIntervalLength(pensize.width, pensize.height);
+			double d = pen.getIntervalLength(pensize2.width, pensize2.height);
 			l += d;
 		}
 		before = e;
@@ -126,7 +139,7 @@ abstract public class Drawer {
 
 
 	private double k(double o,double p,double t,double l){
-		return o*(l-t)+p*t;
+		return (o*(l-t)+p*t)/l;
 	}
 
 	protected DimensionDouble getPenSize(double width,double height,double pressure,double x,double y){
@@ -137,23 +150,28 @@ abstract public class Drawer {
 
 
 
-	private ArrayList<PropertyChangeListener> propertylistener = new ArrayList<PropertyChangeListener>();
+
+
+	private EventListenerList eventlistenerlist = new EventListenerList();
 
 	public void addPropertyChangeListener(PropertyChangeListener l) {
-		if (!propertylistener.contains(l))
-			propertylistener.add(l);
+		eventlistenerlist.remove(PropertyChangeListener.class, l);
+		eventlistenerlist.add(PropertyChangeListener.class, l);
 	}
 
 	public void removePropertyChangeListener(PropertyChangeListener l) {
-		propertylistener.remove(l);
+		eventlistenerlist.remove(PropertyChangeListener.class, l);
 	}
 
-	protected void firePropertyChange(String name, Object oldValue,
-			Object newValue) {
+	public void firePropertyChange(String name, Object oldValue, Object newValue) {
 		PropertyChangeEvent e = new PropertyChangeEvent(this, name, oldValue,
 				newValue);
-		for (PropertyChangeListener l : propertylistener) {
-			l.propertyChange(e);
+
+		Object[] listeners = eventlistenerlist.getListenerList();
+		for (int i = listeners.length - 2; i >= 0; i -= 2) {
+			if (listeners[i] == PropertyChangeListener.class) {
+				((PropertyChangeListener) listeners[i + 1]).propertyChange(e);
+			}
 		}
 	}
 

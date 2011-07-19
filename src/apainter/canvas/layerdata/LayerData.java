@@ -5,9 +5,10 @@ import java.awt.Rectangle;
 import javax.swing.JComponent;
 
 import apainter.canvas.Canvas;
+import apainter.drawer.DrawAccepter;
 import apainter.drawer.DrawEvent;
 
-abstract public class LayerData {
+abstract public class LayerData implements DrawAccepter{
 	protected final Canvas canvas;
 	protected LayerList layerlist = new LayerList();
 
@@ -18,10 +19,22 @@ abstract public class LayerData {
 		layerlist = new LayerList();
 		LayerHandler lh;
 		layerlist.addElement(lh=makeLayer(12));
+		layerlist.setSelectLayer(lh);
 		lh.setTransparent(127);
 		layerlist.addElement(lh=makeLayer(3));
 		lh.setTransparent(127);
+	}
 
+	@Override
+	public boolean  paint(DrawEvent e){
+		LayerHandler l = e.getTarget();
+		if(!layerlist.contains(l) || !l.isDrawable())return false;
+		Layer layer = l.getLayer();
+		return layer.paint(e);
+	}
+
+	public LayerHandler getSelectedLayerHandler(){
+		return layerlist.getSelectLayerHandler();
 	}
 
 	public int getWidth(){
@@ -53,10 +66,9 @@ abstract public class LayerData {
 	 * protected abstract Group  createGropu(int id);
 	 */
 
-	abstract void draw(DrawEvent e);
 
-	abstract void rendering();
-	abstract void rendering(Rectangle clip);
+	public abstract void rendering();
+	public abstract void rendering(Rectangle clip);
 
 	public abstract JComponent testMethod_createViewPanel();
 

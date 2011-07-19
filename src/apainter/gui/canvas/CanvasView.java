@@ -8,6 +8,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.LayoutManager;
+import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
@@ -18,6 +19,8 @@ import java.awt.geom.NoninvertibleTransformException;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+import apainter.GlobalKey;
+import apainter.GlobalValue;
 import apainter.construct.Angle;
 import java.awt.geom.Point2D.Double;
 
@@ -25,7 +28,7 @@ import nodamushi.pentablet.PenTabletMouseEvent;
 import nodamushi.pentablet.PenTabletRecognizer;
 
 //注意　Double==>Point2D.Double
-public class CanvasView extends JPanel{
+public final class CanvasView extends JPanel{
 
 
 	private final Dimension canvasDafaultSize;
@@ -53,12 +56,13 @@ public class CanvasView extends JPanel{
 
 
 	@SuppressWarnings("unused")
-	private final PenTabletRecognizer tabletlistener;
+	private PenTabletRecognizer tabletlistener;
 	private JComponent canvas;//画像を表示するパネル
+	private CanvasViewRendering canvasRendering;
 	private JComponent background=new JPanel();//背景
 	private JComponent overlayer=new JPanel();//画像を表示するパネルの上のパネル。
+	private GlobalValue global;
 
-	private CanvasMouseListener head,tail;
 	private ComponentListener componentlistener = new ComponentAdapter() {
 		@Override public void componentResized(ComponentEvent e) {
 			setAffinTransform();
@@ -67,10 +71,13 @@ public class CanvasView extends JPanel{
 
 
 
-	public CanvasView(int width,int height,JComponent canvascomponent) {
+	public CanvasView(int width,int height,JComponent canvascomponent,CanvasViewRendering rendering,GlobalValue global) {
 		if(width<=0 || height <=0)throw new RuntimeException(String.format("width:%d,height:%d",width,height));
 		if(canvascomponent==null)throw new NullPointerException("canvas");
+		if(global==null)throw new NullPointerException("global");
+		this.global =global;
 		canvas = canvascomponent;
+		canvasRendering = rendering;
 		canvasDafaultSize = new Dimension(width,height);
 		setBackground(Color.white);
 		setAffinTransform();
@@ -118,7 +125,15 @@ public class CanvasView extends JPanel{
 			@Override public void addLayoutComponent(String name, Component comp) {}
 		});
 
+		installMouseListener();
+
+	}
+
+
+	private void installMouseListener(){
 		tabletlistener = new PenTabletRecognizer(this) {
+			CanvasMouseListener h,t;
+
 			@Override
 			public void operatorChanged(PenTabletMouseEvent e) {
 				// TODO operatorChange
@@ -136,13 +151,16 @@ public class CanvasView extends JPanel{
 				if(!hasFocus())	requestFocus();
 				Double k = convertToCanvas(e.getPointDouble());
 				e.setPoint(k.x, k.y);
+				h=t=null;
 				switch(e.getButtonType()){
 				case HEAD:
 				case BUTTON1:
-					if(head!=null)head.press(e);
+					Object head = global.get(GlobalKey.CanvasHeadAction);
+					if(head!=null && head instanceof CanvasMouseListener)(h=(CanvasMouseListener)head).press(e);
 					break;
 				case TAIL:
-					if(tail!=null)tail.press(e);
+					Object tail = global.get(GlobalKey.CanvasTailAction);
+					if(tail!=null && tail instanceof CanvasMouseListener)(t=(CanvasMouseListener)tail).press(e);
 					break;
 				case BUTTON3:
 					break;
@@ -162,10 +180,10 @@ public class CanvasView extends JPanel{
 				switch(e.getButtonType()){
 				case HEAD:
 				case BUTTON1:
-					if(head!=null)head.release(e);
+					if(h!=null)h.release(e);
 					break;
 				case TAIL:
-					if(tail!=null)tail.release(e);
+					if(t!=null)t.release(e);
 					break;
 				case BUTTON3:
 					break;
@@ -176,6 +194,7 @@ public class CanvasView extends JPanel{
 				case SIDE2:
 					break;
 				}
+				h=t=null;
 			}
 			@Override
 			public void onDragged(PenTabletMouseEvent e) {
@@ -184,10 +203,10 @@ public class CanvasView extends JPanel{
 				switch(e.getButtonType()){
 				case HEAD:
 				case BUTTON1:
-					if(head!=null)head.drag(e);
+					if(h!=null)h.drag(e);
 					break;
 				case TAIL:
-					if(tail!=null)tail.drag(e);
+					if(t!=null)t.drag(e);
 					break;
 				case BUTTON3:
 					break;
@@ -216,7 +235,13 @@ public class CanvasView extends JPanel{
 			}
 
 		};
+	}
 
+	public void rendering(){
+		canvasRendering.rendering();
+	}
+	public void rendering(Rectangle r){
+		canvasRendering.rendering(r);
 	}
 
 	public double getZoom() {
@@ -291,7 +316,7 @@ public class CanvasView extends JPanel{
 	public void setCenterPoint(double x,double y){
 		double tx = x*angle.cos+y*angle.sin;
 		double ty = -x*angle.sin+y*angle.cos;
-		_setCenterPoint(tx, ty);
+		setDefaultCenterPoint(tx, ty);
 	}
 
 	/**
@@ -308,7 +333,7 @@ public class CanvasView extends JPanel{
 		setCenterPoint(getCenterX(), y);
 	}
 
-	private void _setCenterPoint(double x,double y){
+	public void setDefaultCenterPoint(double x,double y){
 		centerR = hypot(x, y);
 		centerAngle = Angle.getAngle(x, y);
 		setAffinTransform();
@@ -379,9 +404,8 @@ public class CanvasView extends JPanel{
 	}
 
 	private void reverse(AffineTransform af){
-		int w = getWidth();
 		af.scale(-1, 1);
-		af.translate(w, 0);
+		af.translate(getWidth(), 0);
 	}
 
 	private Double getCenterPoint(){
