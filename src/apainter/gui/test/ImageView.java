@@ -11,11 +11,11 @@ import javax.swing.JComponent;
  * @author nodamushi
  *
  */
-public class TestImageView extends JComponent{
+public class ImageView extends JComponent{
 
 	private Image img;
 
-	public TestImageView(Image img) {
+	public ImageView(Image img) {
 		this.img = img;
 	}
 
@@ -26,7 +26,7 @@ public class TestImageView extends JComponent{
 
 	@Override
 	protected void paintComponent(Graphics g) {
-		g.drawImage(img, 0, 0, 400, 400, this);
+		g.drawImage(img,0,0, this);
 	}
 
 

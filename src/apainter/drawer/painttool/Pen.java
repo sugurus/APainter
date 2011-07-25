@@ -1,6 +1,6 @@
 package apainter.drawer.painttool;
 
-import static apainter.Utility_PixelFunction.*;
+import static apainter.misc.Utility_PixelFunction.*;
 
 import java.awt.Point;
 import java.awt.Rectangle;

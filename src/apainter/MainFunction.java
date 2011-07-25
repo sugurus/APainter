@@ -14,16 +14,14 @@ class MainFunction {
 	public static void init(APainter apainter){
 		global = GlobalValue.getInstance();
 
-		Canvas canvas = createNewCanvas(400, 400, Device.CPU);
+		Canvas canvas = createNewCanvas(401, 401, Device.CPU);
 		global.addCanvas(canvas);
 		global.put(GlobalKey.CurrentCanvas, canvas);
 
 		APainter.getContentPane()
 		.add(canvas.getCanvasView());
 		CanvasView c = canvas.getCanvasView();
-		c.setCenterPointX(100);
-		c.setAngle(120);
-		//c.setZoom(2);
+
 		apainter.pack();
 
 		GlobalValue.instance = null;

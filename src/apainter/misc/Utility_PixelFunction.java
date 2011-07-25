@@ -1,4 +1,4 @@
-package apainter;
+package apainter.misc;
 
 import apainter.color.Color;
 

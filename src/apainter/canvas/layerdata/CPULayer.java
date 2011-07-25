@@ -24,7 +24,6 @@ import apainter.rendering.RenderingUtilities;
 class CPULayer extends DefaultLayer{
 
 	private PixelDataIntBuffer buffer;
-	private Canvas canvas;
 	private int[] pixel;
 	private CPUMask mask;
 	private CPULayerHandler handler;

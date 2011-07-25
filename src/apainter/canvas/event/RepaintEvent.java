@@ -1,15 +1,18 @@
 package apainter.canvas.event;
 
+import static apainter.misc.Util.*;
+
 import java.awt.Rectangle;
 
-public class RepaintEvent extends PainterEvent{
+import apainter.canvas.Canvas;
+
+public class RepaintEvent extends CanvasEvent{
 
 	Rectangle rect;
 
-	public RepaintEvent(int id, Object source,Rectangle r) {
-		super(id, source);
-		if(r==null)throw new NullPointerException("r");
-		rect = r;
+	public RepaintEvent(int id, Object source,Rectangle r,Canvas canvas) {
+		super(id, source,canvas);
+		rect = nullCheack(r, "r is null");
 	}
 	/**
 	 * コピーしないので中身を変更しないでください。

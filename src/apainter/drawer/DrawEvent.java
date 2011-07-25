@@ -4,13 +4,13 @@ import java.awt.Point;
 import java.awt.Rectangle;
 
 import apainter.Device;
-import apainter.canvas.event.PainterEvent;
+import apainter.canvas.event.CanvasEvent;
 import apainter.canvas.layerdata.LayerHandler;
 import apainter.data.PixelDataBuffer;
 import apainter.rendering.Renderer;
 import apainter.rendering.RenderingOption;
 
-public class DrawEvent extends PainterEvent{
+public class DrawEvent extends CanvasEvent{
 
 	private LayerHandler target;
 	private Rectangle rect;
@@ -23,7 +23,7 @@ public class DrawEvent extends PainterEvent{
 			LayerHandler target,Rectangle bounds,
 			Renderer renderer,Device[] device,
 			PixelDataBuffer mapdata,RenderingOption option) {
-		super(id, source);
+		super(id, source,target.getCanvas());
 		if(target==null)throw new NullPointerException("target");
 		if(mapdata==null)throw new NullPointerException("mapdata");
 		if(bounds==null)throw new NullPointerException("bounds");

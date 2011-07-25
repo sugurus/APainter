@@ -13,7 +13,7 @@ import javax.swing.JDialog;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
-import static apainter.Util.*;
+import static apainter.misc.Util.*;
 public class SplashPanel extends JComponent{
 
 	private Image im;

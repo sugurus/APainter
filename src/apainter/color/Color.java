@@ -5,8 +5,8 @@ import java.beans.PropertyChangeListener;
 
 import javax.swing.event.EventListenerList;
 
-import apainter.Util;
 import apainter.bind.annotation.BindProperty;
+import apainter.misc.Util;
 
 /**
  * ARGBの順に格納されている。<br>

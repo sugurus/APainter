@@ -11,7 +11,9 @@ import javax.swing.event.EventListenerList;
 import apainter.Device;
 import apainter.GlobalValue;
 import apainter.bind.annotation.BindProperty;
-import apainter.canvas.event.PainterEvent;
+import apainter.canvas.cedt.CanvasEventAccepter;
+import apainter.canvas.cedt.cpu.CPUCEA_0;
+import apainter.canvas.event.CanvasEvent;
 import apainter.canvas.layerdata.CPULayerData;
 import apainter.canvas.layerdata.LayerData;
 import apainter.canvas.layerdata.LayerHandler;
@@ -36,7 +38,7 @@ public class Canvas {
 
 
 	private GlobalValue global;
-	private CanvasThread thread;
+	private CanvasEventAccepter ceaccepter;
 	private CanvasView view;
 
 	private CPUCanvasPanel cpucanvas;
@@ -89,7 +91,7 @@ public class Canvas {
 
 
 	private void initCPU(){
-		thread = new CPUThread(global,this);
+		ceaccepter = new CPUCEA_0(this);
 		CPULayerData c = new CPULayerData(this);
 		layerdata = c;
 		cpucanvas = new CPUCanvasPanel(c.getImage());
@@ -105,13 +107,13 @@ public class Canvas {
 		//TODO いつの日か実装したいね。
 	}
 
-	boolean paint(DrawEvent e){
+	public boolean paint(DrawEvent e){
 		return layerdata.paint(e);
 	}
 
 
-	public void dispatchEvent(PainterEvent e){
-		thread.dispatch(e);
+	public void dispatchEvent(CanvasEvent e){
+		ceaccepter.passEvent(e);
 	}
 
 	public DrawEvent subsetEvent(DrawEvent e){
@@ -192,9 +194,24 @@ public class Canvas {
 	}
 
 	public void rendering(Rectangle r){
-		layerdata.rendering();
+		if(r==null || r.isEmpty())return;
+		layerdata.rendering(r);
 		view.rendering();
+	}
 
+	public void rendering(Rectangle[] rects){
+		if(rects==null || rects.length==0)return;
+		Rectangle union=rects[0];
+		for(int i=1;i<rects.length;i++){
+			union = union.union(rects[i]);
+		}
+		if(union.isEmpty())return;
+		if(union.width*union.height < 100){
+			layerdata.rendering(union);
+		}else{
+			for(Rectangle r:rects)layerdata.rendering(r);
+		}
+		view.rendering(union);
 	}
 
 

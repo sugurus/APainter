@@ -14,7 +14,7 @@ import java.net.URL;
 
 import javax.imageio.ImageIO;
 
-import apainter.Util;
+import apainter.misc.Util;
 
 public class ImageUtility {
 

@@ -1,6 +1,6 @@
 package apainter.canvas.layerdata;
 
-import static apainter.Util.*;
+import static apainter.misc.Util.*;
 
 import java.awt.Image;
 import java.awt.Rectangle;
@@ -14,21 +14,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import javax.swing.JComponent;
-import javax.swing.JFrame;
 
-import apainter.Util;
 import apainter.canvas.Canvas;
+import apainter.canvas.cedt.cpu.CPUWorkThread;
 import apainter.data.PixelDataIntBuffer;
-import apainter.drawer.DrawEvent;
-import apainter.gui.test.TestImageView;
+import apainter.gui.test.ImageFrame;
+import apainter.gui.test.ImageView;
 import apainter.hierarchy.Element;
 import apainter.hierarchy.Unit;
+import apainter.misc.Util;
 
 public class CPULayerData extends LayerData{
 
@@ -36,23 +35,9 @@ public class CPULayerData extends LayerData{
 	private Image renderingimage;
 	private MemoryImageSource imagesource;
 	private int core = Runtime.getRuntime().availableProcessors();
-	private ExecutorService pool = Executors.newFixedThreadPool(core);
 
 	//////////////////////////////FIXME debug
-	private JFrame f = new JFrame("Debug キャンバスの通常状態");
-	private JComponent j = new JComponent() {
-		public boolean imageUpdate(Image img, int infoflags, int x, int y, int w, int h) {
-			repaint();
-			return true;
-		}
-
-		protected void paintComponent(java.awt.Graphics g) {
-			g.drawImage(renderingimage,0,0,this);
-		}
-		public java.awt.Dimension getPreferredSize() {
-			return getImageSize(renderingimage);
-		}
-	};
+	private ImageFrame f;
 
 
 
@@ -75,18 +60,13 @@ public class CPULayerData extends LayerData{
 		rendering();
 
 		//FIXME debug
-		f.add(j);
-		f.pack();
+		f = new ImageFrame(renderingimage, "Debag Canvas");
 		f.setLocation(500, 200);
 		f.setVisible(true);
 	}
 
 	public Image getImage(){
 		return renderingimage;
-	}
-
-	private Rectangle rect(){
-		return new Rectangle(0,0,getWidth(),getHeight());
 	}
 
 	int i=0;
@@ -96,14 +76,14 @@ public class CPULayerData extends LayerData{
 		CPULayer l = new CPULayer(id, "test", getWidth(), getHeight(),canvas);
 		//TODO 削除
 		if(i==0){
-			int[] colors = new int[400*200];
+			int[] colors = new int[401*200];
 			Arrays.fill(colors, 0xffff0000);
-			l.setPixels(colors, 0, 0, 400, 200);
+			l.setPixels(colors, 0, 0, 401, 200);
 			i++;
 		}else if(i==1){
-			int[] colors = new int[400*200];
+			int[] colors = new int[401*200];
 			Arrays.fill(colors, 0xff000000);
-			l.setPixels(colors, 200, 0, 200, 400);
+			l.setPixels(colors, 201, 0, 200, 401);
 			i++;
 		}
 		return l;
@@ -120,32 +100,20 @@ public class CPULayerData extends LayerData{
 		if(clip==null)return;
 		clip = rect().intersection(clip);
 		if(clip.isEmpty())return;
-		Rectangle[] rects = Util.partition(clip, core);
+		Rectangle[] rects;
+		if(clip.width*clip.height<core*10){
+			rects = new Rectangle[]{clip};
+		}else{
+			rects = Util.partition(clip, core);
+		}
 		ArrayList<Runnable> runs = new ArrayList<Runnable>(core);
 		for(Rectangle r:rects){
 			if(r.isEmpty())continue;
 			runs.add(new _Rendering(r));
 		}
 
-		exec(runs);
+		CPUWorkThread.exec(runs);
 		imagesource.newPixels(clip.x, clip.y, clip.width, clip.height);
-	}
-
-	private void exec(Collection<Runnable> run){
-		Future<?>[] fs = new Future[run.size()];
-		int i=0;
-		for(Runnable r:run){
-			fs[i++] = pool.submit(r);
-		}
-		for(Future<?> f:fs){
-			try {
-				f.get();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			} catch (ExecutionException e) {
-				e.printStackTrace();
-			}
-		}
 	}
 
 	private class _Rendering implements Runnable{
@@ -170,7 +138,7 @@ public class CPULayerData extends LayerData{
 
 	@Override
 	public JComponent testMethod_createViewPanel() {
-		TestImageView view = new TestImageView(getImage());
+		ImageView view = new ImageView(getImage());
 		return view;
 	}
 

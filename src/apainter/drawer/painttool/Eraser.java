@@ -6,14 +6,14 @@ import java.awt.Rectangle;
 import nodamushi.pentablet.PenTabletMouseEvent;
 import apainter.Device;
 import apainter.GlobalValue;
-import apainter.Utility_PixelFunction;
 import apainter.color.Color;
 import apainter.data.PixelDataBuffer;
 import apainter.data.PixelDataIntBuffer;
+import apainter.misc.Utility_PixelFunction;
 import apainter.rendering.Renderer;
 import apainter.rendering.RenderingOption;
 
-import static apainter.Utility_PixelFunction.*;
+import static apainter.misc.Utility_PixelFunction.*;
 
 public class Eraser extends BasicDrawer{
 

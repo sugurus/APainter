@@ -37,6 +37,10 @@ abstract public class LayerData implements DrawAccepter{
 		return layerlist.getSelectLayerHandler();
 	}
 
+	protected Rectangle rect(){
+		return new Rectangle(0,0,getWidth(),getHeight());
+	}
+
 	public int getWidth(){
 		return canvas.getWidth();
 	}

@@ -1,7 +1,7 @@
 package apainter.gui.canvas;
 
 
-import static apainter.Util.*;
+import static apainter.misc.Util.*;
 import static java.awt.RenderingHints.*;
 import static java.lang.Math.*;
 
@@ -17,8 +17,8 @@ import java.awt.image.VolatileImage;
 
 import javax.swing.JComponent;
 
-import apainter.Util;
 import apainter.construct.Angle;
+import apainter.misc.Util;
 
 
 public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
@@ -54,6 +54,7 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 		renderingZoomImage(r);
 		repaint();
 	}
+
 
 	/**
 	 * 回転画像だけ際レンダリングします
@@ -109,6 +110,7 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 		int height = getHeight();
 		int l = (int) floor(hypot(width,height));
 		Dimension s = getImageSize(renderingImage);
+
 
 		//zoomImageが内容を失っていないかチェック。
 		switch(checkVImage(zoomImage)){
@@ -201,9 +203,9 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 
 		do{
 			Angle angle = parent.getAngle();
-			AffineTransform af = AffineTransform.getTranslateInstance(width/2d, height/2d);
+			AffineTransform af = AffineTransform.getTranslateInstance((width>>1)+(width&1), (height>>1)+(height&1));
 			af.rotate(angle.radian);
-			af.translate(-l/2d, -l/2d);
+			af.translate(-(l>>1)-(l&1), -(l>>1)-(l&1));
 			if(parent.isReverse()){
 				af.scale(-1, 1);
 				af.translate(width, 0);
