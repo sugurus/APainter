@@ -73,7 +73,7 @@ public class CPUCEDT implements CanvasEventDispatchThread{
 		if(e ==null)return;
 
 		Rectangle r = e.getBounds();
-		int s = CPUWorkThread.getThreadSize();
+		int s = CPUParallelWorkThread.getThreadSize();
 		if(s==1|| r.width*r.height < 100){
 			canvas.paint(e);
 		}else{
@@ -105,7 +105,7 @@ public class CPUCEDT implements CanvasEventDispatchThread{
 					};
 				}
 			}
-			CPUWorkThread.exec(runs);
+			CPUParallelWorkThread.exec(runs);
 		}
 		repaint.addJob(r);
 		//TODO HistoryEventを投げる

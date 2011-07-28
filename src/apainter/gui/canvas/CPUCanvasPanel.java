@@ -203,9 +203,9 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 
 		do{
 			Angle angle = parent.getAngle();
-			AffineTransform af = AffineTransform.getTranslateInstance((width>>1)+(width&1), (height>>1)+(height&1));
+			AffineTransform af = AffineTransform.getTranslateInstance((width>>1), (height>>1));
 			af.rotate(angle.radian);
-			af.translate(-(l>>1)-(l&1), -(l>>1)-(l&1));
+			af.translate(-(l>>1), -(l>>1));
 			if(parent.isReverse()){
 				af.scale(-1, 1);
 				af.translate(width, 0);

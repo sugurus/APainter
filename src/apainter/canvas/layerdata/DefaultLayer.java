@@ -1,6 +1,7 @@
 package apainter.canvas.layerdata;
 
 import static apainter.canvas.CanvasConstant.*;
+import static apainter.misc.Util.*;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -19,14 +20,16 @@ abstract class DefaultLayer implements Layer,PixelSetable,MaskContainer{
 	protected boolean visible;
 	protected ColorMode mode;
 	protected final Canvas canvas;
+	protected final LayerData layerdata;
 
-	public DefaultLayer(int id,String name,Canvas canvas) {
+	public DefaultLayer(int id,String name,Canvas canvas,LayerData layerdata) {
 		this.id = id;
 		this.name = name;
 		transparent = 256;
 		visible = true;
 		mode = ColorMode.Default;
-		this.canvas = canvas;
+		this.canvas = nullCheack(canvas, "canvas is null");
+		this.layerdata = nullCheack(layerdata, "layerdata is null");
 	}
 
 	@Override

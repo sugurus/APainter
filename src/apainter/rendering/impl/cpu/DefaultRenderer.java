@@ -4,6 +4,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 
 import apainter.data.PixelDataBuffer;
+import apainter.data.PixelDataByteBuffer;
 import apainter.data.PixelDataIntBuffer;
 import apainter.rendering.Renderer;
 import apainter.rendering.RenderingOption;
@@ -18,7 +19,7 @@ public class DefaultRenderer implements Renderer{
 			PixelDataIntBuffer intb = (PixelDataIntBuffer) base;
 			if (over instanceof PixelDataIntBuffer) {
 				PixelDataIntBuffer into = (PixelDataIntBuffer) over;
-				if(option.hasMask()){
+				if(option.hasSourceMask()){
 					rendering_mask(intb, into, p, clip, option);
 				}else
 					rendering(intb, into, p, clip, option);
@@ -41,7 +42,7 @@ public class DefaultRenderer implements Renderer{
 		final int base_width = base.width;
 		final int over_width = over.width;
 		final int[] basepixel = base.getData(),overpixel = over.getData();
-		final byte[] maskpixel = option.mask.getData();
+		final byte[] maskpixel = ((PixelDataByteBuffer)option.sourcemask).getData();
 		final int px = p.x,py=p.y;
 		final int layer = option.overlayeralph;
 		final int clipx = clip.x;

@@ -7,10 +7,44 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class CPUWorkThread {
+/**
+ *レンダリングなど速度が必要な並行処理を行うためのスレッド。<br>
+ *特に重要でない簡単な処理を任せるためのスレッドではない。
+ */
+public class CPUParallelWorkThread {
 	private static ExecutorService thread=null;
 	private static int threadsize = Runtime.getRuntime().availableProcessors();
+
+	//DefaultThreadFactoryの優先度だけ改変
+	static class WorkThreadFactory implements ThreadFactory {
+        static final AtomicInteger poolNumber = new AtomicInteger(1);
+        final ThreadGroup group;
+        final AtomicInteger threadNumber = new AtomicInteger(1);
+        final String namePrefix;
+
+        WorkThreadFactory() {
+            SecurityManager s = System.getSecurityManager();
+            group = (s != null)? s.getThreadGroup() :
+                                 Thread.currentThread().getThreadGroup();
+            namePrefix = "workpool-" +
+                          poolNumber.getAndIncrement() +
+                         "-thread-";
+        }
+
+        public Thread newThread(Runnable r) {
+            Thread t = new Thread(group, r,
+                                  namePrefix + threadNumber.getAndIncrement(),
+                                  0);
+            if (t.isDaemon())
+                t.setDaemon(false);
+            if (t.getPriority() != Thread.MAX_PRIORITY)
+                t.setPriority(Thread.MAX_PRIORITY);
+            return t;
+        }
+    }
 
 	public static boolean isRunning(){
 		return thread!=null && !thread.isShutdown();
@@ -19,7 +53,8 @@ public class CPUWorkThread {
 	public static synchronized void runThread(){
 		if(isRunning())return;
 		threadsize=Runtime.getRuntime().availableProcessors();
-		thread = Executors.newFixedThreadPool(threadsize-1);
+		thread = Executors.newFixedThreadPool(threadsize-1,new WorkThreadFactory());
+
 	}
 
 	public static synchronized void shutDown(){
@@ -108,4 +143,5 @@ public class CPUWorkThread {
 		}
 	}
 
+	private CPUParallelWorkThread() {}
 }

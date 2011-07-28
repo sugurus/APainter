@@ -1,8 +1,10 @@
 package apainter.rendering;
 
+import java.awt.Point;
 import java.util.HashMap;
 
 import apainter.color.Color;
+import apainter.data.PixelDataBuffer;
 import apainter.data.PixelDataByteBuffer;
 
 public class RenderingOption {
@@ -14,12 +16,20 @@ public class RenderingOption {
 
 	public boolean alphaFixed=false;
 
-	public PixelDataByteBuffer
+	public PixelDataBuffer
+		sourcemask,
+		/**
+		 * destinationのマスクとして使われる。それ以外の意味を持たせても良い。<br>
+		 * destinationのマスクとして扱う場合、問答無用でdestinationと同じ大きさであるとして扱われる。
+		 */
+		destinationmask;
+
 	/**
-	 * overのマスクとして使われる。それ以外の意味を持たせても良い。<br>
-	 * overのマスクとして扱う場合、問答無用でoverと同じ大きさであるとして扱われる。
+	 * sourcemaskの左上の原点をマスクをかける対象上のどこにおくか。座標は必ず0以下。<br>
+	 *
 	 */
-		mask;
+	public Point sourcemask_Point=new Point();
+
 	/**
 	 * overの全体の透明度
 	 */
@@ -48,17 +58,21 @@ public class RenderingOption {
 	 * @param mask マスクデータ
 	 * @param overalph 透明度 0～256
 	 */
-	public RenderingOption(Color front,Color back,PixelDataByteBuffer mask,int overalph) {
+	public RenderingOption(Color front,Color back,PixelDataBuffer mask,int overalph) {
 		if(front!=null)frontColor = front.clone();
 		else frontColor = null;
 		if(back !=null)backColor = back.clone();
 		else backColor = null;
-		this.mask = mask;
+		this.sourcemask = mask;
 		overlayeralph = overalph;
 	}
 
 
-	public boolean hasMask(){
-		return mask!=null;
+	public boolean hasSourceMask(){
+		return sourcemask!=null;
+	}
+
+	public boolean hasDestinationMask(){
+		return destinationmask!=null;
 	}
 }

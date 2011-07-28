@@ -39,7 +39,6 @@ public class APainter
 		final Splash sw = new Splash();
 		sw.showSplashWindow();
 		apainter.init(args);
-		System.out.println("ThreadName:"+Thread.currentThread().getName());
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 				sw.closeSplashWindow();

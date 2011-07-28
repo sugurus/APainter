@@ -24,7 +24,6 @@ public class DrawEvent extends CanvasEvent{
 			Renderer renderer,Device[] device,
 			PixelDataBuffer mapdata,RenderingOption option) {
 		super(id, source,target.getCanvas());
-		if(target==null)throw new NullPointerException("target");
 		if(mapdata==null)throw new NullPointerException("mapdata");
 		if(bounds==null)throw new NullPointerException("bounds");
 		if(option==null)throw new NullPointerException("option");

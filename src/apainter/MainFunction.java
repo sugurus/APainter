@@ -1,6 +1,7 @@
 package apainter;
 
 import apainter.canvas.Canvas;
+import apainter.debug.DebugMain;
 import apainter.gui.canvas.CanvasView;
 
 class MainFunction {
@@ -18,11 +19,14 @@ class MainFunction {
 		global.addCanvas(canvas);
 		global.put(GlobalKey.CurrentCanvas, canvas);
 
-		APainter.getContentPane()
-		.add(canvas.getCanvasView());
 		CanvasView c = canvas.getCanvasView();
+		APainter.getContentPane()
+		.add(c);
 
 		apainter.pack();
+
+		//debug
+		DebugMain.init();
 
 		GlobalValue.instance = null;
 	}

@@ -1,7 +1,5 @@
 package apainter.canvas.layerdata;
 
-import static apainter.misc.Util.*;
-
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -12,16 +10,11 @@ import java.awt.image.DirectColorModel;
 import java.awt.image.MemoryImageSource;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import javax.swing.JComponent;
 
 import apainter.canvas.Canvas;
-import apainter.canvas.cedt.cpu.CPUWorkThread;
+import apainter.canvas.cedt.cpu.CPUParallelWorkThread;
 import apainter.data.PixelDataIntBuffer;
 import apainter.gui.test.ImageFrame;
 import apainter.gui.test.ImageView;
@@ -73,7 +66,7 @@ public class CPULayerData extends LayerData{
 	@Override
 	protected Layer createLayer(int id) {
 		//TODO 名前決め
-		CPULayer l = new CPULayer(id, "test", getWidth(), getHeight(),canvas);
+		CPULayer l = new CPULayer(id, "test", getWidth(), getHeight(),canvas,this);
 		//TODO 削除
 		if(i==0){
 			int[] colors = new int[401*200];
@@ -112,7 +105,7 @@ public class CPULayerData extends LayerData{
 			runs.add(new _Rendering(r));
 		}
 
-		CPUWorkThread.exec(runs);
+		CPUParallelWorkThread.exec(runs);
 		imagesource.newPixels(clip.x, clip.y, clip.width, clip.height);
 	}
 

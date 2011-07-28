@@ -29,9 +29,11 @@ class CPULayer extends DefaultLayer{
 	private CPULayerHandler handler;
 	private MemoryImageSource imagesource;
 	private Image img;
+	private CPULayerData layerData;
 
-	public CPULayer(int id, String name,int width,int height,Canvas canvas) {
-		super(id, name,canvas);
+	public CPULayer(int id, String name,int width,int height,Canvas canvas,CPULayerData layerData) {
+		super(id, name,canvas,layerData);
+		this.layerData = layerData;
 		buffer = PixelDataIntBuffer.create(width, height);
 		pixel = buffer.getData();
 		mask = new CPUMask(width, height);

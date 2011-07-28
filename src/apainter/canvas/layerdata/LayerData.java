@@ -11,6 +11,8 @@ import apainter.drawer.DrawEvent;
 abstract public class LayerData implements DrawAccepter{
 	protected final Canvas canvas;
 	protected LayerList layerlist = new LayerList();
+	protected Mask mask;
+	protected boolean hasSelectedArea = false;
 
 
 	public LayerData(Canvas canvas) {
@@ -30,6 +32,9 @@ abstract public class LayerData implements DrawAccepter{
 		LayerHandler l = e.getTarget();
 		if(!layerlist.contains(l) || !l.isDrawable())return false;
 		Layer layer = l.getLayer();
+		if(hasSelectedArea){
+			e.getOption().destinationmask=mask.getDataBuffer();
+		}
 		return layer.paint(e);
 	}
 

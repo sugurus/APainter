@@ -383,15 +383,15 @@ public final class CanvasView extends JPanel{
 		double lw = canvasDafaultSize.width/2d;
 		double lh = canvasDafaultSize.height/2d;
 
-		toCanvas.setToTranslation(lw, lh);
+		toCanvas.setToTranslation((int)lw, (int)lh);
 
 		toCanvas.scale(1/zoom, 1/zoom);
 
-		toCanvas.translate(-cx, -cy);
+		toCanvas.translate(-(int)cx, -(int)cy);
 
-		toCanvas.translate(p.x, p.y);
+		toCanvas.translate((int)p.x, (int)p.y);
 		toCanvas.rotate(-angle.radian);
-		toCanvas.translate(-p.x, -p.y);
+		toCanvas.translate(-(int)p.x, -(int)p.y);
 
 		if(reverse)reverse(toCanvas);
 
