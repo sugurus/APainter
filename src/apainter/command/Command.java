@@ -1,4 +1,4 @@
-package apainter.debug;
+package apainter.command;
 
 import apainter.GlobalValue;
 

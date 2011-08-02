@@ -1,0 +1,17 @@
+<%FIELD>
+private static final int val(int b,int o,int a1,int oa,int t,int k){
+	return ((b*a1 + o * oa+t)*k>>16);
+}
+<%ALPHA>
+int alpha=calca(a,oa);
+<%RED>
+int a1 = (255-oa > a)? a:255-oa;
+int k = 65536/(a1+oa);
+int t = oa + a1-1;
+int red=val(r,or,a1,oa,t,k);
+<%GREEN>
+int green=val(g,og,a1,oa,t,k);
+<%BLUE>
+int blue=val(b,ob,a1,oa,t,k);
+<%COLORa0>
+int colora0=color;

@@ -10,18 +10,12 @@ public class DebugMain {
 	public static void init(){
 		gv=GlobalValue.getInstance();
 		initCUI();
-
 	}
 
 
 	private static void initCUI(){
 		CUI cui = CUI.cui;
 		cui.setGlobalValue(gv);
-
-		cui.setCommand(new Exit());
-		cui.setCommand(new Rotation());
-		cui.setCommand(new Zoom());
-
 
 		cui.start();
 

@@ -3,6 +3,8 @@ package apainter.debug;
 import java.util.Scanner;
 
 import apainter.GlobalValue;
+import apainter.command.CommandCenter;
+import apainter.command.CommandDecoder;
 
 public class CUI implements Runnable{
 
@@ -11,13 +13,6 @@ public class CUI implements Runnable{
 	private GlobalValue gloval;
 	private CommandCenter command = new CommandCenter();
 
-	public void setCommand(CommandDecoder d){
-		command.addCommand(d);
-	}
-
-	public void removeCommand(CommandDecoder d){
-		command.removeCommand(d);
-	}
 
 	public void setGlobalValue(GlobalValue g){
 		if(gloval!=null)return;

@@ -1,0 +1,240 @@
+
+
+	<%FIELD>
+
+	@Override
+	final public void rendering(PixelDataBuffer base, PixelDataBuffer over, Point p,
+			Rectangle clip, RenderingOption option) {
+		if(base instanceof PixelDataIntBuffer){
+			dolayer((PixelDataIntBuffer)base, over, p, clip, option);
+		}else if(base instanceof PixelDataByteBuffer){
+			domask((PixelDataByteBuffer)base,over,p,clip,option);
+		}
+	}
+
+	final private static void dolayer(PixelDataIntBuffer base, PixelDataBuffer over, Point p,
+			Rectangle clip, RenderingOption option) {
+		if(option.alphaFixed){
+			if(option.hasDestinationMask()){
+				renderint_alphfix_dmask(base, (PixelDataIntBuffer)over, p, clip, option,(PixelDataByteBuffer)option.destinationmask);
+			}else{
+				renderint_alphfix(base, (PixelDataIntBuffer)over, p, clip, option);
+			}
+		}
+		else{
+			if(option.hasDestinationMask()){
+				renderint_dmask(base, (PixelDataIntBuffer)over, p, clip, option,(PixelDataByteBuffer)option.destinationmask);
+			}else{
+				renderint(base, (PixelDataIntBuffer)over, p, clip, option);
+			}
+		}
+	}
+
+	private static void domask(PixelDataByteBuffer base, PixelDataBuffer over, Point p,
+			Rectangle clip, RenderingOption option){
+		//TODO draw mask
+		if(option.hasDestinationMask()){
+
+		}else{
+
+		}
+
+	}
+
+	final static void renderint(PixelDataIntBuffer base,PixelDataIntBuffer over,Point p,Rectangle clip,RenderingOption option){
+		final int[] basep = base.getData();
+		final int basew = base.width;
+		final int[] overp = over.getData();
+		final int overw = over.width;
+		final int color = option.frontColor.getARGB();
+		final int or=r(color);
+		final int og=g(color);
+		final int ob=b(color);
+		final int overalph = option.overlayeralph;
+		final int endy = clip.height+clip.y,endx=clip.width+clip.x;
+		final int px=p.x,py=p.y;
+
+
+		for(int x,y = clip.y;y<endy;y++){
+			for(x = clip.x;x<endx;x++){
+				final int c = pixel(basep,x,y,basew);
+				final int a = a(c);
+				final int r = r(c);
+				final int g = g(c);
+				final int b = b(c);
+
+				final int oc = pixel(overp,x-px,y-py,overw);
+				final int oa = layeralph(oc,overalph);
+
+
+				if(a !=0){
+					<%ALPHA>	
+					<%RED>
+					<%GREEN>
+					<%BLUE>
+					set(basep,argb(
+						alpha,
+						red,
+						green,
+						blue),
+						x,y,basew);
+					continue;
+				}else{
+					<%COLORa0>
+					set(basep,oa,colora0,x,y,basew);
+					continue;
+				}
+			}
+		}
+	}
+
+	final static void renderint_dmask(PixelDataIntBuffer base,PixelDataIntBuffer over,Point p,Rectangle clip,RenderingOption option,
+	PixelDataByteBuffer dmask){
+		final int[] basep = base.getData();
+		final int basew = base.width;
+		final byte[] dmaskp = dmask.getData();
+		final int[] overp = over.getData();
+		final int overw = over.width;
+		final int color = option.frontColor.getARGB();
+		final int or=r(color);
+		final int og=g(color);
+		final int ob=b(color);
+		final int overalph = option.overlayeralph;
+		final int endy = clip.height+clip.y,endx=clip.width+clip.x;
+		final int px=p.x,py=p.y;
+
+
+		for(int x,y = clip.y;y<endy;y++){
+			for(x = clip.x;x<endx;x++){
+				final int dmaskv = pixel(dmaskp,x,y,basew)&0xff;
+				if(dmaskv==0)continue;
+				final int rdmaskv = 255-dmaskv;
+				final int c = pixel(basep,x,y,basew);
+				final int a = a(c);
+				final int r = r(c);
+				final int g = g(c);
+				final int b = b(c);
+
+				final int oc = pixel(overp,x-px,y-py,overw);
+				final int oa = layeralph(oc,overalph);
+
+
+				if(a !=0){
+					<%ALPHA>	
+					<%RED>
+					<%GREEN>
+					<%BLUE>
+					set(basep,argb(
+						(alpha*dmaskv+a*rdmaskv)/255,
+						(red*dmaskv+r*rdmaskv)/255,
+						(green*dmaskv+g*rdmaskv)/255,
+						(blue*dmaskv+b*rdmaskv)/255),x,y,basew);
+					continue;
+				}else{
+					<%COLORa0>
+					final int red = (r(colora0)*dmaskv+r*rdmaskv)/255;
+					final int green = (g(colora0)*dmaskv+g*rdmaskv)/255;
+					final int blue = (b(colora0)*dmaskv+b*rdmaskv)/255;
+					
+					set(basep,argb(
+						oa*dmaskv/255,
+						red,
+						green,
+						blue
+					),x,y,basew);
+					continue;
+				}
+			}
+		}
+	}
+
+	final static void renderint_alphfix(PixelDataIntBuffer base,PixelDataIntBuffer over,Point p,Rectangle clip,RenderingOption option){
+		final int[] basep = base.getData();
+		final int basew = base.width;
+		final int[] overp = over.getData();
+		final int overw = over.width;
+		final int color = option.frontColor.getARGB();
+		final int or=r(color);
+		final int og=g(color);
+		final int ob=b(color);
+		final int overalph = option.overlayeralph;
+		final int endy = clip.height+clip.y,endx=clip.width+clip.x;
+		final int px=p.x,py=p.y;
+
+
+		for(int y = clip.y;y<endy;y++){
+			for(int x = clip.x;x<endx;x++){
+				final int c = pixel(basep,x,y,basew);
+				final int a = a(c);
+				if(a !=0){
+					final int oc = pixel(overp,x-px,y-py,overw);
+					final int oa = layeralph(oc,overalph);
+					final int r = r(c);
+					final int g = g(c);
+					final int b = b(c);
+
+					<%RED>
+					<%GREEN>
+					<%BLUE>
+					set(basep,
+							argb(
+							a,
+							red,
+							green,
+							blue),
+							x,y,basew);
+					continue;
+				}
+			}
+		}
+	}
+
+
+	final static void renderint_alphfix_dmask(PixelDataIntBuffer base,PixelDataIntBuffer over,Point p,Rectangle clip,RenderingOption option,
+		PixelDataByteBuffer mask){
+		final int[] basep = base.getData();
+		final int basew = base.width;
+		final byte[] dmaskp = mask.getData();
+		final int[] overp = over.getData();
+		final int overw = over.width;
+		final int color = option.frontColor.getARGB();
+		final int or=r(color);
+		final int og=g(color);
+		final int ob=b(color);
+		final int overalph = option.overlayeralph;
+		final int endy = clip.height+clip.y,endx=clip.width+clip.x;
+		final int px=p.x,py=p.y;
+
+
+		for(int y = clip.y;y<endy;y++){
+			for(int x = clip.x;x<endx;x++){
+				final int dmaskv = pixel(dmaskp,x,y,basew)&0xff;
+				if(dmaskv==0)continue;
+				final int rdmaskv=255-dmaskv;
+				final int c = pixel(basep,x,y,basew);
+				final int a = a(c);
+				
+				if(a !=0){
+					final int oc =pixel(overp,x-px,y-py,overw);
+					final int oa = layeralph(a(oc),overalph);
+					final int r = r(c);
+					final int g = g(c);
+					final int b = b(c);
+
+
+					<%RED>
+					<%GREEN>
+					<%BLUE>
+					set(basep,
+							argb(a,
+								(red*dmaskv+r*rdmaskv)/255,
+								(green*dmaskv+g*rdmaskv)/255,
+								(blue*dmaskv+b*rdmaskv)/255),
+							x,y,basew);
+					continue;
+				}
+			}
+		}
+	}
+
+	//TODO mask

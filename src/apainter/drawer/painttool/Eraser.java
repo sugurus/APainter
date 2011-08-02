@@ -8,8 +8,8 @@ import apainter.Device;
 import apainter.GlobalValue;
 import apainter.color.Color;
 import apainter.data.PixelDataBuffer;
+import apainter.data.PixelDataByteBuffer;
 import apainter.data.PixelDataIntBuffer;
-import apainter.misc.Utility_PixelFunction;
 import apainter.rendering.Renderer;
 import apainter.rendering.RenderingOption;
 
@@ -42,39 +42,123 @@ public class Eraser extends BasicDrawer{
 
 class EraserCPURendering implements Renderer{
 
+
 	@Override
-	public void rendering(PixelDataBuffer base, PixelDataBuffer over, Point p,
+	final public void rendering(PixelDataBuffer base, PixelDataBuffer over, Point p,
 			Rectangle clip, RenderingOption option) {
 		if(base instanceof PixelDataIntBuffer){
-			renderint((PixelDataIntBuffer)base, (PixelDataIntBuffer)over, p, clip, option);
+			dolayer((PixelDataIntBuffer)base, over, p, clip, option);
+		}else if(base instanceof PixelDataByteBuffer){
+			domask((PixelDataByteBuffer)base,over,p,clip,option);
 		}
 	}
 
-	void renderint(PixelDataIntBuffer base,PixelDataIntBuffer over,Point p,Rectangle clip,RenderingOption option){
-		int[] basep = base.getData();
-		int basew = base.width;
-		int[] overp = over.getData();
-		int overw = over.width;
-		int overalph = option.overlayeralph;
-		int endy = clip.height+clip.y,endx=clip.width+clip.x;
-		int px = p.x,py = p.y;
-
-		for(int y=clip.y;y<endy;y++){
-			int overy = y-py;
-			for(int x=clip.x;x<endx;x++){
-				int overx = x-px;
-				int color =basep[x+y*basew];
-				int alph = (color>>>24)-(overp[overx+overy*overw]*overalph>>8);
-				basep[x+y*basew]=
-					alph<=0?
-							Color.ClearColor:
-							alph<<24|(color&0xffffff);
+	final private static void dolayer(PixelDataIntBuffer base, PixelDataBuffer over, Point p,
+			Rectangle clip, RenderingOption option) {
+		if(option.alphaFixed){
+			if(option.hasDestinationMask()){
+				renderint_alphfix_dmask(base, (PixelDataIntBuffer)over, p, clip, option,(PixelDataByteBuffer)option.destinationmask);
+			}else{
+				renderint_alphfix(base, (PixelDataIntBuffer)over, p, clip, option);
+			}
+		}
+		else{
+			if(option.hasDestinationMask()){
+				renderint_dmask(base, (PixelDataIntBuffer)over, p, clip, option,(PixelDataByteBuffer)option.destinationmask);
+			}else{
+				renderint(base, (PixelDataIntBuffer)over, p, clip, option);
 			}
 		}
 	}
 
-	//TODO alph fix
+	final private static void domask(PixelDataByteBuffer base, PixelDataBuffer over, Point p,
+			Rectangle clip, RenderingOption option){
+		//TODO draw mask
+		if(option.hasDestinationMask()){
 
-	//TODO MaskのPixelDataByteBuffer
+		}else{
+
+		}
+
+	}
+
+	final static void renderint(PixelDataIntBuffer base,PixelDataIntBuffer over,Point p,Rectangle clip,RenderingOption option){
+		final int[] basep = base.getData();
+		final int basew = base.width;
+		final int[] overp = over.getData();
+		final int overw = over.width;
+		final int overalph = option.overlayeralph;
+		final int endy = clip.height+clip.y,endx=clip.width+clip.x;
+		final int px=p.x,py=p.y;
+
+
+		for(int x,y = clip.y;y<endy;y++){
+			for(x = clip.x;x<endx;x++){
+				final int c = pixel(basep,x,y,basew);
+				final int a = a(c);
+
+				final int oa = layeralph(pixel(overp,x-px,y-py,overw),overalph);
+
+
+				if(a !=0){
+					int alpha = a-oa;
+
+					set(basep,alpha<=0?Color.ClearColor:(alpha<<24)|c&0xffffff,
+							x,y,basew);
+					continue;
+				}
+			}
+		}
+	}
+
+	final static void renderint_dmask(PixelDataIntBuffer base,PixelDataIntBuffer over,Point p,Rectangle clip,RenderingOption option,
+			PixelDataByteBuffer dmask){
+		final int[] basep = base.getData();
+		final int basew = base.width;
+		final byte[] dmaskp = dmask.getData();
+		final int[] overp = over.getData();
+		final int overw = over.width;
+		final int overalph = option.overlayeralph;
+		final int endy = clip.height+clip.y,endx=clip.width+clip.x;
+		final int px=p.x,py=p.y;
+
+
+		for(int x,y = clip.y;y<endy;y++){
+			for(x = clip.x;x<endx;x++){
+				final int dmaskv = pixel(dmaskp,x,y,basew)&0xff;
+				if(dmaskv==0)continue;
+				final int rdmaskv = 255-dmaskv;
+				final int c = pixel(basep,x,y,basew);
+				final int a = a(c);
+
+				final int oa = layeralph(pixel(overp,x-px,y-py,overw),overalph);
+
+
+				if(a !=0){
+					int alpha = (a-oa)<=0?0:a-oa;
+					alpha = (alpha*dmaskv+a*rdmaskv)/255;
+
+					set(basep,alpha<=0?Color.ClearColor:(alpha<<24)|c&0xffffff,
+							x,y,basew);
+					continue;
+				}
+			}
+		}
+	}
+
+	final static void renderint_alphfix(PixelDataIntBuffer base,PixelDataIntBuffer over,Point p,Rectangle clip,RenderingOption option){
+		option.frontColor=option.backColor;
+		PenCPURendering.renderint_alphfix(base, over, p, clip, option);
+	}
+
+
+	final static void renderint_alphfix_dmask(PixelDataIntBuffer base,PixelDataIntBuffer over,Point p,Rectangle clip,RenderingOption option,
+			PixelDataByteBuffer mask){
+		option.frontColor=option.backColor;
+		PenCPURendering.renderint_alphfix_dmask(base, over, p, clip, option, mask);
+	}
+
+
+	//TODO mask
 
 }
