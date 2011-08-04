@@ -23,7 +23,7 @@ JAVAC=javac
 ENCODING=-encoding utf-8
 
 
-APainter=apainter/APainter
+APainter=APainter
 
 JAR=apainter.jar
 MANIFEST=apainter.mf
@@ -31,16 +31,13 @@ MANIFEST=apainter.mf
 
 
 #defaultfiles
-SPLASH=splashImage.png
+SPLASH=/splashImage.png
 
 
 CP=-classpath $(JPENPATH)
 
 
-$(CLASSDIR)/$(APainter).class:$(SOURCEDIR)/$(APainter).java
-	mkdir -p $(CLASSDIR)
-	$(JAVAC) $(CP) $(ENCODING) -d $(CLASSDIR) -sourcepath $(SOURCEDIR) $<
-	cp $(SOURCEDIR)$(SPLASH) $(CLASSDIR)$(SPLASH)
+$(CLASSDIR)/$(APainter).class:build
 
 $(JAR):$(CLASSDIR)/$(APainter).class
 	jar cfm $(JAR) $(MANIFEST) -C $(CLASSDIR) apainter -C $(CLASSDIR) nodamushi
@@ -52,7 +49,7 @@ jar:$(JAR)
 
 build:$(SOURCEDIR)/$(APainter).java
 	mkdir -p $(CLASSDIR)
-	$(JAVAC) $(CP) $(ENCODING) -d $(CLASSDIR) -g:none -sourcepath $(SOURCEDIR) $<
+	$(JAVAC) $(CP) $(ENCODING) -d $(CLASSDIR) -sourcepath $(SOURCEDIR) $<
 	cp $(SOURCEDIR)$(SPLASH) $(CLASSDIR)$(SPLASH)
 
 clean:

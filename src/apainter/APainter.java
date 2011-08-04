@@ -54,7 +54,7 @@ public class APainter {
 			ArrayList<CanvasMouseListener> list = new  ArrayList<CanvasMouseListener>();
 			list.add(pen);
 			list.add(era);
-			global.put(CanvasList, list);
+			global.put(CanvasActionList, list);
 		}
 		command = new CommandCenter(global);
 		global.put(CommandCenter,command);
