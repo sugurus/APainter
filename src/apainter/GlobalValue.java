@@ -25,21 +25,8 @@ import static apainter.GlobalKey.*;
  */
 public class GlobalValue extends HashMap<Object, Object>{
 
-	static GlobalValue instance = new GlobalValue();
-
 	private Color front,back;
 
-
-
-	public static GlobalValue getInstance(){
-		if(cheack()){
-			return instance;
-		}else throw new RuntimeException("don't have a access right.");
-	}
-
-	private static boolean cheack(){
-		return APainter.isInitThread(Thread.currentThread());
-	}
 
 
 	public Color getFrontColor(){
@@ -65,68 +52,49 @@ public class GlobalValue extends HashMap<Object, Object>{
 		if(!l.contains(canvas))l.add(canvas);
 	}
 
+	@SuppressWarnings("unchecked")
+	public <E> E get(Object key,Class<E> claz){
+		Object o = get(key);
+		if(o!=null && claz.isAssignableFrom(o.getClass())){
+			return (E)o;
+		}
+		return null;
+	}
+
 	@Override
 	public Object put(Object key, Object value) {
-		IF:if(
-		(key instanceof GlobalBindKey && !((GlobalBindKey)key).change) ||
-		(key instanceof GlobalKey && !((GlobalKey)key).change)
-		){
+		if((key instanceof GlobalBindKey && !((GlobalBindKey)key).change) ||
+		(key instanceof GlobalKey && !((GlobalKey)key).change)){
 			Object o = get(key);
-			if(o==null){
-				break IF;
+			if(o!=null){
+				System.err.println("already exist key!"+key.toString());
+				return null;
+			}else{
+				return super.put(key, value);
 			}
-			System.out.println("Can't put");
-			return null;
 		}
 		Object old= super.put(key, value);
 		firePropertyChange(key.toString(), old, value);
 		return old;
 	}
 
-
-	private GlobalValue() {
-		{//色
-			front = new Color(0xff000000);
-			back = new Color(0xffffffff);
-			super.put(FrontColor, front);
-			super.put(BackColor,back);
-			Bind f = new Bind(Color.propertyColorChange),
-			f16 = new Bind(Color.propertyColorChangeLong),
-			b = new Bind(Color.propertyColorChange),
-			b16 = new Bind(Color.propertyColorChangeLong);
-			f.bind(front);
-			f16.bind(front);
-			b.bind(back);
-			b16.bind(back);
-			super.put(FrontColorBIND,f);
-			super.put(FrontColor16bitBIND,f16);
-			super.put(BackColorBIND,b);
-			super.put(BackColor16bitBIND,b16);
-		}
-		{
-			ArrayList<Canvas> list = new ArrayList<Canvas>();
-			super.put(CanvasList,list);
-		}
-		{
-			PenFactoryCenter p = new PenFactoryCenter();
-			super.put(PenFactoryCenter, p);
-			Pen pen = new Pen(this);
-			Eraser era = new Eraser(this);
-			PenShapeFactory f = p.getPenShapeFactory(0);
-			f.load();
-			PenShape s = f.createPenShape(1, 1);
-			pen.setPen(s);
-			era.setPen(s);
-			super.put(CanvasHeadAction, pen);
-			super.put(CanvasTailAction,era);
-			ArrayList<CanvasMouseListener> list = new  ArrayList<CanvasMouseListener>();
-			list.add(pen);
-			list.add(era);
-			super.put(CanvasList, list);
-
-
-		}
-
+	public GlobalValue() {
+		front = new Color(0xff000000);
+		back = new Color(0xffffffff);
+		super.put(FrontColor, front);
+		super.put(BackColor,back);
+		Bind f = new Bind(Color.propertyColorChange),
+		f16 = new Bind(Color.propertyColorChangeLong),
+		b = new Bind(Color.propertyColorChange),
+		b16 = new Bind(Color.propertyColorChangeLong);
+		f.bind(front);
+		f16.bind(front);
+		b.bind(back);
+		b16.bind(back);
+		super.put(FrontColorBIND,f);
+		super.put(FrontColor16bitBIND,f16);
+		super.put(BackColorBIND,b);
+		super.put(BackColor16bitBIND,b16);
 	}
 
 

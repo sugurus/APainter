@@ -6,6 +6,10 @@ public enum GlobalKey{
 	CanvasActionList(false),CanvasHeadAction,CanvasTailAction,
 	PenFactoryCenter(false),
 
+	CommandCenter(false),
+
+	NEWLayerDefaultName
+
 	;
 
 

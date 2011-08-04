@@ -29,19 +29,9 @@ public class CommandCenter {
 		return null;
 	}
 
-	private void set(){
-		addCommand(new Exit());
-		addCommand(new Rotation());
-		addCommand(new Zoom());
-	}
-
 	GlobalValue v;
 	ArrayList<CommandDecoder> decoders = new ArrayList<CommandDecoder>();
-	public CommandCenter() {this(null);}
-	public CommandCenter(GlobalValue gv){v = gv;set();}
-	public void setGlobalValue(GlobalValue gv){
-		if(v==null)v=gv;
-	}
+	public CommandCenter(GlobalValue gv){v = gv;}
 	public void addCommand(CommandDecoder d){
 		if(d!=null&&!decoders.contains(d))decoders.add(d);
 	}

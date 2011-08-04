@@ -1,24 +1,27 @@
-package apainter.command;
+package apainter;
 
 import static java.util.regex.Pattern.*;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import apainter.GlobalKey;
-import apainter.GlobalValue;
 import apainter.canvas.Canvas;
+import apainter.command.Command;
+import apainter.command.CommandDecoder;
 import apainter.gui.canvas.CanvasView;
 
-class Exit implements CommandDecoder{
-
-	private static String name="exit";
-	private static Command com = new Command() {
-		public void exec(GlobalValue global) {
-			System.out.println("APainter exit");
-			System.exit(0);
+class CreateLayer implements CommandDecoder{
+	private static String name="createlayer";
+	private  static class Com implements Command{
+		String s;
+		Com(String name){
+			s = name;
 		}
-	};
+		@Override
+		public void exec(GlobalValue global) {
+			Canvas c=(Canvas) global.get(GlobalKey.CurrentCanvas);
+		}
+	}
 
 	@Override
 	public boolean isMatch(String commandname) {
@@ -27,10 +30,9 @@ class Exit implements CommandDecoder{
 
 	@Override
 	public Command decode(String param) {
-		return com;
+		return new Com(param);
 	}
 }
-
 
 class Rotation implements CommandDecoder{
 	private static String name = "rot";

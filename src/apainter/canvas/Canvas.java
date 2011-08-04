@@ -92,7 +92,7 @@ public class Canvas {
 
 	private void initCPU(){
 		ceaccepter = new CPUCEA_0(this);
-		CPULayerData c = new CPULayerData(this);
+		CPULayerData c = new CPULayerData(this,global);
 		layerdata = c;
 		cpucanvas = new CPUCanvasPanel(c.getImage());
 		view = new CanvasView(width, height, cpucanvas,cpucanvas,global);
@@ -111,6 +111,9 @@ public class Canvas {
 		return layerdata.paint(e);
 	}
 
+	public void shutDownCEDT(){
+		ceaccepter.shutDownCEDT();
+	}
 
 	public void dispatchEvent(CanvasEvent e){
 		ceaccepter.passEvent(e);
@@ -188,7 +191,7 @@ public class Canvas {
 		}
 	}
 
-	//TODO TestMethod
+	//FIXME TestMethod
 	public JComponent testMethod_getPanel(){
 		return layerdata.testMethod_createViewPanel();
 	}
@@ -212,6 +215,17 @@ public class Canvas {
 			for(Rectangle r:rects)layerdata.rendering(r);
 		}
 		view.rendering(union);
+	}
+
+
+
+
+
+	//LayerData操作--------------------------------------------------
+
+
+	public LayerHandler createNewLayer(String name){
+		return layerdata.createLayer(name);
 	}
 
 

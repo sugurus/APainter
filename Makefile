@@ -2,6 +2,8 @@
 JPENPATH=C:/javaclasspath/jpen/jpen-2.jar
 #classfile directory
 CLASSDIR=classdir
+#if unix=> :
+CLASSPATHSEP=\;
 ###########################################
 ##make
 ##		compile java files
@@ -29,7 +31,7 @@ MANIFEST=apainter.mf
 
 
 #defaultfiles
-SPLASH=/apainter/gui/splash/splashImage.png
+SPLASH=splashImage.png
 
 
 CP=-classpath $(JPENPATH)
@@ -44,7 +46,7 @@ $(JAR):$(CLASSDIR)/$(APainter).class
 	jar cfm $(JAR) $(MANIFEST) -C $(CLASSDIR) apainter -C $(CLASSDIR) nodamushi
 
 run:$(CLASSDIR)/$(APainter).class
-	java $(CP)\;$(CLASSDIR) $(APainter)
+	java $(CP)$(CLASSPATHSEP)$(CLASSDIR) $(APainter)
 
 jar:$(JAR)
 

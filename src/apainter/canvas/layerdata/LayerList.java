@@ -1,5 +1,7 @@
 package apainter.canvas.layerdata;
 
+import static apainter.PropertyChangeNames.*;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -7,12 +9,10 @@ import java.util.Map;
 import apainter.bind.annotation.BindProperty;
 import apainter.hierarchy.Element;
 import apainter.hierarchy.Hierarchy;
+import apainter.hierarchy.Unit;
 
 
 public class LayerList extends Hierarchy<LayerHandler>{
-	public static final String
-		SelectedLayerChangeProperty = "selectedLayer",
-		SelectedMaskChangeProperty = "selectedMask";
 
 	private Map<Integer, LayerHandler> alllayer = new HashMap<Integer, LayerHandler>();
 	private LayerHandler selectedLayer;
@@ -26,6 +26,11 @@ public class LayerList extends Hierarchy<LayerHandler>{
 			selectedMask = false;
 			LayerHandler old = selectedLayer;
 			selectedLayer = l;
+			if(l.getElement().isUnit()){
+				setCurrentUnit((Unit<LayerHandler>)l.getElement());
+			}else{
+				setCurrentUnit(l.getElement().getUnit());
+			}
 			firePropertyChange(SelectedLayerChangeProperty, old, l);
 		}
 	}
@@ -46,16 +51,18 @@ public class LayerList extends Hierarchy<LayerHandler>{
 	protected void add(Element<LayerHandler> e) {
 		LayerHandler l = e.getProperty();
 		alllayer.put(l.getID(), l);
+		System.out.println(l);
+		l.setElement(e);
 		super.add(e);
 	}
 
 	@Override
-	protected void addAll(Collection<Element<LayerHandler>> e) {
+	protected void readdAll(Collection<Element<LayerHandler>> e) {
 		for(Element<LayerHandler> el:e){
 			LayerHandler l = el.getProperty();
 			alllayer.put(l.getID(), l);
 		}
-		super.addAll(e);
+		super.readdAll(e);
 	}
 
 	@Override
@@ -83,6 +90,36 @@ public class LayerList extends Hierarchy<LayerHandler>{
 				firePropertyChange(SelectedMaskChangeProperty, !b, b);
 			}
 		}
+	}
+
+
+	public void moveToNext(LayerHandler l){
+		Element<LayerHandler> e = l.getElement();
+		Unit<LayerHandler> u = e.getUnit();
+		int pos = e.getIndex()+1;
+		int size = u.size();
+		if(pos==size)return;
+		Element<LayerHandler> before = u.getElement(pos);
+		moveToNext(e, before);
+	}
+
+	public void moveToBefore(LayerHandler l){
+		Element<LayerHandler> e = l.getElement();
+		Unit<LayerHandler> u = e.getUnit();
+		int pos = e.getIndex()-1;
+		if(pos<0)return;
+		Element<LayerHandler> next = u.getElement(pos);
+		moveToBefore(e, next);
+	}
+
+	public void moveToSelectedLayerNext(LayerHandler l){
+		if(l==selectedLayer)return;
+		moveToNext(l.getElement(), selectedLayer.getElement());
+	}
+
+	public void moveToSelectedLayerBefore(LayerHandler l){
+		if(l==selectedLayer)return;
+		moveToBefore(l.getElement(), selectedLayer.getElement());
 	}
 
 

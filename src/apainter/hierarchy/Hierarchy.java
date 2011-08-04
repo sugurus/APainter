@@ -71,10 +71,17 @@ public class Hierarchy<E> {
 		elements.add(e);
 	}
 
-	protected void addAll(Collection<Element<E>> e){
+	/**
+	 * @param e
+	 */
+	protected void readdAll(Collection<Element<E>> e){
 		elements.addAll(e);
 	}
 
+	/**
+	 * 要素を削除するときここを通ります。
+	 * @param e
+	 */
 	protected void remove(Element<E> e){
 		elements.remove(e);
 	}
@@ -162,7 +169,7 @@ public class Hierarchy<E> {
 				for(Element<E> ee:es){
 					if(e.isUnit())unitAdd(lis, (Unit<E>)ee);
 				}
-				addAll(lis);
+				readdAll(lis);
 			}
 			_readd(e,lis);
 			return true;

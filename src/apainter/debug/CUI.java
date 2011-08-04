@@ -1,24 +1,26 @@
 package apainter.debug;
 
+import static apainter.misc.Util.*;
+
 import java.util.Scanner;
 
+import apainter.GlobalKey;
 import apainter.GlobalValue;
 import apainter.command.CommandCenter;
 import apainter.command.CommandDecoder;
 
 public class CUI implements Runnable{
 
-	public static CUI cui=new CUI();
 	private Thread thread;
-	private GlobalValue gloval;
-	private CommandCenter command = new CommandCenter();
+	private GlobalValue gloval;//これスペルミスじゃないんだぜ！
+	private CommandCenter command;
 
 
-	public void setGlobalValue(GlobalValue g){
-		if(gloval!=null)return;
-		gloval = g;
-		command.setGlobalValue(g);
+	public CUI(GlobalValue g){
+		gloval = nullCheack(g);
+		command = g.get(GlobalKey.CommandCenter, CommandCenter.class);
 	}
+
 
 	public synchronized void start(){
 		if(thread!=null&&thread.isAlive())return;

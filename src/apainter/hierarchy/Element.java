@@ -27,7 +27,7 @@ public class Element<E>{
 		return property;
 	}
 
-	public void setUnit(Unit<E> u) {
+	void setUnit(Unit<E> u) {
 		parent = u;
 	}
 

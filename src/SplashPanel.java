@@ -1,4 +1,4 @@
-package apainter.gui.splash;
+
 
 import java.awt.Container;
 import java.awt.Dimension;

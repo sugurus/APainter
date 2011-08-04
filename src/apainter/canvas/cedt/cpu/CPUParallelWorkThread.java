@@ -10,6 +10,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import apainter.APainter;
+
 /**
  *レンダリングなど速度が必要な並行処理を行うためのスレッド。<br>
  *特に重要でない簡単な処理を任せるためのスレッドではない。
@@ -17,6 +19,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class CPUParallelWorkThread {
 	private static ExecutorService thread=null;
 	private static int threadsize = Runtime.getRuntime().availableProcessors();
+	private static ArrayList<APainter> apainters=new ArrayList<APainter>();
+
+	public static synchronized void use(APainter apainter){
+		if(!apainters.contains(apainter)){
+			apainters.add(apainter);
+			runThread();
+		}
+	}
+
+	public static synchronized void stop(APainter apainter){
+		apainters.remove(apainter);
+		if(apainters.isEmpty()){
+			shutDown();
+		}
+	}
 
 	//DefaultThreadFactoryの優先度だけ改変
 	static class WorkThreadFactory implements ThreadFactory {

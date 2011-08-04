@@ -5,6 +5,7 @@ import java.awt.Image;
 import apainter.canvas.Canvas;
 import apainter.data.PixelDataBuffer;
 import apainter.drawer.DrawEvent;
+import apainter.hierarchy.Element;
 import apainter.rendering.ColorMode;
 
 public abstract class LayerHandler implements LayerHandle,PixelSetable{
@@ -35,5 +36,19 @@ public abstract class LayerHandler implements LayerHandle,PixelSetable{
 	abstract Image getMaskImage();
 	abstract PixelSetable getDrawable();
 
+	private Element<LayerHandler> thiselement=null;
+	final synchronized void setElement(Element<LayerHandler> e){
+		if(thiselement==null){
+			thiselement=e;
+		}
+	}
+
+	final Element<LayerHandler> getElement(){
+		return thiselement;
+	}
+
+	final boolean hasElement(){
+		return thiselement!=null;
+	}
 
 }

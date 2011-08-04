@@ -1,30 +1,37 @@
 package apainter.canvas.layerdata;
 
+import static apainter.misc.Util.*;
+
 import java.awt.Rectangle;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import javax.swing.JComponent;
+import javax.swing.event.EventListenerList;
 
+import apainter.GlobalKey;
+import apainter.GlobalValue;
 import apainter.canvas.Canvas;
 import apainter.drawer.DrawAccepter;
 import apainter.drawer.DrawEvent;
 
 abstract public class LayerData implements DrawAccepter{
 	protected final Canvas canvas;
+	protected final GlobalValue global;
 	protected LayerList layerlist = new LayerList();
 	protected Mask mask;
 	protected boolean hasSelectedArea = false;
+	protected int layerid=0;
 
 
-	public LayerData(Canvas canvas) {
-		if(canvas==null)throw new NullPointerException("canvas");
-		this.canvas = canvas;
+	//デフォルト
+	public LayerData(Canvas canvas,GlobalValue globalvalue) {
+		this.canvas = nullCheack(canvas, "canvas is null");
+		global = nullCheack(globalvalue, "globalvalue is null");
 		layerlist = new LayerList();
 		LayerHandler lh;
-		layerlist.addElement(lh=makeLayer(12));
+		layerlist.addElement(lh=makeLayer(layerid,null));
 		layerlist.setSelectLayer(lh);
-		lh.setTransparent(127);
-		layerlist.addElement(lh=makeLayer(3));
-		lh.setTransparent(127);
 	}
 
 	@Override
@@ -54,17 +61,102 @@ abstract public class LayerData implements DrawAccepter{
 		return canvas.getHeight();
 	}
 
-	private LayerHandler makeLayer(int id){
-		Layer l = createLayer(id);
+	public void setSelectLayer(LayerHandler l){
+		if(l==null)return;
+		LayerHandler old = layerlist.getSelectLayerHandler();
+		if(l==old)return;
+		layerlist.setSelectLayer(l);
+	}
+
+	public LayerHandler getSelectedLayer(){
+		return layerlist.getSelectLayerHandler();
+	}
+
+
+	/**
+	 * 渡されたレイヤーをグループ内で一番最初に移動させます。<br>
+	 * (※レンダリングが最初にされるという意味。見た目上は下にあるように見えるだろう)
+	 * @param l
+	 */
+	public void moveToFirst(LayerHandler l){
+		layerlist.moveIntoTop(l.getElement(), l.getElement().getUnit());
+	}
+
+	/**
+	 * 渡されたレイヤーをグループ内で一番最後に移動させます。<br>
+	 * (※レンダリングが最後にされるという意味。見た目は上にあるように見えるだろう)
+	 * @param l
+	 */
+	public void moveToLast(LayerHandler l){
+		layerlist.moveIntoLast(l.getElement(), l.getElement().getUnit());
+	}
+
+	/**
+	 * next「を」beforeの次へ移動させます。
+	 * @param next
+	 * @param before
+	 */
+	public void moveToNext(LayerHandler next,LayerHandler before){
+		layerlist.moveToNext(next.getElement(), before.getElement());
+	}
+
+	/**
+	 * before「を」nextの前へ移動させます
+	 */
+	public void moveToBefore(LayerHandler before,LayerHandler next){
+		layerlist.moveToBefore(before.getElement(), next.getElement());
+	}
+
+	/**
+	 * 可能ならば、グループ内で一つ次に移動させます。
+	 * @param l
+	 */
+	public void moveToNext(LayerHandler l){
+		layerlist.moveToNext(l);
+	}
+	/**
+	 * 可能ならば、グループ内で一つ前に移動させます。
+	 * @param l
+	 */
+	public void moveToBefore(LayerHandler l){
+		layerlist.moveToBefore(l);
+	}
+
+
+	/**
+	 * 選択レイヤーの次に新たなレイヤーを追加します。
+	 * @param layername
+	 * @return
+	 */
+	public LayerHandler createLayer(String layername){
+		LayerHandler lh= makeLayer(layerid++, layername);
+		layerlist.addElement(lh);
+		layerlist.moveToSelectedLayerNext(lh);
+		return lh;
+	}
+
+	private LayerHandler makeLayer(int id,String layername){
+		Layer l = createLayer(id,layername);
 		return l.getHandler();
 	}
+
+	private int layernumber=1;
+	protected String makeLayerName(String name){
+		if(name!=null)return name;
+		String s=global.get(GlobalKey.NEWLayerDefaultName,String.class);
+		if(s==null)s="newlayer";
+		s = s+layernumber;
+		layernumber++;
+		return s;
+	}
+
 	//TODO レイヤーの追加の外部関数
 
 	/**
 	 * @param id 作成するレイヤーに設定するid
 	 * @return
 	 */
-	protected abstract Layer createLayer(int id);
+	protected abstract Layer createLayer(int id,String layername);
 
 	/*TODO Group作成
 	 * private LayerHandler makeGroup(int id){
@@ -80,5 +172,32 @@ abstract public class LayerData implements DrawAccepter{
 	public abstract void rendering(Rectangle clip);
 
 	public abstract JComponent testMethod_createViewPanel();
+
+
+
+	//------------listener----------------------------------------
+
+	private EventListenerList eventlistenerlist = new EventListenerList();
+
+	public void addPropertyChangeListener(PropertyChangeListener l) {
+		eventlistenerlist.remove(PropertyChangeListener.class, l);
+		eventlistenerlist.add(PropertyChangeListener.class, l);
+	}
+
+	public void removePropertyChangeListener(PropertyChangeListener l) {
+		eventlistenerlist.remove(PropertyChangeListener.class, l);
+	}
+
+	public void firePropertyChange(String name, Object oldValue, Object newValue) {
+		PropertyChangeEvent e = new PropertyChangeEvent(this, name, oldValue,
+				newValue);
+
+		Object[] listeners = eventlistenerlist.getListenerList();
+		for (int i = listeners.length - 2; i >= 0; i -= 2) {
+			if (listeners[i] == PropertyChangeListener.class) {
+				((PropertyChangeListener) listeners[i + 1]).propertyChange(e);
+			}
+		}
+	}
 
 }

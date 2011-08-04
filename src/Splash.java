@@ -1,4 +1,4 @@
-package apainter.gui.splash;
+
 
 import java.awt.EventQueue;
 import java.awt.Image;
@@ -10,7 +10,12 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.UIManager;
 
-import apainter.APainter;
+
+/**
+ * わざわざ自作のスプラッシュ？ロマンですよ。
+ * @author nodamushi
+ *
+ */
 public class Splash{
 	public static String SplashWindowImageURLKey ="SplashWindowImageURLKey";
 	public static URL defaultImage = Splash.class.getResource("splashImage.png");
@@ -27,7 +32,12 @@ public class Splash{
 		window.setUndecorated(true);
 		JComponent c = (JComponent) window.getContentPane();
 		String s =UIManager.getString(SplashWindowImageURLKey);
-		com.sun.awt.AWTUtilities.setWindowOpaque(window, false);
+
+		//TODO java7で書き直すべきかね？というか、AWTUtilities使うの良くない。
+		if(com.sun.awt.AWTUtilities.isTranslucencySupported(com.sun.awt.AWTUtilities.Translucency.PERPIXEL_TRANSLUCENT)){
+			com.sun.awt.AWTUtilities.setWindowOpaque(window, false);
+		}
+
 		URL u;
 		if(s==null)u = defaultImage;
 		else{

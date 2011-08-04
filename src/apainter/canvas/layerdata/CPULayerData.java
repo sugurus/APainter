@@ -13,6 +13,7 @@ import java.util.Arrays;
 
 import javax.swing.JComponent;
 
+import apainter.GlobalValue;
 import apainter.canvas.Canvas;
 import apainter.canvas.cedt.cpu.CPUParallelWorkThread;
 import apainter.data.PixelDataIntBuffer;
@@ -34,8 +35,8 @@ public class CPULayerData extends LayerData{
 
 
 
-	public CPULayerData(Canvas canvas) {
-		super(canvas);
+	public CPULayerData(Canvas canvas,GlobalValue globalvalue) {
+		super(canvas,globalvalue);
 		init();
 	}
 
@@ -62,23 +63,9 @@ public class CPULayerData extends LayerData{
 		return renderingimage;
 	}
 
-	int i=0;
 	@Override
-	protected Layer createLayer(int id) {
-		//TODO 名前決め
-		CPULayer l = new CPULayer(id, "test", getWidth(), getHeight(),canvas,this);
-		//TODO 削除
-		if(i==0){
-			int[] colors = new int[401*200];
-			Arrays.fill(colors, 0xffff0000);
-			l.setPixels(colors, 0, 0, 401, 200);
-			i++;
-		}else if(i==1){
-			int[] colors = new int[401*200];
-			Arrays.fill(colors, 0xff000000);
-			l.setPixels(colors, 201, 0, 200, 401);
-			i++;
-		}
+	protected Layer createLayer(int id,String layername) {
+		CPULayer l = new CPULayer(id, makeLayerName(layername), getWidth(), getHeight(),canvas,this);
 		return l;
 	}
 
