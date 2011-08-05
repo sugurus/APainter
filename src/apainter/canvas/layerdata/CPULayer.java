@@ -209,6 +209,10 @@ class CPULayer extends DefaultLayer{
 			return h.paint(e);
 		}
 
+		@Override
+		public String getLayerTypeName() {
+			return "Layer";
+		}
 
 		@Override
 		public Canvas getCanvas() {
@@ -225,6 +229,7 @@ class CPULayer extends DefaultLayer{
 		Layer getLayer() {
 			return h;
 		}
+
 
 		@Override
 		PixelDataBuffer getOriginalData() {

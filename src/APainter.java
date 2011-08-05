@@ -9,20 +9,17 @@ import javax.swing.SwingUtilities;
 
 import apainter.CanvasHandler;
 import apainter.Device;
+import apainter.ExitListener;
 import apainter.annotation.Version;
 import apainter.canvas.Canvas;
 
 
 @Version("0.1.0")
-public class APainter
+public class APainter implements ExitListener
 //extends JApplet
 {
 	static private APainter apainter=null;
-	static private Thread initThread;
 
-	static public boolean isInitThread(Thread t){
-		return initThread==null?false:initThread == t;
-	}
 
 	static public JComponent getContentPane(){
 		if(apainter.isApplet){
@@ -32,7 +29,6 @@ public class APainter
 	}
 	public static synchronized void main(final String[] args) {
 		if(apainter!=null)return;
-		initThread = Thread.currentThread();
 		apainter = new APainter();
 		apainter.isApplet = false;
 		apainter.frame = new JFrame("APainter");
@@ -67,6 +63,8 @@ public class APainter
 	public void init(String[] args){
 		//TODO init
 		core = new apainter.APainter(Device.CPU);
+		core.init();
+		core.addExitListener(this);
 		CanvasHandler canvas = core.createNewCanvas(401, 401);
 		frame.add(canvas.getComponent());
 		frame.pack();
@@ -78,7 +76,6 @@ public class APainter
 	public void init() {
 		if(apainter==null){
 			apainter = this;
-			initThread = Thread.currentThread();
 		//TODO for JApplet
 		}
 	}
@@ -102,6 +99,22 @@ public class APainter
 
 	public void setTitle(String title){
 		if(!isApplet)frame.setTitle(title);
+	}
+
+
+	@Override
+	public boolean exiting(apainter.APainter apainter) {
+		return true;
+	}
+
+	@Override
+	public void exit(apainter.APainter apainter) {
+
+	}
+
+	@Override
+	public void exited(apainter.APainter apainter) {
+		System.exit(0);
 	}
 
 }

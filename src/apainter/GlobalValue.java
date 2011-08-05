@@ -1,5 +1,8 @@
 package apainter;
 
+import static apainter.GlobalBindKey.*;
+import static apainter.GlobalKey.*;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -10,14 +13,6 @@ import javax.swing.event.EventListenerList;
 import apainter.bind.Bind;
 import apainter.canvas.Canvas;
 import apainter.color.Color;
-import apainter.drawer.painttool.Eraser;
-import apainter.drawer.painttool.Pen;
-import apainter.gui.canvas.CanvasMouseListener;
-import apainter.pen.PenFactoryCenter;
-import apainter.pen.PenShape;
-import apainter.pen.PenShapeFactory;
-import static apainter.GlobalBindKey.*;
-import static apainter.GlobalKey.*;
 /**
  *初期化スレッド以外（AWTスレッドなど）からのインスタンスの取得はできないので、<br>
  *必要ならば、mainスレッドから呼ばれる初期化時に取得しておくこと。
@@ -47,8 +42,7 @@ public class GlobalValue extends HashMap<Object, Object>{
 	}
 
 	public void addCanvas(Canvas canvas){
-		@SuppressWarnings("unchecked")
-		ArrayList<Canvas> l = (ArrayList<Canvas>)get(CanvasList);
+		CanvasList l = (CanvasList)get(CanvasList);
 		if(!l.contains(canvas))l.add(canvas);
 	}
 

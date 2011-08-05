@@ -1,23 +1,19 @@
 package apainter.debug;
 
-import static apainter.misc.Util.*;
-
 import java.util.Scanner;
 
 import apainter.GlobalKey;
 import apainter.GlobalValue;
 import apainter.command.CommandCenter;
-import apainter.command.CommandDecoder;
+import apainter.command.NotFoundCommandException;
 
 public class CUI implements Runnable{
 
 	private Thread thread;
-	private GlobalValue gloval;//これスペルミスじゃないんだぜ！
 	private CommandCenter command;
 
 
 	public CUI(GlobalValue g){
-		gloval = nullCheack(g);
 		command = g.get(GlobalKey.CommandCenter, CommandCenter.class);
 	}
 
@@ -41,7 +37,11 @@ public class CUI implements Runnable{
 			System.out.print("command>");
 			String s = scan.nextLine();
 			if(!"".equals(s)){
-				command.exec(s);
+				try {
+					command.exec(s);
+				} catch (NotFoundCommandException e) {
+					System.out.println(e.getMessage()+" not found!");
+				}
 			}
 			if(Thread.interrupted())break;
 		}

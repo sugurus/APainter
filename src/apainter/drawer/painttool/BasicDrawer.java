@@ -24,19 +24,19 @@ public abstract class BasicDrawer extends Drawer implements CanvasMouseListener{
 
 	@Override
 	public void press(PenTabletMouseEvent e) {
-		DrawEvent de=start(e, getCanvas().getSelectedLayerHandler());
+		DrawEvent de=start(e, getCanvas().getSelectedLayer());
 		postEvent(de);
 	}
 
 	@Override
 	public void drag(PenTabletMouseEvent e) {
-		DrawEvent[] de=paint(e, getCanvas().getSelectedLayerHandler());
+		DrawEvent[] de=paint(e, getCanvas().getSelectedLayer());
 		postEvent(de);
 	}
 
 	@Override
 	public void release(PenTabletMouseEvent e) {
-		DrawEvent[] de=end(e, getCanvas().getSelectedLayerHandler());
+		DrawEvent[] de=end(e, getCanvas().getSelectedLayer());
 		postEvent(de);
 	}
 

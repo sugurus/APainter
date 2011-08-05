@@ -25,16 +25,16 @@ public class Hierarchy<E> {
 
 
 
-	public void addListener(HierarchyListener<E> l){
+	public synchronized void addListener(HierarchyListener<E> l){
 		if(!listener.contains(l))
 			listener.add(l);
 	}
 
-	public void removeListener(HierarchyListener<E> l){
+	public synchronized void removeListener(HierarchyListener<E> l){
 		listener.remove(l);
 	}
 
-	public boolean containListener(HierarchyListener<E> l){
+	public  synchronized boolean containListener(HierarchyListener<E> l){
 		return listener.contains(l);
 	}
 
@@ -82,15 +82,15 @@ public class Hierarchy<E> {
 	 * 要素を削除するときここを通ります。
 	 * @param e
 	 */
-	protected void remove(Element<E> e){
+	protected synchronized void remove(Element<E> e){
 		elements.remove(e);
 	}
 
-	protected void removeAll(Collection<Element<E>> e){
+	protected synchronized void removeAll(Collection<Element<E>> e){
 		elements.removeAll(e);
 	}
 
-	public Element<E> addElement(E property){
+	public  synchronized Element<E> addElement(E property){
 		Element<E> e = new Element<E>(property, this);
 		add(e);
 		toplevel.appendElement(e);
@@ -98,7 +98,7 @@ public class Hierarchy<E> {
 		return e;
 	}
 
-	public Unit<E> addUnit(E property){
+	public  synchronized Unit<E> addUnit(E property){
 		Unit<E> e = new Unit<E>(property, this);
 		add(e);
 		toplevel.appendElement(e);
@@ -106,7 +106,7 @@ public class Hierarchy<E> {
 		return e;
 	}
 
-	public Element<E> addElementToCurrentUnit(E property){
+	public  synchronized Element<E> addElementToCurrentUnit(E property){
 		Element<E> e = new Element<E>(property, this);
 		add(e);
 		currentunit.appendElement(e);
@@ -114,7 +114,7 @@ public class Hierarchy<E> {
 		return e;
 	}
 
-	public Unit<E> addUnitToCurrentUnit(E property){
+	public synchronized Unit<E> addUnitToCurrentUnit(E property){
 		Unit<E> e = new Unit<E>(property, this);
 		add(e);
 		currentunit.appendElement(e);
@@ -122,7 +122,7 @@ public class Hierarchy<E> {
 		return e;
 	}
 
-	public boolean setCurrentUnit(Unit<E> u){
+	public synchronized boolean setCurrentUnit(Unit<E> u){
 		if(contains(u)){
 			currentunit = u;
 			return true;
@@ -130,11 +130,11 @@ public class Hierarchy<E> {
 		return false;
 	}
 
-	public Unit<E> getCurrentUnit(){
+	public synchronized Unit<E> getCurrentUnit(){
 		return currentunit;
 	}
 
-	public void removeElement(Element<E> e){
+	public synchronized void removeElement(Element<E> e){
 		if(contains(e)){
 			e.getUnit().removeElement(e);
 			remove(e);
@@ -158,7 +158,7 @@ public class Hierarchy<E> {
 		}
 	}
 
-	public boolean reAddElement(Element<E> e){
+	public synchronized boolean reAddElement(Element<E> e){
 		if(!contains(e)&&e.getUnit()==null){
 			add(e);
 			toplevel.appendElement(e);
@@ -178,12 +178,13 @@ public class Hierarchy<E> {
 	}
 
 
-	public void moveToNext(Element<E> e,Element<E> before){
+	public synchronized void moveToNext(Element<E> e,Element<E> before){
 		if(containsAll(e,before)){
 			Unit<E> u = before.getUnit(),eu= e.getUnit();
 			if(eu==u){
 				u.removeElement(e);
 				int i = before.getIndex();
+				u.appendElement(e);
 				u.move(e, i+1);
 			}else{
 				eu.moveTo(e, u);
@@ -194,12 +195,13 @@ public class Hierarchy<E> {
 		}
 	}
 
-	public void moveToBefore(Element<E> e,Element<E> next){
+	public synchronized void moveToBefore(Element<E> e,Element<E> next){
 		if(containsAll(e,next)){
 			Unit<E> u = next.getUnit(),eu= e.getUnit();
 			if(eu==u){
 				u.removeElement(e);
 				int i = next.getIndex();
+				u.appendElement(e);
 				u.move(e, i);
 			}else{
 				eu.moveTo(e, u);
@@ -210,7 +212,7 @@ public class Hierarchy<E> {
 		}
 	}
 
-	public void moveIntoTop(Element<E> e,Unit<E> u){
+	public synchronized void moveIntoTop(Element<E> e,Unit<E> u){
 		if(u==null){
 			if(contains(e)){
 				Unit<E> ue = e.getUnit();
@@ -236,7 +238,7 @@ public class Hierarchy<E> {
 
 
 
-	public void moveIntoLast(Element<E> e,Unit<E> u){
+	public synchronized void moveIntoLast(Element<E> e,Unit<E> u){
 		if(u==null){
 			if(contains(e)){
 				Unit<E> ue = e.getUnit();

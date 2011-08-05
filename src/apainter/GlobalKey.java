@@ -1,6 +1,7 @@
 package apainter;
 
 public enum GlobalKey{
+	APainter(false),
 	FrontColor(false),BackColor(false),
 	CanvasList(false),CurrentCanvas,
 	CanvasActionList(false),CanvasHeadAction,CanvasTailAction,

@@ -34,6 +34,7 @@ public class Canvas {
 	private long makeDay,workTime,actionCount;
 	private long createdTime;//このCanvasが作成された時間
 	private LayerData layerdata;
+	private int id;
 	//-----------------------------------------------------------------
 
 
@@ -41,15 +42,16 @@ public class Canvas {
 	private CanvasEventAccepter ceaccepter;
 	private CanvasView view;
 
+
 	private CPUCanvasPanel cpucanvas;
 
 
-	public Canvas(int width,int height,Device device,GlobalValue globalvalue){
-		this(width,height,device,globalvalue,null,null,0,0,0);
+	public Canvas(int width,int height,Device device,GlobalValue globalvalue,int canvasid){
+		this(width,height,device,globalvalue,null,null,0,0,0,canvasid);
 	}
 
 	public Canvas(int width,int height,Device device,GlobalValue globalvalue,
-			String author,String canvasname,long makeDay,long workTime,long actionCount) {
+			String author,String canvasname,long makeDay,long workTime,long actionCount,int canvasid) {
 		if(width <=0 || height <= 0)
 			throw new IllegalArgumentException(String.format("width:%d,height:%d",width,height));
 		if(globalvalue ==null)throw new NullPointerException("GlobalValue");
@@ -74,6 +76,7 @@ public class Canvas {
 		this.makeDay = makeDay;
 		this.workTime  = workTime;
 		this.actionCount = actionCount;
+		id = canvasid;
 		createdTime = System.currentTimeMillis();
 
 		switch(device){
@@ -97,10 +100,6 @@ public class Canvas {
 		cpucanvas = new CPUCanvasPanel(c.getImage());
 		view = new CanvasView(width, height, cpucanvas,cpucanvas,global);
 		cpucanvas.setCanvasView(view);
-	}
-
-	public LayerHandler getSelectedLayerHandler(){
-		return layerdata.getSelectedLayerHandler();
 	}
 
 	private void initGPU(){
@@ -145,6 +144,10 @@ public class Canvas {
 
 	public CanvasView getCanvasView(){
 		return view;
+	}
+
+	public int getID(){
+		return id;
 	}
 
 	public String getAuthor() {
@@ -226,6 +229,18 @@ public class Canvas {
 
 	public LayerHandler createNewLayer(String name){
 		return layerdata.createLayer(name);
+	}
+
+	public String getLayerLine(){
+		return layerdata.getLayerLine();
+	}
+
+	public LayerHandler getSelectedLayer(){
+		return layerdata.getSelectedLayer();
+	}
+
+	public void setSelectedLayer(int layerid){
+		layerdata.setSelectLayer(layerid);
 	}
 
 

@@ -4,7 +4,6 @@ import java.awt.Image;
 
 import apainter.canvas.Canvas;
 import apainter.data.PixelDataBuffer;
-import apainter.drawer.DrawEvent;
 import apainter.hierarchy.Element;
 import apainter.rendering.ColorMode;
 
@@ -27,6 +26,7 @@ public abstract class LayerHandler implements LayerHandle,PixelSetable{
 	 */
 	public abstract ColorMode[] getUsableModes();
 	public abstract Canvas getCanvas();
+	public abstract String getLayerTypeName();
 
 
 	abstract Layer getLayer();
@@ -49,6 +49,12 @@ public abstract class LayerHandler implements LayerHandle,PixelSetable{
 
 	final boolean hasElement(){
 		return thiselement!=null;
+	}
+
+	private static final String p ="%s[ID:%d,Name:%s]";
+	@Override
+	public String toString() {
+		return String.format(p, getLayerTypeName(),getID(),getName());
 	}
 
 }

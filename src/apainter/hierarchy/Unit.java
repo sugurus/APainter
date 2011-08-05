@@ -53,6 +53,7 @@ public class Unit<E> extends Element<E>{
 
 	void appendElement(Element<E> e) {
 		Unit<E> u = e.getUnit();
+		if(u==this) return;
 		addCheck(e);
 		elements.add(e);
 		if(u!=null){
@@ -75,7 +76,7 @@ public class Unit<E> extends Element<E>{
 
 	void removeElement(Element<E> e) {
 		elements.remove(e);
-		setUnit(null);
+		e.setUnit(null);
 	}
 
 	@Override

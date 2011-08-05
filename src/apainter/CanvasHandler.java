@@ -30,6 +30,10 @@ public class CanvasHandler {
 	}
 
 
+	public int getID(){
+		return canvas.getID();
+	}
+
 	public int getWidth() {
 		return canvas.getWidth();
 	}

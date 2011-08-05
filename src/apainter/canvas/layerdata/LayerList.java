@@ -2,6 +2,7 @@ package apainter.canvas.layerdata;
 
 import static apainter.PropertyChangeNames.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +36,10 @@ public class LayerList extends Hierarchy<LayerHandler>{
 		}
 	}
 
+	public ArrayList<LayerHandler> getAllLayerHandler(){
+		return new ArrayList<LayerHandler>(alllayer.values());
+	}
+
 	public void setSelectLayer(int id){
 		setSelectLayer(alllayer.get(id));
 	}
@@ -51,10 +56,40 @@ public class LayerList extends Hierarchy<LayerHandler>{
 	protected void add(Element<LayerHandler> e) {
 		LayerHandler l = e.getProperty();
 		alllayer.put(l.getID(), l);
-		System.out.println(l);
 		l.setElement(e);
 		super.add(e);
 	}
+
+	public synchronized boolean canRemove(LayerHandler l){
+		Unit<LayerHandler> unit = getTopLevelUnit();
+		Element<LayerHandler> ll = l.getElement();
+		int size = unit.size();
+		for(int i=0;i<size;i++){
+			Element<LayerHandler> lh = unit.getElement(i);
+			if(ll==lh)continue;
+			if(lh.isUnit()){
+				if(_canRemove((Unit<LayerHandler>)lh, ll))
+					return true;
+			}
+			else return true;
+		}
+		return false;
+	}
+
+	private boolean _canRemove(Unit<LayerHandler> unit,Element<LayerHandler> l){
+		int size = unit.size();
+		for(int i=0;i<size;i++){
+			Element<LayerHandler> lh = unit.getElement(i);
+			if(l==lh)continue;
+			if(lh.isUnit()){
+				if(_canRemove((Unit<LayerHandler>)lh, l))return true;
+			}
+			else return true;
+		}
+		return false;
+	}
+
+
 
 	@Override
 	protected void readdAll(Collection<Element<LayerHandler>> e) {
@@ -122,6 +157,34 @@ public class LayerList extends Hierarchy<LayerHandler>{
 		moveToBefore(l.getElement(), selectedLayer.getElement());
 	}
 
+
+	@Override
+	public String toString() {
+		Unit<LayerHandler> l = getTopLevelUnit();
+		int s = l.size();
+		StringBuilder str = new StringBuilder();
+		for(int i=0;i<s;i++){
+			Element<LayerHandler> ll = l.getElement(i);
+			str.append(ll.getProperty().getID()).append("\n");
+			if(ll.isUnit()){
+				str.append(_toString("-", (Unit<LayerHandler>)ll));
+			}
+		}
+		return str.toString();
+	}
+
+	private String _toString(String st,Unit<LayerHandler> l){
+		StringBuilder str = new StringBuilder();
+		int s = l.size();
+		for(int i=0;i<s;i++){
+			Element<LayerHandler> ll = l.getElement(i);
+			str.append(st).append(ll.getProperty().getID()).append("\n");
+			if(ll.isUnit()){
+				str.append(_toString(st+"-", (Unit<LayerHandler>)ll)).append("\n");
+			}
+		}
+		return str.toString();
+	}
 
 
 }

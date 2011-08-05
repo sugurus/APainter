@@ -5,6 +5,7 @@ import static apainter.misc.Util.*;
 import java.awt.Rectangle;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 
 import javax.swing.JComponent;
 import javax.swing.event.EventListenerList;
@@ -30,8 +31,12 @@ abstract public class LayerData implements DrawAccepter{
 		global = nullCheack(globalvalue, "globalvalue is null");
 		layerlist = new LayerList();
 		LayerHandler lh;
-		layerlist.addElement(lh=makeLayer(layerid,null));
+		layerlist.addElement(lh=makeLayer(makelayerid(),null));
 		layerlist.setSelectLayer(lh);
+	}
+
+	private int makelayerid(){
+		return layerid++;
 	}
 
 	@Override
@@ -48,6 +53,11 @@ abstract public class LayerData implements DrawAccepter{
 	public LayerHandler getSelectedLayerHandler(){
 		return layerlist.getSelectLayerHandler();
 	}
+
+	public ArrayList<LayerHandler> getLayerHandlers(){
+		return layerlist.getAllLayerHandler();
+	}
+
 
 	protected Rectangle rect(){
 		return new Rectangle(0,0,getWidth(),getHeight());
@@ -66,6 +76,10 @@ abstract public class LayerData implements DrawAccepter{
 		LayerHandler old = layerlist.getSelectLayerHandler();
 		if(l==old)return;
 		layerlist.setSelectLayer(l);
+	}
+
+	public void setSelectLayer(int layerid2) {
+		layerlist.setSelectLayer(layerid2);
 	}
 
 	public LayerHandler getSelectedLayer(){
@@ -129,18 +143,36 @@ abstract public class LayerData implements DrawAccepter{
 	 * @return
 	 */
 	public LayerHandler createLayer(String layername){
-		LayerHandler lh= makeLayer(layerid++, layername);
+		LayerHandler lh= makeLayer(makelayerid(), layername);
 		layerlist.addElement(lh);
 		layerlist.moveToSelectedLayerNext(lh);
+		//TODO historys
 		return lh;
+	}
+
+	public boolean canRemove(LayerHandler lh){
+		return layerlist.canRemove(lh);
+	}
+
+	public void remove(LayerHandler lh){
+		if(!canRemove(lh))return;
+		layerlist.remove(lh.getElement());
+		//TODO history
+	}
+
+	/**
+	 * レイヤーの並びを、階層を　「-」で表し、レイヤーをレイヤーidで表した文字列を返します。
+	 */
+	public String getLayerLine(){
+		return layerlist.toString();
 	}
 
 	private LayerHandler makeLayer(int id,String layername){
 		Layer l = createLayer(id,layername);
 		return l.getHandler();
 	}
-
 	private int layernumber=1;
+
 	protected String makeLayerName(String name){
 		if(name!=null)return name;
 		String s=global.get(GlobalKey.NEWLayerDefaultName,String.class);
@@ -199,5 +231,7 @@ abstract public class LayerData implements DrawAccepter{
 			}
 		}
 	}
+
+
 
 }

@@ -1,39 +1,68 @@
 package apainter.command;
 
-import java.util.ArrayList;
+import static apainter.GlobalKey.*;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
+import apainter.APainter;
+import apainter.GlobalKey;
 import apainter.GlobalValue;
 
 public class CommandCenter {
 
-	public void exec(String command){
+	/**
+	 * 解析し、実行する。
+	 * @param command
+	 * @throws NotFoundCommandException コマンドが見つからなかった場合投げられます。
+	 */
+	public void exec(String command)throws NotFoundCommandException{
 		Command c = decode(command);
-		if(c!=null)c.exec(v);
+		if(c!=null)c.exe(v);
 	}
 
+	private static final String[] zero = new String[0];
 	/**
 	 * コマンドを解析し、実行をするCommandを返します。
 	 * @param command コマンド文字列。複数行のコマンドはデコードできません。
 	 * @return
+	 * @throws NotFoundCommandException コマンドが見つからなかった場合投げられます。
 	 */
-	public Command decode(String command){
+	public Command decode(String command)throws NotFoundCommandException{
+		if(command.equals(""))return null;
+		APainter a = v.get(GlobalKey.APainter,APainter.class);
 		String[] strs = command.split(" ",2);
 		String com = strs[0];
-		String par = strs.length<2||strs[1]==null?"":strs[1];
+		String[] par = strs.length<2||strs[1]==null?zero:strs[1].split(" ");
 		for(CommandDecoder cd:decoders){
-			if(cd.isMatch(com)){
-				return cd.decode(par);
+			if(cd.getCommandName().equals(com)){
+				Command c= cd.decode(par);
+				if(c==null)return null;
+				c.setAPainter(a);
+				return c;
 			}
 		}
-		System.err.println("command'"+com+"' is not find! "+command);
-		return null;
+		throw new NotFoundCommandException(com);
 	}
 
 	GlobalValue v;
 	ArrayList<CommandDecoder> decoders = new ArrayList<CommandDecoder>();
 	public CommandCenter(GlobalValue gv){v = gv;}
-	public void addCommand(CommandDecoder d){
-		if(d!=null&&!decoders.contains(d))decoders.add(d);
+
+	public CommandDecoder[] getAllDecoder(){
+		return decoders.toArray(new CommandDecoder[decoders.size()]);
+	}
+
+	public void addCommand(CommandDecoder d)throws ExistCommandNameException{
+		if(d!=null){
+			String s = d.getCommandName();
+			for(CommandDecoder cd:decoders){
+				if(s.equals(cd.getCommandName())){
+					throw new ExistCommandNameException(s);
+				}
+			}
+			decoders.add(d);
+		}
 	}
 
 	public void removeCommand(CommandDecoder d){
