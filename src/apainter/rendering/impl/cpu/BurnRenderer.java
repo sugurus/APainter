@@ -11,7 +11,7 @@ import apainter.rendering.RenderingOption;
 
 import static apainter.rendering.ColorOperations.*;
 import static apainter.misc.Utility_PixelFunction.*;
-public class DefaultRenderer implements Renderer{
+public class BurnRenderer implements Renderer{
 
 	@Override
 	public void rendering(PixelDataBuffer base, PixelDataBuffer over, Point p,
@@ -57,7 +57,7 @@ public class DefaultRenderer implements Renderer{
 				int ob = b(oc);
 
 				if(a !=0){
-					set(basepixel,defaultOp(a, r, g, b, oa, or, og, ob),x,y,base_width);
+					set(basepixel,burnOp(a, r, g, b, oa, or, og, ob),x,y,base_width);
 					continue;
 				}else{
 					set(basepixel,oa,oc,x,y,base_width);
@@ -93,7 +93,7 @@ public class DefaultRenderer implements Renderer{
 				int ob = b(oc);
 
 				if(a !=0){
-					set(basepixel,defaultOp(a, r, g, b, oa, or, og, ob),x,y,base_width);
+					set(basepixel,burnOp(a, r, g, b, oa, or, og, ob),x,y,base_width);
 					continue;
 				}else{
 					set(basepixel,oa,oc,x,y,base_width);

@@ -6,6 +6,7 @@ import java.net.URL;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
+import javax.swing.plaf.ComponentUI;
 
 import apainter.CanvasHandler;
 import apainter.Device;
@@ -18,30 +19,30 @@ import apainter.canvas.Canvas;
 public class APainter implements ExitListener
 //extends JApplet
 {
-	static private APainter apainter=null;
+	static private APainter instance=null;
 
 
 	static public JComponent getContentPane(){
-		if(apainter.isApplet){
+		if(instance.isApplet){
 			//TODO applet
 			return null;
-		}else return (JComponent) apainter.frame.getContentPane();
+		}else return (JComponent) instance.frame.getContentPane();
 	}
 	public static synchronized void main(final String[] args) {
-		if(apainter!=null)return;
-		apainter = new APainter();
-		apainter.isApplet = false;
-		apainter.frame = new JFrame("APainter");
-		apainter.init(args);
+		if(instance!=null)return;
+		instance = new APainter();
+		instance.isApplet = false;
+		instance.frame = new JFrame("APainter");
+		instance.init(args);
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
-				apainter.frame.setVisible(true);
+				instance.frame.setVisible(true);
 			}
 		});
 	}
 
 	public static URL getURL(String path){
-		if(apainter.isApplet){
+		if(instance.isApplet){
 			//TODO applet
 			return null;
 		}else{
@@ -62,8 +63,7 @@ public class APainter implements ExitListener
 
 	public void init(String[] args){
 		//TODO init
-		core = new apainter.APainter(Device.CPU);
-		core.init();
+		core = apainter.APainter.createAPainter(Device.CPU);
 		core.addExitListener(this);
 		CanvasHandler canvas = core.createNewCanvas(401, 401);
 		frame.add(canvas.getComponent());
@@ -74,8 +74,8 @@ public class APainter implements ExitListener
 	}
 
 	public void init() {
-		if(apainter==null){
-			apainter = this;
+		if(instance==null){
+			instance = this;
 		//TODO for JApplet
 		}
 	}

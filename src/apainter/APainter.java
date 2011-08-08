@@ -3,8 +3,10 @@ package apainter;
 import static apainter.GlobalKey.*;
 import static apainter.misc.Util.*;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,39 +29,42 @@ import apainter.pen.PenShape;
 import apainter.pen.PenShapeFactory;
 
 
-@Version("0.1.0")
 /**
  * jre1.6以上で動作します。<br>
- * インスタンスの作成後、init関数を呼び出してください。<br>
+ * APainterインスタンスはcreateAPainterメソッドを用いて作成します。<br>
  * 一度exitしたインスタンスは再利用できません。
  */
+@Version("0.1.0")
 public class APainter {
-	private static final Object
-		DEBAGKEY = new Object();
-
-	private final GlobalValue global;
-	private final CommandCenter command;
-	private final Device device;
-	private final CanvasList canvaslist;
-	private boolean inited=false;
 
 
+	private static AtomicInteger apainterid = new AtomicInteger();
 	/**
-	 * APainterを作成します。
-	 * @param device 動作させる演算デバイス。現在CPUのみ。
+	 * 新しいAPainterを起動します。
+	 * @param device
+	 * @return
 	 */
-	public APainter(Device device) {
+	public static APainter createAPainter(Device device){
 		runtimeCheack();
-		//GPU いつか………
-		if(device==Device.GPU)throw new Error("can't use GPU");
-		this.device = nullCheack(device,"device is null!");
-		global = new GlobalValue();
-		canvaslist = new CanvasList();
-		command = new CommandCenter(global);
-
+		APainter ap = new APainter(device,"");
+		ap.init();
+		return ap;
 	}
 
-	private void runtimeCheack(){
+	/**
+	 * 新しいAPainterを起動します。
+	 * @param device
+	 * @param property APainterのプロパティー
+	 * @return
+	 */
+	public static APainter createAPainter(Device device,String property){
+		runtimeCheack();
+		APainter ap = new APainter(device,property);
+		ap.init();
+		return ap;
+	}
+
+	private static void runtimeCheack(){
 		String v = System.getProperty("java.version");
 		Pattern p = Pattern.compile("\\d\\.(\\d)\\.\\d+_\\d+");
 		Matcher  m = p.matcher(v);
@@ -71,14 +76,37 @@ public class APainter {
 		}
 	}
 
-	/**
-	 * 初期化します。
-	 */
-	public synchronized void init(){
-		if(inited)return;
+	//end static
+	//---------------------------------------------------------------------------
+
+	private static final Object
+		DEBAGKEY = new Object();
+
+	private final GlobalValue global;
+	private final CommandCenter command;
+	private final Device device;
+	private final CanvasList canvaslist;
+	private final Properties properties;
+	private final int id;
+
+
+	private APainter(Device device,String property) {
+		//GPU いつか………
+		if(device==Device.GPU)throw new Error("can't use GPU");
+		this.device = nullCheack(device,"device is null!");
+		properties = Properties.decode(property);
+		global = new GlobalValue(properties);
+		canvaslist = new CanvasList();
+		command = new CommandCenter(global);
+		id = apainterid.incrementAndGet();
+	}
+
+
+	private void init(){
 		global.put(APainter, this);//これの為に初期化をコンストラクターから行えない。
 		global.put(CommandCenter,command);
 		global.put(CanvasList,canvaslist);
+		global.put(Property, properties);
 		{
 			PenFactoryCenter p = new PenFactoryCenter();
 			global.put(PenFactoryCenter, p);
@@ -97,9 +125,6 @@ public class APainter {
 			global.put(CanvasActionList, list);
 		}
 
-		//TODO 設定の外部化
-		global.put(NEWLayerDefaultName,"新規レイヤー");
-
 
 		if(device==Device.CPU){
 			initCPU();
@@ -107,7 +132,6 @@ public class APainter {
 			initGPU();
 		}
 
-		inited=true;
 		initCommand();
 	}
 
@@ -120,6 +144,11 @@ public class APainter {
 		//GPU
 	}
 
+
+	public int getID(){
+		return id;
+	}
+
 	/**
 	 * 文字列を解析し、コマンドオブジェクトを発行します。実行はしません。<br>
 	 * 実行するにはexecに返ってきたオブジェクトを渡してください。
@@ -129,7 +158,6 @@ public class APainter {
 	 * @throws NotFoundCommandException コマンドが見つからなかった場合投げられます。
 	 */
 	public Command decodeCommand(String command)throws NotFoundCommandException{
-		isInit();
 		return this.command.decode(command);
 	}
 
@@ -138,27 +166,24 @@ public class APainter {
 	 * @see apainter.APainter#decodeCommand(String)
 	 * @param com 実行するコマンド
 	 */
-	public void exec(Command com){
-		isInit();
-		if(com!=null)com.exe(global);
+	public Object exec(Command com){
+		if(com!=null)return com.exe(global);
+		return null;
 	}
 
 	/**
 	 * コマンドを解析し、実行します。
 	 * @param command コマンド文字列
-	 * @return コマンドオブジェクト
+	 * @return 実行結果
 	 * @throws NotFoundCommandException コマンドが見つからなかった場合投げられます。
 	 */
-	public Command exec(String command)throws NotFoundCommandException{
-		isInit();
+	public Object exec(String command)throws NotFoundCommandException{
 		Command c = decodeCommand(command);
-		exec(c);
-		return c;
+		return exec(c);
 	}
 
 
 	public void debagON(){
-		isInit();
 		DebugMain d =global.get(DEBAGKEY, DebugMain.class);
 		if(d==null){
 			d= new DebugMain(global);
@@ -168,7 +193,6 @@ public class APainter {
 	}
 
 	public void debagOff(){
-		isInit();
 		DebugMain d =global.get(DEBAGKEY, DebugMain.class);
 		if(d!=null){
 			d.debug(false);
@@ -176,8 +200,104 @@ public class APainter {
 	}
 
 
+	private void stopThreadCPU(){
+		CPUParallelWorkThread.stop(this);
+	}
+
+	private void stopThreadGPU(){
+		//GPU
+	}
+
+
+
+
+
+	//コマンド関連-------------------------------------------------
+
+
+	private void initCommand(){
+		addCommand(new Commands());
+		addCommand(new Rotation());
+		addCommand(new Zoom());
+		addCommand(new Exit());
+		addCommand(new CreateLayer());
+		addCommand(new LayerLine());
+		addCommand(new Selectedlayer());
+		addCommand(new FrontColor());
+		addCommand(new BackColor());
+		addCommand(new CreateCanvas());
+	}
+
+	/**
+	 * コマンドを追加します。
+	 * @param d コマンド解析器
+	 * @throws ExistCommandNameException 既に同じコマンド名が存在している場合投げられます。
+	 */
+	public void addCommand(CommandDecoder d) throws ExistCommandNameException{
+		command.addCommand(d);
+	}
+
+	public void setCommandPrintStream(PrintStream ps){
+		global.put(CommandPrintStream, ps);
+	}
+
+	public void setCommandErrorPrintStream(PrintStream ps){
+		global.put(CommandErrorPrintStream,ps);
+	}
+
+	/**
+	 * コマンドを実行する際に、文字列を出力するかどうかのフラグ。<br>
+	 * falseに設定すると、コマンドを実行しても文字列は出力されません。
+	 * @param b
+	 */
+	public void setCommandPrintFlag(boolean b){
+		global.setCommandPrintFlag(b);
+	}
+
+
+	private int canvasid=0;
+	private Random random = new Random(System.currentTimeMillis());
+
+	public synchronized CanvasHandler createNewCanvas(int width,int height){
+		int id=(random.nextInt()&0xffff)<<16;
+		id|=canvasid++;
+		Canvas canvas= new Canvas(width, height, device, global,id);
+		canvaslist.add(canvas);
+		global.addCanvas(canvas);
+		global.put(GlobalKey.CurrentCanvas, canvas);
+		return new CanvasHandler(canvas,this);
+	}
+
+	public synchronized CanvasHandler createNewCanvas(int width,int height,
+			String author,String canvasname,long makeDay,long workTime,long actionCount){
+		int id=random.nextInt()&0xffff0000;
+		id|=canvasid++;
+		Canvas canvas= new Canvas(width, height, device, global,
+				author, canvasname, makeDay, workTime, actionCount,id);
+		canvaslist.add(canvas);
+		global.addCanvas(canvas);
+		global.put(GlobalKey.CurrentCanvas, canvas);
+		return new CanvasHandler(canvas,this);
+	}
+
+
+
+
+	//------EventListener---------------------------------------------------------
+
+	private EventListenerList exitlistenerlist = new EventListenerList();
+
+	public void addExitListener(ExitListener l) {
+		exitlistenerlist.remove(ExitListener.class, l);
+		exitlistenerlist.add(ExitListener.class, l);
+	}
+
+	public void removeExitListener(ExitListener l) {
+		exitlistenerlist.remove(ExitListener.class, l);
+	}
+
+	//----exit-----------------------------------------------------------
 	public void exit(){
-		if(!inited)return;
 		if(!canExit())return;
 
 		//threadの終了
@@ -199,85 +319,6 @@ public class APainter {
 		//何かやらないといけないことあったらここに追加かな
 
 		exited();
-	}
-
-	private void stopThreadCPU(){
-		CPUParallelWorkThread.stop(this);
-	}
-
-	private void stopThreadGPU(){
-		//GPU
-	}
-
-	private void isInit(){
-		if(!inited)throw new RuntimeException("APainter don't init!");
-	}
-
-
-
-
-	//コマンド関連-------------------------------------------------
-
-
-	private void initCommand(){
-		isInit();
-		addCommand(new Rotation());
-		addCommand(new Zoom());
-		addCommand(new Exit());
-		addCommand(new CreateLayer());
-		addCommand(new LayerLine());
-		addCommand(new Commands());
-		addCommand(new Selectedlayer());
-	}
-
-	/**
-	 * コマンドを追加します。
-	 * @param d コマンド解析器
-	 * @throws ExistCommandNameException 既に同じコマンド名が存在している場合投げられます。
-	 */
-	public void addCommand(CommandDecoder d) throws ExistCommandNameException{
-		command.addCommand(d);
-	}
-
-
-	private int canvasid=0;
-	private Random random = new Random(System.currentTimeMillis());
-
-	public synchronized CanvasHandler createNewCanvas(int width,int height){
-		isInit();
-		int id=(random.nextInt()&0xffff)<<16;
-		id|=canvasid++;
-		Canvas canvas= new Canvas(width, height, device, global,id);
-		canvaslist.add(canvas);
-		global.addCanvas(canvas);
-		global.put(GlobalKey.CurrentCanvas, canvas);
-		return new CanvasHandler(canvas,this);
-	}
-
-	public synchronized CanvasHandler createNewCanvas(int width,int height,GlobalValue globalvalue,
-			String author,String canvasname,long makeDay,long workTime,long actionCount){
-		isInit();
-		int id=random.nextInt()&0xffff0000;
-		id|=canvasid++;
-		Canvas canvas= new Canvas(width, height, device, globalvalue,
-				author, canvasname, makeDay, workTime, actionCount,id);
-		canvaslist.add(canvas);
-		global.addCanvas(canvas);
-		global.put(GlobalKey.CurrentCanvas, canvas);
-		return new CanvasHandler(canvas,this);
-	}
-
-
-
-	private EventListenerList exitlistenerlist = new EventListenerList();
-
-	public void addExitListener(ExitListener l) {
-		exitlistenerlist.remove(ExitListener.class, l);
-		exitlistenerlist.add(ExitListener.class, l);
-	}
-
-	public void removeExitListener(ExitListener l) {
-		exitlistenerlist.remove(ExitListener.class, l);
 	}
 
 	private boolean canExit() {

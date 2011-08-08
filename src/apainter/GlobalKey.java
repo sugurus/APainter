@@ -8,8 +8,10 @@ public enum GlobalKey{
 	PenFactoryCenter(false),
 
 	CommandCenter(false),
+	CommandPrintStream,
+	CommandErrorPrintStream,
+	Property(false),
 
-	NEWLayerDefaultName
 
 	;
 

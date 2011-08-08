@@ -1,5 +1,6 @@
 package apainter.canvas.layerdata;
 
+import static apainter.GlobalKey.*;
 import static apainter.misc.Util.*;
 
 import java.awt.Rectangle;
@@ -12,6 +13,7 @@ import javax.swing.event.EventListenerList;
 
 import apainter.GlobalKey;
 import apainter.GlobalValue;
+import apainter.Properties;
 import apainter.canvas.Canvas;
 import apainter.drawer.DrawAccepter;
 import apainter.drawer.DrawEvent;
@@ -175,8 +177,7 @@ abstract public class LayerData implements DrawAccepter{
 
 	protected String makeLayerName(String name){
 		if(name!=null)return name;
-		String s=global.get(GlobalKey.NEWLayerDefaultName,String.class);
-		if(s==null)s="newlayer";
+		String s=global.getProperty(Properties.PropertyName_newlayername,"newlayer");
 		s = s+layernumber;
 		layernumber++;
 		return s;

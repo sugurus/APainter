@@ -1,0 +1,14 @@
+default
+plus
+subtractive
+multiple
+screen
+overlay
+softlight
+hardlight
+dodge
+burn
+darken
+light
+difference
+exclusion

@@ -4,14 +4,12 @@ import apainter.rendering.impl.cpu.*;
 
 
 public enum ColorMode {
-	Default(0,"default",new DefaultRenderer()) ,Plus(1,"plus") ,
-	Subtractive(2,"subtractive") ,Multip(3,"multip") ,
-	Bright(4,"bright") ,Darken(5,"darken"),Burn(6,"burn"),
-	Dodge(7,"dodge"),SoftLight(8,"softlight"),
-	HardLight(9,"hardlight"),Screen(10,"screen"),
-	OverLay(11,"overlay"),
-	BoolAnd(12,"and") ,BoolOr(13,"or") ,
-	BoolExOR(14,"exor") ,
+	Default(0,"default",new DefaultRenderer()) ,Plus(1,"plus",new PlusRenderer()) ,
+	Subtractive(2,"subtractive",new SubtractiveRenderer()) ,Multip(3,"multip",new MultipleRenderer()) ,
+	Bright(4,"bright",new LightRenderer()) ,Darken(5,"darken",new DarkenRenderer()),Burn(6,"burn",new BurnRenderer()),
+	Dodge(7,"dodge",new DodgeRenderer()),SoftLight(8,"softlight",new SoftlightRenderer()),
+	HardLight(9,"hardlight",new HardlightRenderer()),Screen(10,"screen",new ScreenRenderer()),
+	OverLay(11,"overlay",new OverlayRenderer()),
 	Del(100) , AlphaDawn(101) ,
 	AlphaPlus(102),
 	/**グループ効果がないことを示す*/NONGROUPEFFECT(31,"notlayergroup"),

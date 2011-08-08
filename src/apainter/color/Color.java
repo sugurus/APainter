@@ -7,6 +7,7 @@ import javax.swing.event.EventListenerList;
 
 import apainter.bind.annotation.BindProperty;
 import apainter.misc.Util;
+import apainter.misc.Utility_PixelFunction;
 
 /**
  * ARGBの順に格納されている。<br>
@@ -101,6 +102,15 @@ public class Color implements Cloneable{
 	public Color(Color c){
 		colorint = c.colorint;
 		colorlong = c.colorlong;
+	}
+
+	@Override
+	public String toString() {
+		int a = getA();
+		int r = getR();
+		int g = getG();
+		int b = getB();
+		return String.format("alpha:%d, red:%d, green:%d, blue:%d", a,r,g,b);
 	}
 
 	public void setHSV(double[] hsv){

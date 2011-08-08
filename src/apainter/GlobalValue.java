@@ -2,9 +2,12 @@ package apainter;
 
 import static apainter.GlobalBindKey.*;
 import static apainter.GlobalKey.*;
+import static apainter.misc.Util.*;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -21,6 +24,7 @@ import apainter.color.Color;
 public class GlobalValue extends HashMap<Object, Object>{
 
 	private Color front,back;
+	private Properties property;
 
 
 
@@ -72,7 +76,8 @@ public class GlobalValue extends HashMap<Object, Object>{
 		return old;
 	}
 
-	public GlobalValue() {
+	public GlobalValue(Properties pro) {
+		property = nullCheack(pro);
 		front = new Color(0xff000000);
 		back = new Color(0xffffffff);
 		super.put(FrontColor, front);
@@ -89,6 +94,18 @@ public class GlobalValue extends HashMap<Object, Object>{
 		super.put(FrontColor16bitBIND,f16);
 		super.put(BackColorBIND,b);
 		super.put(BackColor16bitBIND,b16);
+	}
+
+	public String getProperty(String propertyname){
+		return property.get(propertyname);
+	}
+
+	public String getProperty(String propertyname,String defaultvalue){
+		return property.get(propertyname, defaultvalue);
+	}
+
+	public String setProperty(String propertyname,String value){
+		return property.set(propertyname, value);
 	}
 
 
@@ -114,6 +131,54 @@ public class GlobalValue extends HashMap<Object, Object>{
 				((PropertyChangeListener) listeners[i + 1]).propertyChange(e);
 			}
 		}
+	}
+
+
+	private boolean commandprint=true;
+	public void setCommandPrintFlag(boolean b){
+		commandprint = b;
+	}
+
+	public void commandPrintln(Object o){
+		if(!commandprint)return;
+		PrintStream out = get(CommandPrintStream, PrintStream.class);
+		if(out==null)out = System.out;
+		out.println(o);
+	}
+
+	public void commandPrint(Object o){
+		if(!commandprint)return;
+		PrintStream out = get(CommandPrintStream, PrintStream.class);
+		if(out==null)out = System.out;
+		out.print(o);
+	}
+
+	public PrintStream getCommandPrintStream(){
+		if(!commandprint)return null;
+		PrintStream out = get(CommandPrintStream, PrintStream.class);
+		if(out==null)out = System.out;
+		return out;
+	}
+
+	public void commandErrorPrintln(Object o){
+		if(!commandprint)return;
+		PrintStream out = get(CommandErrorPrintStream, PrintStream.class);
+		if(out==null)out = System.err;
+		out.println(o);
+	}
+
+	public void commandErrorPrint(Object o){
+		if(!commandprint)return;
+		PrintStream out = get(CommandErrorPrintStream, PrintStream.class);
+		if(out==null)out = System.err;
+		out.print(o);
+	}
+
+	public PrintStream getErrorCommandPrintStream(){
+		if(!commandprint)return null;
+		PrintStream out = get(CommandErrorPrintStream, PrintStream.class);
+		if(out==null)out = System.err;
+		return out;
 	}
 
 }

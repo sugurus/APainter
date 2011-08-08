@@ -42,6 +42,7 @@ public class Eraser extends BasicDrawer{
 
 class EraserCPURendering implements Renderer{
 
+	private static PenCPUDefaultRendering pcdr = new PenCPUDefaultRendering();
 
 	@Override
 	final public void rendering(PixelDataBuffer base, PixelDataBuffer over, Point p,
@@ -148,14 +149,14 @@ class EraserCPURendering implements Renderer{
 
 	final static void renderint_alphfix(PixelDataIntBuffer base,PixelDataIntBuffer over,Point p,Rectangle clip,RenderingOption option){
 		option.frontColor=option.backColor;
-		PenCPURendering.renderint_alphfix(base, over, p, clip, option);
+		pcdr.renderint_alphfix(base, over, p, clip, option);
 	}
 
 
 	final static void renderint_alphfix_dmask(PixelDataIntBuffer base,PixelDataIntBuffer over,Point p,Rectangle clip,RenderingOption option,
 			PixelDataByteBuffer mask){
 		option.frontColor=option.backColor;
-		PenCPURendering.renderint_alphfix_dmask(base, over, p, clip, option, mask);
+		pcdr.renderint_alphfix_dmask(base, over, p, clip, option, mask);
 	}
 
 
