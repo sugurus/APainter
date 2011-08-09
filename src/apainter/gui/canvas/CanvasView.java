@@ -123,13 +123,10 @@ public final class CanvasView extends JPanel{
 			public void layoutContainer(Container parent) {
 				int w = getWidth(),h=getHeight();
 				canvasComponent.setBounds(0, 0, w, h);
-				//FIXME 書き直し。
-				if(canvasComponent instanceof CPUCanvasPanel){
-					CPUCanvasPanel c = (CPUCanvasPanel) canvasComponent;
-					c.init();
-				}
+
 				background.setBounds(0, 0, w, h);
 				overlayer.setBounds(0, 0, w, h);
+
 			}
 			@Override public void removeLayoutComponent(Component comp) {}
 			@Override public void addLayoutComponent(String name, Component comp) {}
@@ -142,7 +139,6 @@ public final class CanvasView extends JPanel{
 
 	private void installMouseListener(){
 		tabletlistener = new PenTabletRecognizer(this) {
-			CanvasMouseListener h,t;
 
 			@Override
 			public void operatorChanged(PenTabletMouseEvent e) {
@@ -161,87 +157,41 @@ public final class CanvasView extends JPanel{
 				if(!hasFocus())	requestFocus();
 				Double k = convertToCanvas(e.getPointDouble());
 				e.setPoint(k.x, k.y);
-				h=t=null;
-				switch(e.getButtonType()){
-				case HEAD:
-				case BUTTON1:
-					Object head = global.get(GlobalKey.CanvasHeadAction);
-					if(head!=null && head instanceof CanvasMouseListener)(h=(CanvasMouseListener)head).press(e,canvas);
-					break;
-				case TAIL:
-					Object tail = global.get(GlobalKey.CanvasTailAction);
-					if(tail!=null && tail instanceof CanvasMouseListener)(t=(CanvasMouseListener)tail).press(e,canvas);
-					break;
-				case BUTTON3:
-					break;
-				case BUTTON2:
-					break;
-				case SIDE1:
-					break;
-				case SIDE2:
-					break;
-				}
+				canvas.dispatchEvent(e);
 			}
 
 			@Override
 			public void onReleased(PenTabletMouseEvent e) {
 				Double k = convertToCanvas(e.getPointDouble());
 				e.setPoint(k.x, k.y);
-				switch(e.getButtonType()){
-				case HEAD:
-				case BUTTON1:
-					if(h!=null)h.release(e,canvas);
-					break;
-				case TAIL:
-					if(t!=null)t.release(e,canvas);
-					break;
-				case BUTTON3:
-					break;
-				case BUTTON2:
-					break;
-				case SIDE1:
-					break;
-				case SIDE2:
-					break;
-				}
-				h=t=null;
+				canvas.dispatchEvent(e);
 			}
 			@Override
 			public void onDragged(PenTabletMouseEvent e) {
 				Double k = convertToCanvas(e.getPointDouble());
 				e.setPoint(k.x, k.y);
-				switch(e.getButtonType()){
-				case HEAD:
-				case BUTTON1:
-					if(h!=null)h.drag(e,canvas);
-					break;
-				case TAIL:
-					if(t!=null)t.drag(e,canvas);
-					break;
-				case BUTTON3:
-					break;
-				case BUTTON2:
-					break;
-				case SIDE1:
-					break;
-				case SIDE2:
-					break;
-				}
+				canvas.dispatchEvent(e);
 			}
 
 			@Override
 			public void onMove(PenTabletMouseEvent e) {
-				//TODO move
+				Double k = convertToCanvas(e.getPointDouble());
+				e.setPoint(k.x, k.y);
+				canvas.dispatchEvent(e);
 			}
 
 			@Override
 			public void onExit(PenTabletMouseEvent e) {
-				// TODO exit
+				Double k = convertToCanvas(e.getPointDouble());
+				e.setPoint(k.x, k.y);
+				canvas.dispatchEvent(e);
 			}
 
 			@Override
 			public void onEnter(PenTabletMouseEvent e) {
-				// TODO enter
+				Double k = convertToCanvas(e.getPointDouble());
+				e.setPoint(k.x, k.y);
+				canvas.dispatchEvent(e);
 			}
 
 		};
@@ -252,6 +202,10 @@ public final class CanvasView extends JPanel{
 	}
 	public void rendering(Rectangle r){
 		canvasRendering.rendering(r);
+	}
+
+	public void renderingFlug(Rectangle r){
+		canvasRendering.renderingFlag(r);
 	}
 
 	public double getZoom() {

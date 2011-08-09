@@ -12,6 +12,8 @@ import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.Image;
 import java.awt.Rectangle;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.geom.AffineTransform;
 import java.awt.image.VolatileImage;
 
@@ -31,6 +33,32 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 
 	public CPUCanvasPanel(Image img) {
 		renderingImage = img;
+
+		addComponentListener(new ComponentListener() {
+
+			@Override
+			public void componentShown(ComponentEvent e) {
+				// TODO 自動生成されたメソッド・スタブ
+
+			}
+
+			@Override
+			public void componentResized(ComponentEvent e) {
+				init();
+			}
+
+			@Override
+			public void componentMoved(ComponentEvent e) {
+				// TODO 自動生成されたメソッド・スタブ
+
+			}
+
+			@Override
+			public void componentHidden(ComponentEvent e) {
+				// TODO 自動生成されたメソッド・スタブ
+
+			}
+		});
 	}
 
 	public void setCanvasView(CanvasView v){
@@ -63,21 +91,42 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 		renderingRotImage();
 	}
 
+	private volatile boolean renderingflag = true;
+	private Rectangle re;
+	private Object reloc=new Object();
+	@Override
+	public void renderingFlag(Rectangle r) {
+		synchronized (reloc) {
+			if(re!=null){
+				re = re.union(r);
+			}else re = r;
+		}
+		renderingflag = true;
+		repaint();
+	}
+
 	@Override
 	protected void paintComponent(Graphics g) {
 		if(!initedVolatile){
 			initVolatile();
 			if(!initedVolatile)return;
 		}
-		if(checkVImage(zoomImage)!=0)renderingZoomImage(null);
-		else if(checkVImage(rotImage)!=0)renderingRotImage();
+		if(renderingflag){
+			Rectangle r;
+			synchronized (reloc) {
+				r = re;
+				re =null;
+				renderingflag=false;
+			}
+			renderingZoomImage(r);
+		}else{
+			if(checkVImage(zoomImage)!=0)renderingZoomImage(null);
+			else if(checkVImage(rotImage)!=0)renderingRotImage();
+		}
 		g.drawImage(rotImage,0,0,null);
 	}
 
-	/**
-	 * 画面のサイズが更新された、などと言ったときに呼び出してください。<br>
-	 * メモリ割愛のため、画面更新を自動的に取得したりしません。
-	 */
+
 	public void init(){
 		int width = getWidth(),height = getHeight();
 		int l = (int)(floor(hypot(width,height)));
@@ -145,20 +194,27 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 			//拡大、移動を取得設定
 			Dimension size = parent.getSize();
 			double zoom = parent.getZoom();
-			AffineTransform af = AffineTransform.getTranslateInstance((l-width)/2d,(l-height)/2d);
-			af.translate(parent.getDefaultCenterX()+size.width/2d, parent.getDefaultCenterY()+size.height/2d);
+			AffineTransform af = AffineTransform.getTranslateInstance(
+					(int)((l-width)/2d+parent.getDefaultCenterX()+size.width/2d),
+					(int)((l-height)/2d+parent.getDefaultCenterY()+size.height/2d)
+			);
 			af.scale(zoom, zoom);
-			af.translate(-s.width/2d, -s.height/2d);
+			af.translate((int)(-s.width/2d), (int)(-s.height/2d));
 
 			//描画範囲設定
-			if(rect!=null){
-				g.setClip(af.createTransformedShape(rect));
-			}
+
 
 			//無色にする。
 			{
 				Graphics2D gg = (Graphics2D)g.create();
 				gg.setComposite(AlphaComposite.Clear);
+				if(rect!=null){
+					rect.x-=1;
+					rect.y-=1;
+					rect.width+=2;
+					rect.height+=2;
+					gg.setClip(af.createTransformedShape(rect));
+				}
 				gg.fillRect(0, 0, l, l);
 				gg.dispose();
 			}
@@ -167,7 +223,9 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 			//描画　近傍補完
 			g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
 			g.transform(af);
-			g.drawImage(renderingImage,0,0,this);
+			if(rect!=null)
+				g.setClip(rect);
+			g.drawImage(renderingImage,0,0,null);
 
 			g.dispose();
 
@@ -175,7 +233,6 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 		renderingRotImage();
 	}
 
-	//面倒くさいので、常に全面更新。全部グラボ任せだから良いでしょう。
 	private void renderingRotImage(){
 		int width = getWidth(),height = getHeight();
 		int l = (int)(floor(hypot(width,height)));

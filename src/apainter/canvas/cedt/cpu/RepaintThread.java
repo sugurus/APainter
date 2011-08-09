@@ -4,13 +4,16 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-
-import javax.swing.Timer;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import apainter.canvas.Canvas;
 import apainter.misc.UnionRectangle;
 
-public class RepaintThread extends Timer{
+public class RepaintThread{
+
+	private Timer timer = new Timer();
+	private TimerTask t;
 
 	private static ActionListener lis = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
@@ -26,7 +29,6 @@ public class RepaintThread extends Timer{
 	private Canvas canvas;
 
 	public RepaintThread(int delay,Canvas c) {
-		super(delay, lis);
 		canvas = c;
 	}
 
@@ -35,6 +37,30 @@ public class RepaintThread extends Timer{
 		synchronized (bounds) {
 			bounds.add(r);
 		}
+	}
+
+	public synchronized void start(){
+		if(t!=null)return;
+		t = new TimerTask() {
+
+			@Override
+			public void run() {
+				if(haveJob()){
+					exec();
+				}
+			}
+		};
+		timer.scheduleAtFixedRate(t, 0, 1000/60);
+	}
+
+	public synchronized void stop(){
+		if(t==null)return;
+		t.cancel();
+		t=null;
+	}
+
+	public boolean isRunning(){
+		return t!=null;
 	}
 
 

@@ -19,6 +19,7 @@ public class CPUCEA_0 implements CanvasEventAccepter{
 		cedt.dispatch(e);
 	}
 
+
 	@Override
 	public void initCEDT() {
 		cedt.init();
@@ -27,6 +28,11 @@ public class CPUCEA_0 implements CanvasEventAccepter{
 	@Override
 	public void shutDownCEDT() {
 		cedt.shutdown();
+	}
+
+	@Override
+	public void runInAnyThread(Runnable r) {
+		cedt.runInAnyThread(r);
 	}
 
 }

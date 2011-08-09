@@ -19,6 +19,11 @@ public class CPUCEDT implements CanvasEventDispatchThread{
 		canvas = c;
 	}
 
+	public void runInAnyThread(Runnable r){
+		if(!isRunning())init();
+		anyThread.submit(r);
+	}
+
 
 	@Override
 	public synchronized void init() {

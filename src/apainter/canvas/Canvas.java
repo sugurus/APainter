@@ -3,15 +3,24 @@ package apainter.canvas;
 import static apainter.misc.Util.*;
 
 import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D.Double;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.swing.JComponent;
 import javax.swing.event.EventListenerList;
 
+import org.w3c.dom.CDATASection;
+
+import nodamushi.pentablet.PenTabletMouseEvent;
+
 import apainter.APainter;
 import apainter.Device;
+import apainter.GlobalKey;
 import apainter.GlobalValue;
 import apainter.bind.annotation.BindProperty;
 import apainter.canvas.cedt.CanvasEventAccepter;
@@ -22,6 +31,7 @@ import apainter.canvas.layerdata.LayerData;
 import apainter.canvas.layerdata.InnerLayerHandler;
 import apainter.drawer.DrawEvent;
 import apainter.gui.canvas.CPUCanvasPanel;
+import apainter.gui.canvas.CanvasMouseListener;
 import apainter.gui.canvas.CanvasView;
 
 public class Canvas {
@@ -222,7 +232,7 @@ public class Canvas {
 		}else{
 			for(Rectangle r:rects)layerdata.rendering(r);
 		}
-		view.rendering(union);
+		view.renderingFlug(union);
 	}
 
 
@@ -251,6 +261,111 @@ public class Canvas {
 
 	public void setSelectedLayer(int layerid){
 		layerdata.setSelectLayer(layerid);
+	}
+
+
+	//MouseListener-------------------------------
+	public synchronized void dispatchEvent(final PenTabletMouseEvent e){
+		ceaccepter.runInAnyThread(new Runnable() {
+			public void run() {
+				int id=e.getID();
+				switch(id){
+				case MouseEvent.MOUSE_PRESSED:
+					onPressed(e);
+					break;
+				case MouseEvent.MOUSE_DRAGGED:
+					onDragged(e);
+					break;
+				case MouseEvent.MOUSE_RELEASED:
+					onReleased(e);
+					break;
+				case MouseEvent.MOUSE_MOVED:
+					onMove(e);
+					break;
+				case MouseEvent.MOUSE_ENTERED:
+					onEnter(e);
+					break;
+				case MouseEvent.MOUSE_EXITED:
+					onExit(e);
+					break;
+				}
+
+			}
+		});
+	}
+	private CanvasMouseListener t,h;
+	private void onPressed(PenTabletMouseEvent e) {
+		h=t=null;
+		switch(e.getButtonType()){
+		case HEAD:
+		case BUTTON1:
+			Object head = global.get(GlobalKey.CanvasHeadAction);
+			if(head!=null && head instanceof CanvasMouseListener)(h=(CanvasMouseListener)head).press(e,this);
+			break;
+		case TAIL:
+			Object tail = global.get(GlobalKey.CanvasTailAction);
+			if(tail!=null && tail instanceof CanvasMouseListener)(t=(CanvasMouseListener)tail).press(e,this);
+			break;
+		case BUTTON3:
+			break;
+		case BUTTON2:
+			break;
+		case SIDE1:
+			break;
+		case SIDE2:
+			break;
+		}
+	}
+
+	private void onReleased(PenTabletMouseEvent e) {
+		switch(e.getButtonType()){
+		case HEAD:
+		case BUTTON1:
+			if(h!=null)h.release(e,this);
+			break;
+		case TAIL:
+			if(t!=null)t.release(e,this);
+			break;
+		case BUTTON3:
+			break;
+		case BUTTON2:
+			break;
+		case SIDE1:
+			break;
+		case SIDE2:
+			break;
+		}
+		h=t=null;
+	}
+	private void onDragged(PenTabletMouseEvent e) {
+		switch(e.getButtonType()){
+		case HEAD:
+		case BUTTON1:
+			if(h!=null)h.drag(e,this);
+			break;
+		case TAIL:
+			if(t!=null)t.drag(e,this);
+			break;
+		case BUTTON3:
+			break;
+		case BUTTON2:
+			break;
+		case SIDE1:
+			break;
+		case SIDE2:
+			break;
+		}
+	}
+	private void onMove(PenTabletMouseEvent e) {
+		//TODO move
+	}
+
+	private void onExit(PenTabletMouseEvent e) {
+		// TODO exit
+	}
+
+	private void onEnter(PenTabletMouseEvent e) {
+		// TODO enter
 	}
 
 
