@@ -97,6 +97,7 @@ public final class CanvasView extends JPanel{
 		setComponentZOrder(canvasComponent, 1);
 		setComponentZOrder(background, 2);
 
+
 		super.setLayout(new LayoutManager() {
 			@Override
 			public Dimension preferredLayoutSize(Container parent) {
@@ -121,7 +122,12 @@ public final class CanvasView extends JPanel{
 			@Override
 			public void layoutContainer(Container parent) {
 				int w = getWidth(),h=getHeight();
-				if(canvasComponent!=null)canvasComponent.setBounds(0, 0, w, h);
+				canvasComponent.setBounds(0, 0, w, h);
+				//FIXME 書き直し。
+				if(canvasComponent instanceof CPUCanvasPanel){
+					CPUCanvasPanel c = (CPUCanvasPanel) canvasComponent;
+					c.init();
+				}
 				background.setBounds(0, 0, w, h);
 				overlayer.setBounds(0, 0, w, h);
 			}
@@ -374,11 +380,6 @@ public final class CanvasView extends JPanel{
 		return centerAngle.add(angle).sin*centerR;
 	}
 
-
-	@Override
-	protected void paintComponent(Graphics graphics) {
-		super.paintComponent(graphics);
-	}
 
 	private void setAffinTransform(){
 		Double p = getCenterPoint();

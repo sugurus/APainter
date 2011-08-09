@@ -83,7 +83,6 @@ public class Canvas {
 		this.apainter = nullCheack(ap, "apainter is null");
 		id = canvasid;
 		createdTime = System.currentTimeMillis();
-		view = new CanvasView(width, height, cpucanvas,cpucanvas,this,global);//thisどうしよ
 
 		switch(device){
 
@@ -104,6 +103,7 @@ public class Canvas {
 		CPULayerData c = new CPULayerData(this,global);
 		layerdata = c;
 		cpucanvas = new CPUCanvasPanel(c.getImage());
+		view = new CanvasView(width, height, cpucanvas,cpucanvas,this,global);//thisどうしよ
 		cpucanvas.setCanvasView(view);
 	}
 
