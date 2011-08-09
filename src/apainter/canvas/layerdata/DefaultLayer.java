@@ -37,10 +37,11 @@ abstract class DefaultLayer implements Layer,PixelSetable,MaskContainer{
 		return id;
 	}
 
-	@Override
 	public Canvas getCanvas() {
 		return canvas;
 	}
+	
+	
 
 	@Override
 	final public String getName() {

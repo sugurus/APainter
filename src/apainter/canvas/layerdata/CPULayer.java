@@ -67,7 +67,7 @@ class CPULayer extends DefaultLayer{
 	}
 
 	@Override
-	public LayerHandler getHandler() {
+	public InnerLayerHandler getHandler() {
 		return handler;
 	}
 
@@ -194,7 +194,7 @@ class CPULayer extends DefaultLayer{
 	}
 
 
-	private static class CPULayerHandler extends LayerHandler{
+	private static class CPULayerHandler extends InnerLayerHandler{
 
 		private final CPULayer h;
 		private final Canvas canvas;
@@ -214,7 +214,6 @@ class CPULayer extends DefaultLayer{
 			return "Layer";
 		}
 
-		@Override
 		public Canvas getCanvas() {
 			return canvas;
 		}

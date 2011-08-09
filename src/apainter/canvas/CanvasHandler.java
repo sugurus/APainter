@@ -1,10 +1,11 @@
-package apainter;
+package apainter.canvas;
 
 import java.beans.PropertyChangeListener;
 
 import javax.swing.JComponent;
 
-import apainter.canvas.Canvas;
+import apainter.APainter;
+import apainter.canvas.event.CanvasEvent;
 
 /**
  * Canvasのアダプタークラス
@@ -76,6 +77,10 @@ public class CanvasHandler {
 
 	public void removePropertyChangeListener(PropertyChangeListener l) {
 		canvas.removePropertyChangeListener(l);
+	}
+
+	public void dispatchEvent(CanvasEvent e){
+		canvas.dispatchEvent(e);
 	}
 
 }

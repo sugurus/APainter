@@ -2,7 +2,6 @@ package apainter.drawer.painttool;
 
 import nodamushi.pentablet.PenTabletMouseEvent;
 import apainter.Device;
-import apainter.GlobalKey;
 import apainter.GlobalValue;
 import apainter.canvas.Canvas;
 import apainter.color.Color;
@@ -18,30 +17,27 @@ public abstract class BasicDrawer extends Drawer implements CanvasMouseListener{
 	public BasicDrawer(GlobalValue global) {
 		this.global = global;
 	}
-	private Canvas getCanvas(){
-		return (Canvas)global.get(GlobalKey.CurrentCanvas);
-	}
 
 	@Override
-	public void press(PenTabletMouseEvent e) {
-		DrawEvent de=start(e, getCanvas().getSelectedLayer());
+	public void press(PenTabletMouseEvent e,Canvas canvas) {
+		DrawEvent de=start(e, canvas.getSelectedLayer());
 		postEvent(de);
 	}
 
 	@Override
-	public void drag(PenTabletMouseEvent e) {
-		DrawEvent[] de=paint(e, getCanvas().getSelectedLayer());
+	public void drag(PenTabletMouseEvent e,Canvas canvas) {
+		DrawEvent[] de=paint(e, canvas.getSelectedLayer());
 		postEvent(de);
 	}
 
 	@Override
-	public void release(PenTabletMouseEvent e) {
-		DrawEvent[] de=end(e, getCanvas().getSelectedLayer());
+	public void release(PenTabletMouseEvent e,Canvas canvas) {
+		DrawEvent[] de=end(e, canvas.getSelectedLayer());
 		postEvent(de);
 	}
 
 	@Override
-	public void move(PenTabletMouseEvent e) {
+	public void move(PenTabletMouseEvent e,Canvas canvas) {
 
 	}
 

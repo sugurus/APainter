@@ -32,7 +32,7 @@ abstract public class LayerData implements DrawAccepter{
 		this.canvas = nullCheack(canvas, "canvas is null");
 		global = nullCheack(globalvalue, "globalvalue is null");
 		layerlist = new LayerList();
-		LayerHandler lh;
+		InnerLayerHandler lh;
 		layerlist.addElement(lh=makeLayer(makelayerid(),null));
 		layerlist.setSelectLayer(lh);
 	}
@@ -43,7 +43,7 @@ abstract public class LayerData implements DrawAccepter{
 
 	@Override
 	public boolean  paint(DrawEvent e){
-		LayerHandler l = e.getTarget();
+		InnerLayerHandler l = e.getTarget();
 		if(!layerlist.contains(l) || !l.isDrawable())return false;
 		Layer layer = l.getLayer();
 		if(hasSelectedArea){
@@ -52,11 +52,11 @@ abstract public class LayerData implements DrawAccepter{
 		return layer.paint(e);
 	}
 
-	public LayerHandler getSelectedLayerHandler(){
+	public InnerLayerHandler getSelectedLayerHandler(){
 		return layerlist.getSelectLayerHandler();
 	}
 
-	public ArrayList<LayerHandler> getLayerHandlers(){
+	public ArrayList<InnerLayerHandler> getLayerHandlers(){
 		return layerlist.getAllLayerHandler();
 	}
 
@@ -73,9 +73,9 @@ abstract public class LayerData implements DrawAccepter{
 		return canvas.getHeight();
 	}
 
-	public void setSelectLayer(LayerHandler l){
+	public void setSelectLayer(InnerLayerHandler l){
 		if(l==null)return;
-		LayerHandler old = layerlist.getSelectLayerHandler();
+		InnerLayerHandler old = layerlist.getSelectLayerHandler();
 		if(l==old)return;
 		layerlist.setSelectLayer(l);
 	}
@@ -84,7 +84,7 @@ abstract public class LayerData implements DrawAccepter{
 		layerlist.setSelectLayer(layerid2);
 	}
 
-	public LayerHandler getSelectedLayer(){
+	public InnerLayerHandler getSelectedLayer(){
 		return layerlist.getSelectLayerHandler();
 	}
 
@@ -94,7 +94,7 @@ abstract public class LayerData implements DrawAccepter{
 	 * (※レンダリングが最初にされるという意味。見た目上は下にあるように見えるだろう)
 	 * @param l
 	 */
-	public void moveToFirst(LayerHandler l){
+	public void moveToFirst(InnerLayerHandler l){
 		layerlist.moveIntoTop(l.getElement(), l.getElement().getUnit());
 	}
 
@@ -103,7 +103,7 @@ abstract public class LayerData implements DrawAccepter{
 	 * (※レンダリングが最後にされるという意味。見た目は上にあるように見えるだろう)
 	 * @param l
 	 */
-	public void moveToLast(LayerHandler l){
+	public void moveToLast(InnerLayerHandler l){
 		layerlist.moveIntoLast(l.getElement(), l.getElement().getUnit());
 	}
 
@@ -112,14 +112,14 @@ abstract public class LayerData implements DrawAccepter{
 	 * @param next
 	 * @param before
 	 */
-	public void moveToNext(LayerHandler next,LayerHandler before){
+	public void moveToNext(InnerLayerHandler next,InnerLayerHandler before){
 		layerlist.moveToNext(next.getElement(), before.getElement());
 	}
 
 	/**
 	 * before「を」nextの前へ移動させます
 	 */
-	public void moveToBefore(LayerHandler before,LayerHandler next){
+	public void moveToBefore(InnerLayerHandler before,InnerLayerHandler next){
 		layerlist.moveToBefore(before.getElement(), next.getElement());
 	}
 
@@ -127,14 +127,14 @@ abstract public class LayerData implements DrawAccepter{
 	 * 可能ならば、グループ内で一つ次に移動させます。
 	 * @param l
 	 */
-	public void moveToNext(LayerHandler l){
+	public void moveToNext(InnerLayerHandler l){
 		layerlist.moveToNext(l);
 	}
 	/**
 	 * 可能ならば、グループ内で一つ前に移動させます。
 	 * @param l
 	 */
-	public void moveToBefore(LayerHandler l){
+	public void moveToBefore(InnerLayerHandler l){
 		layerlist.moveToBefore(l);
 	}
 
@@ -144,19 +144,19 @@ abstract public class LayerData implements DrawAccepter{
 	 * @param layername
 	 * @return
 	 */
-	public LayerHandler createLayer(String layername){
-		LayerHandler lh= makeLayer(makelayerid(), layername);
+	public InnerLayerHandler createLayer(String layername){
+		InnerLayerHandler lh= makeLayer(makelayerid(), layername);
 		layerlist.addElement(lh);
 		layerlist.moveToSelectedLayerNext(lh);
 		//TODO historys
 		return lh;
 	}
 
-	public boolean canRemove(LayerHandler lh){
+	public boolean canRemove(InnerLayerHandler lh){
 		return layerlist.canRemove(lh);
 	}
 
-	public void remove(LayerHandler lh){
+	public void remove(InnerLayerHandler lh){
 		if(!canRemove(lh))return;
 		layerlist.remove(lh.getElement());
 		//TODO history
@@ -169,7 +169,7 @@ abstract public class LayerData implements DrawAccepter{
 		return layerlist.toString();
 	}
 
-	private LayerHandler makeLayer(int id,String layername){
+	private InnerLayerHandler makeLayer(int id,String layername){
 		Layer l = createLayer(id,layername);
 		return l.getHandler();
 	}

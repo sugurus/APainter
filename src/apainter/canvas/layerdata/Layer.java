@@ -19,7 +19,7 @@ interface Layer extends LayerHandle,Renderable,DrawAccepter{
 	 * このレイヤーを操作するためのハンドラーを返します。
 	 * @return
 	 */
-	public LayerHandler getHandler();
+	public InnerLayerHandler getHandler();
 
 	public RenderingOption getRenderingOption();
 

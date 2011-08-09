@@ -13,22 +13,22 @@ import apainter.hierarchy.Hierarchy;
 import apainter.hierarchy.Unit;
 
 
-public class LayerList extends Hierarchy<LayerHandler>{
+public class LayerList extends Hierarchy<InnerLayerHandler>{
 
-	private Map<Integer, LayerHandler> alllayer = new HashMap<Integer, LayerHandler>();
-	private LayerHandler selectedLayer;
+	private Map<Integer, InnerLayerHandler> alllayer = new HashMap<Integer, InnerLayerHandler>();
+	private InnerLayerHandler selectedLayer;
 	private boolean selectedMask=false;
 
 
 	@BindProperty(SelectedLayerChangeProperty)
-	public void setSelectLayer(LayerHandler l){
+	public void setSelectLayer(InnerLayerHandler l){
 		if(l==null)return;
 		if(selectedLayer !=l){
 			selectedMask = false;
-			LayerHandler old = selectedLayer;
+			InnerLayerHandler old = selectedLayer;
 			selectedLayer = l;
 			if(l.getElement().isUnit()){
-				setCurrentUnit((Unit<LayerHandler>)l.getElement());
+				setCurrentUnit((Unit<InnerLayerHandler>)l.getElement());
 			}else{
 				setCurrentUnit(l.getElement().getUnit());
 			}
@@ -36,15 +36,15 @@ public class LayerList extends Hierarchy<LayerHandler>{
 		}
 	}
 
-	public ArrayList<LayerHandler> getAllLayerHandler(){
-		return new ArrayList<LayerHandler>(alllayer.values());
+	public ArrayList<InnerLayerHandler> getAllLayerHandler(){
+		return new ArrayList<InnerLayerHandler>(alllayer.values());
 	}
 
 	public void setSelectLayer(int id){
 		setSelectLayer(alllayer.get(id));
 	}
 
-	public LayerHandler getSelectLayerHandler(){
+	public InnerLayerHandler getSelectLayerHandler(){
 		return selectedLayer;
 	}
 
@@ -53,22 +53,22 @@ public class LayerList extends Hierarchy<LayerHandler>{
 	}
 
 	@Override
-	protected void add(Element<LayerHandler> e) {
-		LayerHandler l = e.getProperty();
+	protected void add(Element<InnerLayerHandler> e) {
+		InnerLayerHandler l = e.getProperty();
 		alllayer.put(l.getID(), l);
 		l.setElement(e);
 		super.add(e);
 	}
 
-	public synchronized boolean canRemove(LayerHandler l){
-		Unit<LayerHandler> unit = getTopLevelUnit();
-		Element<LayerHandler> ll = l.getElement();
+	public synchronized boolean canRemove(InnerLayerHandler l){
+		Unit<InnerLayerHandler> unit = getTopLevelUnit();
+		Element<InnerLayerHandler> ll = l.getElement();
 		int size = unit.size();
 		for(int i=0;i<size;i++){
-			Element<LayerHandler> lh = unit.getElement(i);
+			Element<InnerLayerHandler> lh = unit.getElement(i);
 			if(ll==lh)continue;
 			if(lh.isUnit()){
-				if(_canRemove((Unit<LayerHandler>)lh, ll))
+				if(_canRemove((Unit<InnerLayerHandler>)lh, ll))
 					return true;
 			}
 			else return true;
@@ -76,13 +76,13 @@ public class LayerList extends Hierarchy<LayerHandler>{
 		return false;
 	}
 
-	private boolean _canRemove(Unit<LayerHandler> unit,Element<LayerHandler> l){
+	private boolean _canRemove(Unit<InnerLayerHandler> unit,Element<InnerLayerHandler> l){
 		int size = unit.size();
 		for(int i=0;i<size;i++){
-			Element<LayerHandler> lh = unit.getElement(i);
+			Element<InnerLayerHandler> lh = unit.getElement(i);
 			if(l==lh)continue;
 			if(lh.isUnit()){
-				if(_canRemove((Unit<LayerHandler>)lh, l))return true;
+				if(_canRemove((Unit<InnerLayerHandler>)lh, l))return true;
 			}
 			else return true;
 		}
@@ -92,25 +92,25 @@ public class LayerList extends Hierarchy<LayerHandler>{
 
 
 	@Override
-	protected void readdAll(Collection<Element<LayerHandler>> e) {
-		for(Element<LayerHandler> el:e){
-			LayerHandler l = el.getProperty();
+	protected void readdAll(Collection<Element<InnerLayerHandler>> e) {
+		for(Element<InnerLayerHandler> el:e){
+			InnerLayerHandler l = el.getProperty();
 			alllayer.put(l.getID(), l);
 		}
 		super.readdAll(e);
 	}
 
 	@Override
-	protected void remove(Element<LayerHandler> e) {
-		LayerHandler l = e.getProperty();
+	protected void remove(Element<InnerLayerHandler> e) {
+		InnerLayerHandler l = e.getProperty();
 		alllayer.remove(l.getID());
 		super.remove(e);
 	}
 
 	@Override
-	protected void removeAll(Collection<Element<LayerHandler>> e) {
-		for(Element<LayerHandler> el:e){
-			LayerHandler l = el.getProperty();
+	protected void removeAll(Collection<Element<InnerLayerHandler>> e) {
+		for(Element<InnerLayerHandler> el:e){
+			InnerLayerHandler l = el.getProperty();
 			alllayer.remove(l.getID());
 		}
 		super.removeAll(e);
@@ -128,31 +128,31 @@ public class LayerList extends Hierarchy<LayerHandler>{
 	}
 
 
-	public void moveToNext(LayerHandler l){
-		Element<LayerHandler> e = l.getElement();
-		Unit<LayerHandler> u = e.getUnit();
+	public void moveToNext(InnerLayerHandler l){
+		Element<InnerLayerHandler> e = l.getElement();
+		Unit<InnerLayerHandler> u = e.getUnit();
 		int pos = e.getIndex()+1;
 		int size = u.size();
 		if(pos==size)return;
-		Element<LayerHandler> before = u.getElement(pos);
+		Element<InnerLayerHandler> before = u.getElement(pos);
 		moveToNext(e, before);
 	}
 
-	public void moveToBefore(LayerHandler l){
-		Element<LayerHandler> e = l.getElement();
-		Unit<LayerHandler> u = e.getUnit();
+	public void moveToBefore(InnerLayerHandler l){
+		Element<InnerLayerHandler> e = l.getElement();
+		Unit<InnerLayerHandler> u = e.getUnit();
 		int pos = e.getIndex()-1;
 		if(pos<0)return;
-		Element<LayerHandler> next = u.getElement(pos);
+		Element<InnerLayerHandler> next = u.getElement(pos);
 		moveToBefore(e, next);
 	}
 
-	public void moveToSelectedLayerNext(LayerHandler l){
+	public void moveToSelectedLayerNext(InnerLayerHandler l){
 		if(l==selectedLayer)return;
 		moveToNext(l.getElement(), selectedLayer.getElement());
 	}
 
-	public void moveToSelectedLayerBefore(LayerHandler l){
+	public void moveToSelectedLayerBefore(InnerLayerHandler l){
 		if(l==selectedLayer)return;
 		moveToBefore(l.getElement(), selectedLayer.getElement());
 	}
@@ -160,27 +160,27 @@ public class LayerList extends Hierarchy<LayerHandler>{
 
 	@Override
 	public String toString() {
-		Unit<LayerHandler> l = getTopLevelUnit();
+		Unit<InnerLayerHandler> l = getTopLevelUnit();
 		int s = l.size();
 		StringBuilder str = new StringBuilder();
 		for(int i=0;i<s;i++){
-			Element<LayerHandler> ll = l.getElement(i);
+			Element<InnerLayerHandler> ll = l.getElement(i);
 			str.append(ll.getProperty().getID()).append("\n");
 			if(ll.isUnit()){
-				str.append(_toString("-", (Unit<LayerHandler>)ll));
+				str.append(_toString("-", (Unit<InnerLayerHandler>)ll));
 			}
 		}
 		return str.toString();
 	}
 
-	private String _toString(String st,Unit<LayerHandler> l){
+	private String _toString(String st,Unit<InnerLayerHandler> l){
 		StringBuilder str = new StringBuilder();
 		int s = l.size();
 		for(int i=0;i<s;i++){
-			Element<LayerHandler> ll = l.getElement(i);
+			Element<InnerLayerHandler> ll = l.getElement(i);
 			str.append(st).append(ll.getProperty().getID()).append("\n");
 			if(ll.isUnit()){
-				str.append(_toString(st+"-", (Unit<LayerHandler>)ll)).append("\n");
+				str.append(_toString(st+"-", (Unit<InnerLayerHandler>)ll)).append("\n");
 			}
 		}
 		return str.toString();

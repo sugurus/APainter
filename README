@@ -1,0 +1,26 @@
+APainter
+2011/8/9 nodamushi
+
+プロジェクト名:APainter
+Licensing：New BSD License
+仕様外部ライブラリー：Jpen　http://sourceforge.net/apps/mediawiki/jpen/index.php
+
+-APainterとは
+ブラウザ上で動作する高機能ペイントソフトが欲しいという願望から始まったプロジェクトです。
+現在はGUI機能はキャンバスの表示を覗き、提供する予定はなく、CUIで動作します。
+CUIコマンドについてはCommands.txtを参照してください。
+現在はCPU動作で作っていますが、そのうちGPUでも動作するようにしたい。
+
+-コンパイル方法
+コンパイルにはJpen2が必要になります。
+Jpenのプロジェクトよりファイルを別にダウンロードし、適当な場所に解凍してください。
+次にMakefileをテキストエディタで開き、2行目にあるJPENPATHをJpenを解凍したディレクトリに変更してください。
+また、OSがUnix系の場合はCLASSPATHSEPを「:」に変更してください。
+コマンドプロンプト（ターミナル、端末）上で「make」を実行することでコンパイルできます。
+また、「make jar」でjarファイルを生成します。
+「make clean」でコンパイルしたクラスファイルを削除します。
+
+-実行方法
+実行するには「make run」でウィンドウにキャンバスを入れただけの簡単なペイントソフトが起動します。
+操作についてはCommands.txtを参考にしてください。
+

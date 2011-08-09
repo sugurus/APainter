@@ -1,5 +1,6 @@
 package apainter.gui.canvas;
 
+import static apainter.misc.Util.*;
 import static java.lang.Math.*;
 
 import java.awt.Color;
@@ -21,6 +22,7 @@ import javax.swing.JPanel;
 
 import apainter.GlobalKey;
 import apainter.GlobalValue;
+import apainter.canvas.Canvas;
 import apainter.construct.Angle;
 import java.awt.geom.Point2D.Double;
 
@@ -57,11 +59,12 @@ public final class CanvasView extends JPanel{
 
 	@SuppressWarnings("unused")
 	private PenTabletRecognizer tabletlistener;
-	private JComponent canvas;//画像を表示するパネル
+	private JComponent canvasComponent;//画像を表示するパネル
 	private CanvasViewRendering canvasRendering;
 	private JComponent background=new JPanel();//背景
 	private JComponent overlayer=new JPanel();//画像を表示するパネルの上のパネル。
 	private GlobalValue global;
+	private Canvas canvas;
 
 	private ComponentListener componentlistener = new ComponentAdapter() {
 		@Override public void componentResized(ComponentEvent e) {
@@ -71,13 +74,14 @@ public final class CanvasView extends JPanel{
 
 
 
-	public CanvasView(int width,int height,JComponent canvascomponent,CanvasViewRendering rendering,GlobalValue global) {
+	public CanvasView(int width,int height,JComponent canvascomponent,CanvasViewRendering rendering,Canvas canvas,GlobalValue global) {
 		if(width<=0 || height <=0)throw new RuntimeException(String.format("width:%d,height:%d",width,height));
 		if(canvascomponent==null)throw new NullPointerException("canvas");
 		if(global==null)throw new NullPointerException("global");
 		this.global =global;
-		canvas = canvascomponent;
+		canvasComponent = canvascomponent;
 		canvasRendering = rendering;
+		this.canvas = nullCheack(canvas, "canvas is null!");
 		canvasDafaultSize = new Dimension(width,height);
 		setBackground(Color.white);
 		setAffinTransform();
@@ -87,10 +91,10 @@ public final class CanvasView extends JPanel{
 		background.setOpaque(false);
 		background.setVisible(false);
 		add(overlayer);
-		add(canvas);
+		add(canvasComponent);
 		add(background);
 		setComponentZOrder(overlayer, 0);
-		setComponentZOrder(canvas, 1);
+		setComponentZOrder(canvasComponent, 1);
 		setComponentZOrder(background, 2);
 
 		super.setLayout(new LayoutManager() {
@@ -99,8 +103,8 @@ public final class CanvasView extends JPanel{
 				Container p = getParent();
 				Dimension d =p==null?new Dimension():p.getSize();
 				if(d.width==0||d.height==0){
-					if(canvas!=null){
-						d = canvas.getPreferredSize();
+					if(canvasComponent!=null){
+						d = canvasComponent.getPreferredSize();
 					}else{
 						d.width = 30;
 						d.height = 30;
@@ -117,7 +121,7 @@ public final class CanvasView extends JPanel{
 			@Override
 			public void layoutContainer(Container parent) {
 				int w = getWidth(),h=getHeight();
-				if(canvas!=null)canvas.setBounds(0, 0, w, h);
+				if(canvasComponent!=null)canvasComponent.setBounds(0, 0, w, h);
 				background.setBounds(0, 0, w, h);
 				overlayer.setBounds(0, 0, w, h);
 			}
@@ -156,11 +160,11 @@ public final class CanvasView extends JPanel{
 				case HEAD:
 				case BUTTON1:
 					Object head = global.get(GlobalKey.CanvasHeadAction);
-					if(head!=null && head instanceof CanvasMouseListener)(h=(CanvasMouseListener)head).press(e);
+					if(head!=null && head instanceof CanvasMouseListener)(h=(CanvasMouseListener)head).press(e,canvas);
 					break;
 				case TAIL:
 					Object tail = global.get(GlobalKey.CanvasTailAction);
-					if(tail!=null && tail instanceof CanvasMouseListener)(t=(CanvasMouseListener)tail).press(e);
+					if(tail!=null && tail instanceof CanvasMouseListener)(t=(CanvasMouseListener)tail).press(e,canvas);
 					break;
 				case BUTTON3:
 					break;
@@ -180,10 +184,10 @@ public final class CanvasView extends JPanel{
 				switch(e.getButtonType()){
 				case HEAD:
 				case BUTTON1:
-					if(h!=null)h.release(e);
+					if(h!=null)h.release(e,canvas);
 					break;
 				case TAIL:
-					if(t!=null)t.release(e);
+					if(t!=null)t.release(e,canvas);
 					break;
 				case BUTTON3:
 					break;
@@ -203,10 +207,10 @@ public final class CanvasView extends JPanel{
 				switch(e.getButtonType()){
 				case HEAD:
 				case BUTTON1:
-					if(h!=null)h.drag(e);
+					if(h!=null)h.drag(e,canvas);
 					break;
 				case TAIL:
-					if(t!=null)t.drag(e);
+					if(t!=null)t.drag(e,canvas);
 					break;
 				case BUTTON3:
 					break;

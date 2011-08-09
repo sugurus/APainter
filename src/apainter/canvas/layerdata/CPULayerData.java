@@ -101,12 +101,12 @@ public class CPULayerData extends LayerData{
 		_Rendering(Rectangle clip) {this.clip = clip;}
 		public void run(){
 			renderingbuffer.setData(0xffffffff, clip);
-			Unit<LayerHandler> unit =layerlist.getTopLevelUnit();
+			Unit<InnerLayerHandler> unit =layerlist.getTopLevelUnit();
 
-			ArrayList<Element<LayerHandler>> elements = unit.getElements();
+			ArrayList<Element<InnerLayerHandler>> elements = unit.getElements();
 
 
-			for(Element<LayerHandler> e:elements){
+			for(Element<InnerLayerHandler> e:elements){
 				Layer l = e.getProperty().getLayer();
 				l.render(renderingbuffer, clip);
 			}

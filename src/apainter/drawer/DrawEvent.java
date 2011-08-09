@@ -5,14 +5,14 @@ import java.awt.Rectangle;
 
 import apainter.Device;
 import apainter.canvas.event.CanvasEvent;
-import apainter.canvas.layerdata.LayerHandler;
+import apainter.canvas.layerdata.InnerLayerHandler;
 import apainter.data.PixelDataBuffer;
 import apainter.rendering.Renderer;
 import apainter.rendering.RenderingOption;
 
 public class DrawEvent extends CanvasEvent{
 
-	private LayerHandler target;
+	private InnerLayerHandler target;
 	private Rectangle rect;
 	private PixelDataBuffer mapdata;
 	private RenderingOption option;
@@ -20,7 +20,7 @@ public class DrawEvent extends CanvasEvent{
 	private Device[] device;
 
 	public DrawEvent(int id, Drawer source,
-			LayerHandler target,Rectangle bounds,
+			InnerLayerHandler target,Rectangle bounds,
 			Renderer renderer,Device[] device,
 			PixelDataBuffer mapdata,RenderingOption option) {
 		super(id, source,target.getCanvas());
@@ -71,7 +71,7 @@ public class DrawEvent extends CanvasEvent{
 		return option;
 	}
 
-	public LayerHandler getTarget(){
+	public InnerLayerHandler getTarget(){
 		return target;
 	}
 

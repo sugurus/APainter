@@ -9,6 +9,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import apainter.canvas.Canvas;
+import apainter.canvas.CanvasHandler;
+import apainter.canvas.layerdata.InnerLayerHandler;
 import apainter.canvas.layerdata.LayerHandler;
 import apainter.command.Command;
 import apainter.command.CommandCenter;
@@ -226,9 +228,9 @@ class CreateLayer implements CommandDecoder{
 		@Override
 		public LayerHandler execution(GlobalValue global) {
 			Canvas c=(Canvas) global.get(GlobalKey.CurrentCanvas);
-			LayerHandler l= c.createNewLayer(s);
+			InnerLayerHandler l= c.createNewLayer(s);
 			global.commandPrintln(l);
-			return l;
+			return l.getLayerHandler();
 		}
 	}
 
@@ -268,9 +270,9 @@ class Selectedlayer implements CommandDecoder {
 				c.setSelectedLayer(i);
 			}
 
-			LayerHandler l = c.getSelectedLayer();
+			InnerLayerHandler l = c.getSelectedLayer();
 			global.commandPrintln(l.toString());
-			return l;
+			return l.getLayerHandler();
 		}
 	}
 

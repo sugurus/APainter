@@ -74,7 +74,7 @@ public interface LayerHandle{
 
 	public boolean isGroup();
 	public boolean isLayer();
-
 	public Canvas getCanvas();
+
 
 }

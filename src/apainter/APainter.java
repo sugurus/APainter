@@ -14,6 +14,7 @@ import javax.swing.event.EventListenerList;
 
 import apainter.annotation.Version;
 import apainter.canvas.Canvas;
+import apainter.canvas.CanvasHandler;
 import apainter.canvas.cedt.cpu.CPUParallelWorkThread;
 import apainter.command.Command;
 import apainter.command.CommandCenter;
@@ -261,11 +262,11 @@ public class APainter {
 	public synchronized CanvasHandler createNewCanvas(int width,int height){
 		int id=(random.nextInt()&0xffff)<<16;
 		id|=canvasid++;
-		Canvas canvas= new Canvas(width, height, device, global,id);
+		Canvas canvas= new Canvas(width, height, device, global,id,this);
 		canvaslist.add(canvas);
 		global.addCanvas(canvas);
 		global.put(GlobalKey.CurrentCanvas, canvas);
-		return new CanvasHandler(canvas,this);
+		return canvas.getCanvasHandler();
 	}
 
 	public synchronized CanvasHandler createNewCanvas(int width,int height,
@@ -273,11 +274,11 @@ public class APainter {
 		int id=random.nextInt()&0xffff0000;
 		id|=canvasid++;
 		Canvas canvas= new Canvas(width, height, device, global,
-				author, canvasname, makeDay, workTime, actionCount,id);
+				author, canvasname, makeDay, workTime, actionCount,id,this);
 		canvaslist.add(canvas);
 		global.addCanvas(canvas);
 		global.put(GlobalKey.CurrentCanvas, canvas);
-		return new CanvasHandler(canvas,this);
+		return canvas.getCanvasHandler();
 	}
 
 

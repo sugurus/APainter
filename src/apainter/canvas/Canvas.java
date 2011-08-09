@@ -1,5 +1,7 @@
 package apainter.canvas;
 
+import static apainter.misc.Util.*;
+
 import java.awt.Rectangle;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -8,6 +10,7 @@ import java.util.ArrayList;
 import javax.swing.JComponent;
 import javax.swing.event.EventListenerList;
 
+import apainter.APainter;
 import apainter.Device;
 import apainter.GlobalValue;
 import apainter.bind.annotation.BindProperty;
@@ -16,7 +19,7 @@ import apainter.canvas.cedt.cpu.CPUCEA_0;
 import apainter.canvas.event.CanvasEvent;
 import apainter.canvas.layerdata.CPULayerData;
 import apainter.canvas.layerdata.LayerData;
-import apainter.canvas.layerdata.LayerHandler;
+import apainter.canvas.layerdata.InnerLayerHandler;
 import apainter.drawer.DrawEvent;
 import apainter.gui.canvas.CPUCanvasPanel;
 import apainter.gui.canvas.CanvasView;
@@ -41,17 +44,18 @@ public class Canvas {
 	private GlobalValue global;
 	private CanvasEventAccepter ceaccepter;
 	private CanvasView view;
+	private APainter apainter;
 
 
 	private CPUCanvasPanel cpucanvas;
 
 
-	public Canvas(int width,int height,Device device,GlobalValue globalvalue,int canvasid){
-		this(width,height,device,globalvalue,null,null,0,0,0,canvasid);
+	public Canvas(int width,int height,Device device,GlobalValue globalvalue,int canvasid,APainter ap){
+		this(width,height,device,globalvalue,null,null,0,0,0,canvasid,ap);
 	}
 
 	public Canvas(int width,int height,Device device,GlobalValue globalvalue,
-			String author,String canvasname,long makeDay,long workTime,long actionCount,int canvasid) {
+			String author,String canvasname,long makeDay,long workTime,long actionCount,int canvasid,APainter ap) {
 		if(width <=0 || height <= 0)
 			throw new IllegalArgumentException(String.format("width:%d,height:%d",width,height));
 		if(globalvalue ==null)throw new NullPointerException("GlobalValue");
@@ -76,8 +80,10 @@ public class Canvas {
 		this.makeDay = makeDay;
 		this.workTime  = workTime;
 		this.actionCount = actionCount;
+		this.apainter = nullCheack(ap, "apainter is null");
 		id = canvasid;
 		createdTime = System.currentTimeMillis();
+		view = new CanvasView(width, height, cpucanvas,cpucanvas,this,global);//thisどうしよ
 
 		switch(device){
 
@@ -98,7 +104,6 @@ public class Canvas {
 		CPULayerData c = new CPULayerData(this,global);
 		layerdata = c;
 		cpucanvas = new CPUCanvasPanel(c.getImage());
-		view = new CanvasView(width, height, cpucanvas,cpucanvas,global);
 		cpucanvas.setCanvasView(view);
 	}
 
@@ -221,13 +226,18 @@ public class Canvas {
 	}
 
 
+	public CanvasHandler getCanvasHandler(){
+		return new CanvasHandler(this, apainter);
+	}
+
+
 
 
 
 	//LayerData操作--------------------------------------------------
 
 
-	public LayerHandler createNewLayer(String name){
+	public InnerLayerHandler createNewLayer(String name){
 		return layerdata.createLayer(name);
 	}
 
@@ -235,7 +245,7 @@ public class Canvas {
 		return layerdata.getLayerLine();
 	}
 
-	public LayerHandler getSelectedLayer(){
+	public InnerLayerHandler getSelectedLayer(){
 		return layerdata.getSelectedLayer();
 	}
 

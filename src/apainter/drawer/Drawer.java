@@ -11,7 +11,7 @@ import nodamushi.pentablet.PenTabletMouseEvent;
 import apainter.Device;
 import apainter.bind.annotation.BindProperty;
 import apainter.canvas.event.EventConstant;
-import apainter.canvas.layerdata.LayerHandler;
+import apainter.canvas.layerdata.InnerLayerHandler;
 import apainter.color.Color;
 import apainter.construct.DimensionDouble;
 import apainter.data.PixelDataBuffer;
@@ -33,7 +33,7 @@ abstract public class Drawer {
 
 
 	protected void postEvent(DrawEvent e){
-		e.getTarget().getCanvas().dispatchEvent(e);
+		e.canvas.dispatchEvent(e);
 	}
 	protected void postEvent(DrawEvent[] events){
 		for(DrawEvent e:events){
@@ -41,12 +41,12 @@ abstract public class Drawer {
 		}
 	}
 
-	protected DrawEvent start(PenTabletMouseEvent e,LayerHandler target){
+	protected DrawEvent start(PenTabletMouseEvent e,InnerLayerHandler target){
 		before = e;
 		return createOneEvent(e, target);
 	}
 
-	private DrawEvent createOneEvent(PenTabletMouseEvent e,LayerHandler target){
+	private DrawEvent createOneEvent(PenTabletMouseEvent e,InnerLayerHandler target){
 		Point2D.Double xy=e.getPointDouble();
 		double pressure =e.getPressure();
 		DimensionDouble pensize = pen.getSize();
@@ -67,7 +67,7 @@ abstract public class Drawer {
 	abstract protected Renderer getRenderer();
 	abstract protected Device[] getUsableDevices();
 
-	protected DrawEvent[] end(PenTabletMouseEvent e,LayerHandler target){
+	protected DrawEvent[] end(PenTabletMouseEvent e,InnerLayerHandler target){
 		PenTabletMouseEvent bef = before;
 		Point2D.Double befp = bef.getPointDouble(),p = e.getPointDouble();
 		double bx=befp.x,by = befp.y;
@@ -84,7 +84,7 @@ abstract public class Drawer {
 		return ret;
 	}
 
-	protected DrawEvent[] paint(PenTabletMouseEvent e,LayerHandler target){
+	protected DrawEvent[] paint(PenTabletMouseEvent e,InnerLayerHandler target){
 		PenTabletMouseEvent bef = before;
 		Point2D.Double befp = bef.getPointDouble(),p = e.getPointDouble();
 		double bx=befp.x,by = befp.y;

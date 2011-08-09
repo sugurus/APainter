@@ -30,8 +30,7 @@ MANIFEST=apainter.mf
 
 
 
-#defaultfiles
-SPLASH=/splashImage.png
+
 
 
 CP=-classpath $(JPENPATH)
@@ -50,7 +49,6 @@ jar:$(JAR)
 build:$(SOURCEDIR)/$(APainter).java
 	mkdir -p $(CLASSDIR)
 	$(JAVAC) $(CP) $(ENCODING) -d $(CLASSDIR) -sourcepath $(SOURCEDIR) $<
-	cp $(SOURCEDIR)$(SPLASH) $(CLASSDIR)$(SPLASH)
 
 clean:
 	rm -rf $(CLASSDIR)

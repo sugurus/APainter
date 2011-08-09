@@ -8,11 +8,11 @@ import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.plaf.ComponentUI;
 
-import apainter.CanvasHandler;
 import apainter.Device;
 import apainter.ExitListener;
 import apainter.annotation.Version;
 import apainter.canvas.Canvas;
+import apainter.canvas.CanvasHandler;
 
 
 @Version("0.1.0")
