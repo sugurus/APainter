@@ -23,7 +23,8 @@ JAVAC=javac
 ENCODING=-encoding utf-8
 
 
-APainter=APainter
+APainter=apainter.APainter
+DEMO=demo.APainterDemo
 
 JAR=apainter.jar
 MANIFEST=apainter.mf
@@ -41,12 +42,12 @@ $(CLASSDIR)/$(APainter).class:build
 $(JAR):$(CLASSDIR)/$(APainter).class
 	jar cfm $(JAR) $(MANIFEST) -C $(CLASSDIR) apainter -C $(CLASSDIR) nodamushi
 
-run:$(CLASSDIR)/$(APainter).class
-	java $(CP)$(CLASSPATHSEP)$(CLASSDIR) $(APainter)
+run:$(CLASSDIR)/$(DEMO).class
+	java $(CP)$(CLASSPATHSEP)$(CLASSDIR) $(DEMO)
 
 jar:$(JAR)
 
-build:$(SOURCEDIR)/$(APainter).java
+build:$(SOURCEDIR)/$(DEMO).java
 	mkdir $(CLASSDIR)
 	$(JAVAC) $(CP) $(ENCODING) -d $(CLASSDIR) -sourcepath $(SOURCEDIR) $<
 

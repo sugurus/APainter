@@ -2,6 +2,7 @@ package apainter;
 
 import static apainter.GlobalBindKey.*;
 import static apainter.GlobalKey.*;
+import static apainter.PropertyChangeNames.*;
 import static apainter.misc.Util.*;
 
 import java.beans.PropertyChangeEvent;
@@ -23,8 +24,17 @@ public class GlobalValue extends HashMap<Object, Object>{
 
 	private Color front,back;
 	private Properties property;
+	private APainter apainter;
 
 
+	void setAPainter(APainter a){
+		apainter = a;
+		put(APainter, a);
+	}
+
+	public APainter getAPainter(){
+		return apainter;
+	}
 
 	public Color getFrontColor(){
 		return front;
@@ -80,10 +90,10 @@ public class GlobalValue extends HashMap<Object, Object>{
 		back = new Color(0xffffffff);
 		super.put(FrontColor, front);
 		super.put(BackColor,back);
-		Bind f = new Bind(Color.propertyColorChange),
-		f16 = new Bind(Color.propertyColorChangeLong),
-		b = new Bind(Color.propertyColorChange),
-		b16 = new Bind(Color.propertyColorChangeLong);
+		Bind f = new Bind(ColorPropertyChange),
+		f16 = new Bind(LongColorPropertyChange),
+		b = new Bind(ColorPropertyChange),
+		b16 = new Bind(LongColorPropertyChange);
 		f.bind(front);
 		f16.bind(front);
 		b.bind(back);

@@ -7,7 +7,7 @@ Licensing：New BSD License
 
 -APainterとは
 ブラウザ上で動作する高機能ペイントソフトが欲しいという願望から始まったプロジェクトです。
-現在はGUI機能はキャンバスの表示を覗き、提供する予定はなく、CUIで動作します。
+設計思想はペイントソフトのエンジンで、GUIはキャンバスの表示を除いて提供する予定はなく、CUIで動作します。
 CUIコマンドについてはCommands.txtを参照してください。
 現在はCPU動作で作っていますが、そのうちGPUでも動作するようにしたい。
 
@@ -24,3 +24,11 @@ Jpenのプロジェクトよりファイルを別にダウンロードし、適�
 実行するには「make run」でウィンドウにキャンバスを入れただけの簡単なペイントソフトが起動します。
 操作についてはCommands.txtを参考にしてください。
 
+＊＊＊＊＊開発者へ
+まぁ、そのうち何か書きます………
+
+起点はapainter.APainter.javaからです。これがメインのクラスになります。
+
+-ColorOpMakeフォルダ
+これはColorOperationsやPenCPU～Rendering.javaのテンプレートです
+ColorOperations.javaやPenCPURendering.javaの変更がしたいときはここを変更します。

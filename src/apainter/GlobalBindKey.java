@@ -3,7 +3,7 @@ package apainter;
 public enum GlobalBindKey {
 	FrontColorBIND(false),FrontColor16bitBIND(false),
 	BackColorBIND(false),BackColor16bitBIND(false),
-
+	PenModeBIND(false),
 	;
 
 

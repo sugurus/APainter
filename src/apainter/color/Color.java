@@ -7,7 +7,7 @@ import javax.swing.event.EventListenerList;
 
 import apainter.bind.annotation.BindProperty;
 import apainter.misc.Util;
-
+import static apainter.PropertyChangeNames.*;
 /**
  * ARGBの順に格納されている。<br>
  * A透明度<br>
@@ -28,15 +28,6 @@ public class Color implements Cloneable{
 	private long colorlong=0;
 	private int colorint=0;
 
-	public static final String
-	/**
-	 * set16bitARGB が呼び出されたときに使われるプロパティー名
-	 */
-	propertyColorChangeLong="color_lnog",
-	/**
-	 * setARGBが呼び出されたときに使われるプロパティー名
-	 */
-	propertyColorChange="color_int";
 
 	public static int RGB2YCrCb(int argb){
 		int a = argb&0xff000000;
@@ -211,7 +202,7 @@ public class Color implements Cloneable{
 	  * 色要素の値が255の時のみ、16bitでの値を0xffffとし、それ以外の場合下位8bitは0になります。
 	  * @param argb
 	  */
-	 @BindProperty(propertyColorChange)
+	 @BindProperty(ColorPropertyChange)
 	 public void setARGB(int argb){
 		 if(colorint==argb)return;
 		 int oldValue = colorint;
@@ -230,14 +221,14 @@ public class Color implements Cloneable{
 		 if(g==0xff00)g=0xffff;
 		 if(b==0xff00)b=0xffff;
 		 colorlong = (long)a << 48 | (long)r << 32 | g << 16 | b;
-		 firePropertyChange(propertyColorChange, oldValue, colorint);
+		 firePropertyChange(ColorPropertyChange, oldValue, colorint);
 	 }
 
 	 public void setARGB(int a,int r,int g,int b){
 		 setARGB(a<<24 | r << 16|g<<8|b);
 	 }
 
-	 @BindProperty(propertyColorChangeLong)
+	 @BindProperty(LongColorPropertyChange)
 	 public void set16bitARGB(long argb){
 		 if(argb == colorlong)return;
 		 long oldValue = colorlong;
@@ -252,7 +243,7 @@ public class Color implements Cloneable{
 		 g >>=8;
 		 b >>=8;
 		 colorint =a<<24 | r << 16|g<<8|b;
-		 firePropertyChange(propertyColorChangeLong, oldValue, colorlong);
+		 firePropertyChange(LongColorPropertyChange, oldValue, colorlong);
 	 }
 
 	 public void set16bitARGB(int a,int r,int g,int b){

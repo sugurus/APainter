@@ -479,7 +479,6 @@ final class JPenRecognizer implements PenListener,Listener{
 
 
 	public void penKindEvent(PKindEvent e) {
-		System.out.println(e);
 		Pen pen = e.pen;
 		float x,y,r,tx,ty;
 
@@ -578,7 +577,6 @@ final class JPenRecognizer implements PenListener,Listener{
 
 
 	public void penScrollEvent(PScrollEvent e) {
-		System.out.println(e);
 		int val = e.scroll.value;
 		if(val==0)return;
 		Pen pen = e.pen;

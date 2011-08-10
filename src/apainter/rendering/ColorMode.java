@@ -1,17 +1,15 @@
 package apainter.rendering;
 
-import javax.swing.Timer;
-
 import apainter.rendering.impl.cpu.*;
 
 
 public enum ColorMode {
-	Default(0,"default",new DefaultRenderer()) ,Add(1,"add",new PlusRenderer()) ,
-	Subtractive(2,"subtractive",new SubtractiveRenderer()) ,Multiplication(3,"multiplication",new MultipleRenderer()) ,
-	Bright(4,"bright",new LightRenderer()) ,Darken(5,"darken",new DarkenRenderer()),Burn(6,"burn",new BurnRenderer()),
+	Default(0,"default",new DefaultRenderer()) ,Add(1,"add",new AddRenderer()) ,
+	Subtractive(2,"subtractive",new SubtractiveRenderer()) ,Multiplication(3,"multiplication",new MultiplicationRenderer()) ,
+	Light(4,"light",new LightRenderer()) ,Darken(5,"darken",new DarkenRenderer()),Burn(6,"burn",new BurnRenderer()),
 	Dodge(7,"dodge",new DodgeRenderer()),Softlight(8,"softlight",new SoftlightRenderer()),
 	Hardlight(9,"hardlight",new HardlightRenderer()),Screen(10,"screen",new ScreenRenderer()),
-	Overlay(11,"overlay",new OverlayRenderer()),
+	Overlay(11,"overlay",new OverlayRenderer()),Difference(12,"difference",new DifferenceRenderer()),Exclusion(13,"exclusion",new ExclusionRenderer()),
 	Del(100) , AlphaDawn(101) ,
 	AlphaPlus(102),
 	/**グループ効果がないことを示す*/NONGROUPEFFECT(31,"nongroupeffect"),
@@ -27,9 +25,10 @@ public enum ColorMode {
 	//Indigoが正式にjava7に対応したら書き換えます。
 	//コンパイル前の元ファイルはelseフォルダーのColorMode.java。
 	//ところで、このbyte0ってなんのためにあるんだろ。
-	public static ColorMode getColorMode(String s)
+    public static ColorMode getColorMode(String s)
     {
-		if(s==null)return null;
+        if(s == null)
+            return null;
         s = s.toLowerCase();
         ColorMode colormode = null;
         String s1 = s;
@@ -56,8 +55,8 @@ public enum ColorMode {
                 byte0 = 3;
             break;
 
-        case -1380798726:
-            if(s1.equals("bright"))
+        case 102970646:
+            if(s1.equals("light"))
                 byte0 = 4;
             break;
 
@@ -95,6 +94,11 @@ public enum ColorMode {
             if(s1.equals("overlay"))
                 byte0 = 11;
             break;
+
+        case 295704547:
+            if(s1.equals("nongroupeffect"))
+                byte0 = 12;
+            break;
         }
         switch(byte0)
         {
@@ -115,7 +119,7 @@ public enum ColorMode {
             break;
 
         case 4: // '\004'
-            colormode = Bright;
+            colormode = Light;
             break;
 
         case 5: // '\005'
@@ -144,6 +148,10 @@ public enum ColorMode {
 
         case 11: // '\013'
             colormode = Overlay;
+            break;
+
+        case 12: // '\f'
+            colormode = NONGROUPEFFECT;
             break;
         }
         return colormode;

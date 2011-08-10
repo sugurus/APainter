@@ -9,6 +9,6 @@
 		return a<<24 |
 		(uoalpha*{{opename}}Op(ur,or)+u_oalpha*ur+_uoalpha*or)*div>>>24 << 16 | 
 		(uoalpha*{{opename}}Op(ug,og)+u_oalpha*ug+_uoalpha*og)*div>>>24 <<8 |
-		(uoalpha*{{opename}}Op(ur,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
+		(uoalpha*{{opename}}Op(ub,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
 	}
 

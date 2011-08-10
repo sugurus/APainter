@@ -1,7 +1,7 @@
 default
-plus
+add
 subtractive
-multiple
+multiplication
 screen
 overlay
 softlight

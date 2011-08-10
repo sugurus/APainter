@@ -3,14 +3,24 @@ package apainter;
 import static apainter.GlobalKey.*;
 import static apainter.misc.Util.*;
 
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.event.EventListenerList;
+import javax.tools.DiagnosticCollector;
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileManager;
+import javax.tools.JavaFileManager.Location;
+import javax.tools.JavaFileObject;
+import javax.tools.StandardLocation;
+import javax.tools.ToolProvider;
 
 import apainter.annotation.Version;
 import apainter.canvas.Canvas;
@@ -104,7 +114,8 @@ public class APainter {
 
 
 	private void init(){
-		global.put(APainter, this);//これの為に初期化をコンストラクターから行えない。
+		global.setAPainter(this);
+		global.put(OnDevice, device);
 		global.put(CommandCenter,command);
 		global.put(CanvasList,canvaslist);
 		global.put(Property, properties);
@@ -148,6 +159,10 @@ public class APainter {
 
 	public int getID(){
 		return id;
+	}
+
+	public void bind(GlobalBindKey bkey,Object obj){
+		global.getBind(bkey).bind(obj);
 	}
 
 	/**
@@ -214,19 +229,80 @@ public class APainter {
 
 
 	//コマンド関連-------------------------------------------------
-
+	//コマンドの追加が面倒くさいので開発時はJavaFileManagerで
+	//実際にコンパイルするときはfalseに設定。
+	//trueの時addcommandlistコマンドが追加される。
+	//addCommand(new .....の文字列が表示される。
+	private final boolean develop=true;
 
 	private void initCommand(){
 		addCommand(new Commands());
-		addCommand(new Rotation());
-		addCommand(new Zoom());
-		addCommand(new Exit());
-		addCommand(new CreateLayer());
-		addCommand(new LayerLine());
-		addCommand(new Selectedlayer());
-		addCommand(new FrontColor());
-		addCommand(new BackColor());
-		addCommand(new CreateCanvas());
+
+		if(!develop){
+			addCommand(new _BackColor());
+			addCommand(new _CreateCanvas());
+			addCommand(new _CreateLayer());
+			addCommand(new _Exit());
+			addCommand(new _FrontColor());
+			addCommand(new _LayerLine());
+			addCommand(new _PenColorMode());
+			addCommand(new _Rotation());
+			addCommand(new _Selectedlayer());
+			addCommand(new _Zoom());
+		}else{
+
+			StringBuffer sb = new StringBuffer();
+			JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+			JavaFileManager fm = compiler.getStandardFileManager(
+					new DiagnosticCollector<JavaFileObject>(), null, null);
+
+			Set<JavaFileObject.Kind> kind = new HashSet<JavaFileObject.Kind>();
+			kind.add(JavaFileObject.Kind.CLASS);
+			try {
+				for(JavaFileObject f:fm.list(StandardLocation.CLASS_PATH, "apainter", kind, false)){
+					String name = f.getName();
+					if(name.startsWith("_") && name.endsWith("class") && !name.contains("$")){
+						String clname = name.substring(0,name.length()-6);
+						try {
+							Class<?> claz = Class.forName("apainter."+clname);
+							if(claz!=null && CommandDecoder.class.isAssignableFrom(claz)){
+								CommandDecoder cd = (CommandDecoder) claz.newInstance();
+								addCommand(cd);
+								sb.append("addCommand(new ").append(clname).append("());\n");
+							}
+						} catch (ClassNotFoundException e) {
+						} catch (InstantiationException e) {
+						} catch (IllegalAccessException e) {
+						}
+					}
+				}
+			} catch (IOException e) {}
+			final String str = sb.toString();
+			addCommand(new CommandDecoder() {
+
+				@Override
+				public String help() {
+					return "addcommandlist:::make addCommands list";
+				}
+
+				@Override
+				public String getCommandName() {
+					return "addcommandlist";
+				}
+
+				@Override
+				public Command decode(String[] params) {
+					return new Command() {
+						@Override
+						protected Object execution(GlobalValue global) {
+							global.commandPrint(str);
+							return str;
+						}
+					};
+				}
+			});
+		}
+
 	}
 
 	/**

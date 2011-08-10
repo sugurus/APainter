@@ -1,0 +1,200 @@
+// Decompiled by Jad v1.5.8g. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.kpdus.com/jad.html
+// Decompiler options: packimports(3) 
+// Source File Name:   ColorMode.java
+
+
+public final class ColorMode extends Enum
+{
+
+    public static ColorMode[] values()
+    {
+        return (ColorMode[])$VALUES.clone();
+    }
+
+    public static ColorMode valueOf(String s)
+    {
+        return (ColorMode)Enum.valueOf(ColorMode, s);
+    }
+
+    private ColorMode(String s, int i)
+    {
+        super(s, i);
+    }
+
+    public static ColorMode getColorMode(String s)
+    {
+        if(s == null)
+            return null;
+        s = s.toLowerCase();
+        ColorMode colormode = null;
+        String s1 = s;
+        byte byte0 = -1;
+        switch(s1.hashCode())
+        {
+        case 1544803905: 
+            if(s1.equals("default"))
+                byte0 = 0;
+            break;
+
+        case 96417: 
+            if(s1.equals("add"))
+                byte0 = 1;
+            break;
+
+        case -1774340796: 
+            if(s1.equals("subtractive"))
+                byte0 = 2;
+            break;
+
+        case 668845958: 
+            if(s1.equals("multiplication"))
+                byte0 = 3;
+            break;
+
+        case 102970646: 
+            if(s1.equals("light"))
+                byte0 = 4;
+            break;
+
+        case -1338968417: 
+            if(s1.equals("darken"))
+                byte0 = 5;
+            break;
+
+        case 3035599: 
+            if(s1.equals("burn"))
+                byte0 = 6;
+            break;
+
+        case 95758295: 
+            if(s1.equals("dodge"))
+                byte0 = 7;
+            break;
+
+        case -2060367060: 
+            if(s1.equals("softlight"))
+                byte0 = 8;
+            break;
+
+        case -680702197: 
+            if(s1.equals("hardlight"))
+                byte0 = 9;
+            break;
+
+        case -907689876: 
+            if(s1.equals("screen"))
+                byte0 = 10;
+            break;
+
+        case -1091287984: 
+            if(s1.equals("overlay"))
+                byte0 = 11;
+            break;
+
+        case 295704547: 
+            if(s1.equals("nongroupeffect"))
+                byte0 = 12;
+            break;
+        }
+        switch(byte0)
+        {
+        case 0: // '\0'
+            colormode = Default;
+            break;
+
+        case 1: // '\001'
+            colormode = Add;
+            break;
+
+        case 2: // '\002'
+            colormode = Subtractive;
+            break;
+
+        case 3: // '\003'
+            colormode = Multiplication;
+            break;
+
+        case 4: // '\004'
+            colormode = Light;
+            break;
+
+        case 5: // '\005'
+            colormode = Darken;
+            break;
+
+        case 6: // '\006'
+            colormode = Burn;
+            break;
+
+        case 7: // '\007'
+            colormode = Dodge;
+            break;
+
+        case 8: // '\b'
+            colormode = Softlight;
+            break;
+
+        case 9: // '\t'
+            colormode = Hardlight;
+            break;
+
+        case 10: // '\n'
+            colormode = Screen;
+            break;
+
+        case 11: // '\013'
+            colormode = Overlay;
+            break;
+
+        case 12: // '\f'
+            colormode = NONGROUPEFFECT;
+            break;
+        }
+        return colormode;
+    }
+
+    public static final ColorMode Default;
+    public static final ColorMode Add;
+    public static final ColorMode Subtractive;
+    public static final ColorMode Multiplication;
+    public static final ColorMode Light;
+    public static final ColorMode Darken;
+    public static final ColorMode Burn;
+    public static final ColorMode Dodge;
+    public static final ColorMode Softlight;
+    public static final ColorMode Hardlight;
+    public static final ColorMode Screen;
+    public static final ColorMode Overlay;
+    public static final ColorMode Del;
+    public static final ColorMode AlphaDawn;
+    public static final ColorMode AlphaPlus;
+    public static final ColorMode NONGROUPEFFECT;
+    public static final ColorMode REPLACEMENT;
+    private static final ColorMode $VALUES[];
+
+    static 
+    {
+        Default = new ColorMode("Default", 0);
+        Add = new ColorMode("Add", 1);
+        Subtractive = new ColorMode("Subtractive", 2);
+        Multiplication = new ColorMode("Multiplication", 3);
+        Light = new ColorMode("Light", 4);
+        Darken = new ColorMode("Darken", 5);
+        Burn = new ColorMode("Burn", 6);
+        Dodge = new ColorMode("Dodge", 7);
+        Softlight = new ColorMode("Softlight", 8);
+        Hardlight = new ColorMode("Hardlight", 9);
+        Screen = new ColorMode("Screen", 10);
+        Overlay = new ColorMode("Overlay", 11);
+        Del = new ColorMode("Del", 12);
+        AlphaDawn = new ColorMode("AlphaDawn", 13);
+        AlphaPlus = new ColorMode("AlphaPlus", 14);
+        NONGROUPEFFECT = new ColorMode("NONGROUPEFFECT", 15);
+        REPLACEMENT = new ColorMode("REPLACEMENT", 16);
+        $VALUES = (new ColorMode[] {
+            Default, Add, Subtractive, Multiplication, Light, Darken, Burn, Dodge, Softlight, Hardlight, 
+            Screen, Overlay, Del, AlphaDawn, AlphaPlus, NONGROUPEFFECT, REPLACEMENT
+        });
+    }
+}

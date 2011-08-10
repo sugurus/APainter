@@ -17,20 +17,16 @@ public class DrawEvent extends CanvasEvent{
 	private PixelDataBuffer mapdata;
 	private RenderingOption option;
 	private Renderer renderer;
-	private Device[] device;
 
 	public DrawEvent(int id, Drawer source,
 			InnerLayerHandler target,Rectangle bounds,
-			Renderer renderer,Device[] device,
-			PixelDataBuffer mapdata,RenderingOption option) {
+			Renderer renderer,PixelDataBuffer mapdata,RenderingOption option) {
 		super(id, source,target.getCanvas());
 		if(mapdata==null)throw new NullPointerException("mapdata");
 		if(bounds==null)throw new NullPointerException("bounds");
 		if(option==null)throw new NullPointerException("option");
 		if(renderer == null)throw new NullPointerException("rendere");
-		if(device==null)throw new NullPointerException("device");
 		this.renderer = renderer;
-		this.device = device;
 		this.target = target;
 		this.rect = bounds;
 		this.mapdata = mapdata;
@@ -41,14 +37,9 @@ public class DrawEvent extends CanvasEvent{
 		if(!rect.contains(r)){
 			throw new RuntimeException("r isn't subset");
 		}
-		return new DrawEvent(id, getSource(), target, r, renderer, device, mapdata, option);
+		return new DrawEvent(id, getSource(), target, r, renderer,  mapdata, option);
 	}
 
-	public boolean canUseDevice(Device d){
-		for(Device dd:device)
-			if(dd.equals(d))return true;
-		return false;
-	}
 
 	public Renderer getRenderer(){
 		return renderer;

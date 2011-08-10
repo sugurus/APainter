@@ -11,9 +11,11 @@ public class CUI implements Runnable{
 
 	private Thread thread;
 	private CommandCenter command;
+	private GlobalValue global;
 
 
 	public CUI(GlobalValue g){
+		global =g;
 		command = g.get(GlobalKey.CommandCenter, CommandCenter.class);
 	}
 
@@ -34,13 +36,13 @@ public class CUI implements Runnable{
 		Scanner scan = new Scanner(System.in);
 
 		while(true){
-			System.out.print("command>");
+			global.commandPrint("command>");
 			String s = scan.nextLine();
 			if(!"".equals(s)){
 				try {
 					command.exec(s);
 				} catch (NotFoundCommandException e) {
-					System.out.println(e.getMessage()+" not found!");
+					global.commandPrint(e.getMessage()+" not found!\n");
 				}
 			}
 			if(Thread.interrupted())break;

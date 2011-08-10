@@ -24,7 +24,7 @@ public class Eraser extends BasicDrawer{
 	}
 
 	@Override
-	protected Renderer getRenderer() {
+	protected Renderer getRenderer(Device d) {
 		return cpu8bit;
 	}
 

@@ -20,7 +20,7 @@ public class LayerList extends Hierarchy<InnerLayerHandler>{
 	private boolean selectedMask=false;
 
 
-	@BindProperty(SelectedLayerChangeProperty)
+	@BindProperty(SelectedLayerPropertyChange)
 	public void setSelectLayer(InnerLayerHandler l){
 		if(l==null)return;
 		if(selectedLayer !=l){
@@ -32,12 +32,16 @@ public class LayerList extends Hierarchy<InnerLayerHandler>{
 			}else{
 				setCurrentUnit(l.getElement().getUnit());
 			}
-			firePropertyChange(SelectedLayerChangeProperty, old, l);
+			firePropertyChange(SelectedLayerPropertyChange, old, l);
 		}
 	}
 
 	public ArrayList<InnerLayerHandler> getAllLayerHandler(){
 		return new ArrayList<InnerLayerHandler>(alllayer.values());
+	}
+
+	public InnerLayerHandler getLayer(int id){
+		return alllayer.get(id);
 	}
 
 	public void setSelectLayer(int id){
@@ -117,12 +121,12 @@ public class LayerList extends Hierarchy<InnerLayerHandler>{
 	}
 
 
-	@BindProperty(SelectedMaskChangeProperty)
+	@BindProperty(SelectedMaskPropertyChange)
 	public void setSelectedMask(boolean b){
 		if(b!=selectedMask){
 			if( ( b && selectedLayer.isEnableMask()) || !b){
 				selectedMask = b;
-				firePropertyChange(SelectedMaskChangeProperty, !b, b);
+				firePropertyChange(SelectedMaskPropertyChange, !b, b);
 			}
 		}
 	}

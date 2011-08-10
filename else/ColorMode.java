@@ -1,7 +1,7 @@
 public enum ColorMode {
 	Default,Add,
 	Subtractive ,Multiplication ,
-	Bright ,Darken,Burn,
+	Light ,Darken,Burn,
 	Dodge,Softlight,
 	Hardlight,Screen,
 	Overlay,
@@ -25,8 +25,8 @@ public enum ColorMode {
 		case "multiplication":
 			m = Multiplication;
 			break;
-		case "bright":
-			m=Bright;
+		case "light":
+			m=Light;
 			break;
 		case "darken":
 			m=Darken;
@@ -48,6 +48,9 @@ public enum ColorMode {
 			break;
 		case "overlay":
 			m=Overlay;
+			break;
+		case "nongroupeffect":
+			m=NONGROUPEFFECT;
 			break;
 		}
 		return m;

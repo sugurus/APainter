@@ -57,10 +57,10 @@ public abstract class InnerLayerHandler implements LayerHandle,PixelSetable{
 		return thiselement!=null;
 	}
 
-	private static final String p ="%s[ID:%d,Name:%s,RenderingMode:%s,hasMask:%s]";
+	private static final String p ="%s[ID:%d,Name:%s,ColorMode:%s,hasMask:%s]";
 	@Override
 	public String toString() {
-		return String.format(p, getLayerTypeName(),getID(),getName());
+		return String.format(p, getLayerTypeName(),getID(),getName(),getRenderingMode(),isEnableMask()?"T":"F");
 	}
 
 	private LH2 lh = new LH2(this);

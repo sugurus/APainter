@@ -41,12 +41,12 @@ abstract public class Drawer {
 		}
 	}
 
-	protected DrawEvent start(PenTabletMouseEvent e,InnerLayerHandler target){
+	protected DrawEvent start(PenTabletMouseEvent e,InnerLayerHandler target,Device d){
 		before = e;
-		return createOneEvent(e, target);
+		return createOneEvent(e, target,d);
 	}
 
-	private DrawEvent createOneEvent(PenTabletMouseEvent e,InnerLayerHandler target){
+	private DrawEvent createOneEvent(PenTabletMouseEvent e,InnerLayerHandler target,Device d){
 		Point2D.Double xy=e.getPointDouble();
 		double pressure =e.getPressure();
 		DimensionDouble pensize = pen.getSize();
@@ -59,24 +59,24 @@ abstract public class Drawer {
 		setOption(option,e);
 		DrawEvent de =
 			new DrawEvent(EventConstant.ID_PaintStart, this, target, bounds,
-					getRenderer(), getUsableDevices(), map, option);
+					getRenderer(d), map, option);
 		length = pen.getIntervalLength(pensize.width, pensize.height);
 		return de;
 	}
 
-	abstract protected Renderer getRenderer();
+	abstract protected Renderer getRenderer(Device d);
 	abstract protected Device[] getUsableDevices();
 
-	protected DrawEvent[] end(PenTabletMouseEvent e,InnerLayerHandler target){
+	protected DrawEvent[] end(PenTabletMouseEvent e,InnerLayerHandler target,Device d){
 		PenTabletMouseEvent bef = before;
 		Point2D.Double befp = bef.getPointDouble(),p = e.getPointDouble();
 		double bx=befp.x,by = befp.y;
 		double dl = Math.hypot(bx-p.x, by-p.y),l=length;
 		if(dl < l){
-			return new DrawEvent[]{createOneEvent(bef, target)};
+			return new DrawEvent[]{createOneEvent(bef, target,d)};
 		}
 
-		DrawEvent[] ret = paint(bef, target);
+		DrawEvent[] ret = paint(bef, target,d);
 
 		length = 0;
 		before = null;
@@ -84,7 +84,7 @@ abstract public class Drawer {
 		return ret;
 	}
 
-	protected DrawEvent[] paint(PenTabletMouseEvent e,InnerLayerHandler target){
+	protected DrawEvent[] paint(PenTabletMouseEvent e,InnerLayerHandler target,Device dv){
 		PenTabletMouseEvent bef = before;
 		Point2D.Double befp = bef.getPointDouble(),p = e.getPointDouble();
 		double bx=befp.x,by = befp.y;
@@ -96,7 +96,7 @@ abstract public class Drawer {
 		double Ppressure = e.getPressure();
 		DimensionDouble pensize = pen.getSize();
 		double cos = (p.x-befp.x)/dl,sin =(p.y-befp.y)/dl;
-		Renderer renderer = getRenderer();
+		Renderer renderer = getRenderer(dv);
 
 		ArrayList<DrawEvent> es = new ArrayList<DrawEvent>();
 		Device[] device = getUsableDevices();
@@ -113,7 +113,7 @@ abstract public class Drawer {
 			setOption(option,e);
 			DrawEvent de =
 				new DrawEvent(EventConstant.ID_Paint, this, target,
-						bounds, renderer, device, map, option);
+						bounds, renderer,  map, option);
 			es.add(de);
 			double d = pen.getIntervalLength(pensize2.width, pensize2.height);
 			l += d;

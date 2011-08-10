@@ -3,13 +3,13 @@ package apainter.misc;
 import apainter.color.Color;
 
 public final class Utility_PixelFunction {
-	public static final int div255shift23 = 32897;//((1<<23)+254)/255
-	public static final int div255shift24 = 65794;//((1<<24)+254)/255
+	public static final int div255shift23 = 3289;//((1<<23))/255
+	public static final int div255shift24 = 65794;//((1<<24))/255
 	public static final int ClearColor = Color.ClearColor;
 	public static final int NullColor = Color.NotColor;
 
 	public static final int calca(int a,int oa){
-		return (((a+oa)*255-a*oa)*div255shift24>>>24);
+		return a+oa-((a*oa)*div255shift24>>>24);
 	}
 
 	public static final int layeralph(int a,int layer){

@@ -172,7 +172,7 @@ class PenCPUDefaultRendering extends PenCPURendering{
 	}
 }
 
-class PenCPUPlusRendering extends PenCPURendering{
+class PenCPUAddRendering extends PenCPURendering{
 	@Override
 	final protected void renderint(PixelDataIntBuffer base,PixelDataIntBuffer over,Point p,Rectangle clip,RenderingOption option){
 		int[] basep = base.getData();
@@ -200,7 +200,7 @@ class PenCPUPlusRendering extends PenCPURendering{
 
 
 				if(a !=0){
-					set(basep,plusOp(a, r, g, b, oa, or, og, ob),x,y,basew);
+					set(basep,addOp(a, r, g, b, oa, or, og, ob),x,y,basew);
 					continue;
 				}else{
 					set(basep,oa,color,x,y,basew);
@@ -242,7 +242,7 @@ class PenCPUPlusRendering extends PenCPURendering{
 
 
 				if(a !=0){
-					int argb = plusOp(a, r, g, b, oa, or, og, ob);
+					int argb = addOp(a, r, g, b, oa, or, og, ob);
 					set(basep,argb(
 							(a(argb)*dmaskv+a*rdmaskv)*div255shift24>>>24,
 							(r(argb)*dmaskv+r*rdmaskv)*div255shift24>>>24,
@@ -281,7 +281,7 @@ class PenCPUPlusRendering extends PenCPURendering{
 				int c = pixel(basep,x,y,basew);
 				int a = a(c);
 				if(a !=0){
-					set(basep,plusOp(a, r(c), g(c), b(c), layeralph(pixel(overp,x-px,y-py,overw),overalph), or, og, ob)&0xffffff | a<<24,x,y,basew);
+					set(basep,addOp(a, r(c), g(c), b(c), layeralph(pixel(overp,x-px,y-py,overw),overalph), or, og, ob)&0xffffff | a<<24,x,y,basew);
 					continue;
 				}
 			}
@@ -319,7 +319,7 @@ class PenCPUPlusRendering extends PenCPURendering{
 				int oa = layeralph(a(oc),overalph);
 
 				if(a !=0){
-					int argb = plusOp(a, r, g, b, oa, or, og, ob);
+					int argb = addOp(a, r, g, b, oa, or, og, ob);
 
 					set(basep,
 							argb(a,
@@ -496,7 +496,7 @@ class PenCPUSubtractiveRendering extends PenCPURendering{
 	}
 }
 
-class PenCPUMultipleRendering extends PenCPURendering{
+class PenCPUMultiplicationRendering extends PenCPURendering{
 	@Override
 	final protected void renderint(PixelDataIntBuffer base,PixelDataIntBuffer over,Point p,Rectangle clip,RenderingOption option){
 		int[] basep = base.getData();
@@ -524,7 +524,7 @@ class PenCPUMultipleRendering extends PenCPURendering{
 
 
 				if(a !=0){
-					set(basep,multipleOp(a, r, g, b, oa, or, og, ob),x,y,basew);
+					set(basep,multiplicationOp(a, r, g, b, oa, or, og, ob),x,y,basew);
 					continue;
 				}else{
 					set(basep,oa,color,x,y,basew);
@@ -566,7 +566,7 @@ class PenCPUMultipleRendering extends PenCPURendering{
 
 
 				if(a !=0){
-					int argb = multipleOp(a, r, g, b, oa, or, og, ob);
+					int argb = multiplicationOp(a, r, g, b, oa, or, og, ob);
 					set(basep,argb(
 							(a(argb)*dmaskv+a*rdmaskv)*div255shift24>>>24,
 							(r(argb)*dmaskv+r*rdmaskv)*div255shift24>>>24,
@@ -605,7 +605,7 @@ class PenCPUMultipleRendering extends PenCPURendering{
 				int c = pixel(basep,x,y,basew);
 				int a = a(c);
 				if(a !=0){
-					set(basep,multipleOp(a, r(c), g(c), b(c), layeralph(pixel(overp,x-px,y-py,overw),overalph), or, og, ob)&0xffffff | a<<24,x,y,basew);
+					set(basep,multiplicationOp(a, r(c), g(c), b(c), layeralph(pixel(overp,x-px,y-py,overw),overalph), or, og, ob)&0xffffff | a<<24,x,y,basew);
 					continue;
 				}
 			}
@@ -643,7 +643,7 @@ class PenCPUMultipleRendering extends PenCPURendering{
 				int oa = layeralph(a(oc),overalph);
 
 				if(a !=0){
-					int argb = multipleOp(a, r, g, b, oa, or, og, ob);
+					int argb = multiplicationOp(a, r, g, b, oa, or, og, ob);
 
 					set(basep,
 							argb(a,

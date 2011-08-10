@@ -5,7 +5,7 @@ public enum GlobalKey{
 	FrontColor(false),BackColor(false),
 	CanvasList(false),CurrentCanvas,
 	CanvasActionList(false),CanvasHeadAction,CanvasTailAction,
-	PenFactoryCenter(false),
+	PenFactoryCenter(false),OnDevice(false),
 
 	CommandCenter(false),
 	CommandPrintStream,

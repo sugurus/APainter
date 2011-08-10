@@ -231,6 +231,10 @@ abstract public class LayerData implements DrawAccepter{
 		}
 	}
 
+	public InnerLayerHandler getLayer(int id) {
+		return layerlist.getLayer(id);
+	}
+
 
 
 }

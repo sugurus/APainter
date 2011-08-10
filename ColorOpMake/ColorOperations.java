@@ -16,7 +16,7 @@ public final class ColorOperations {
 		return over;
 	}
 	
-	public static final int plusOp(int under,int over){
+	public static final int addOp(int under,int over){
 		return under+over>255?255:under+over;
 	}
 	
@@ -24,7 +24,7 @@ public final class ColorOperations {
 		return under-over>=0?under-over:0;
 	}
 
-	public static final int multipleOp(int under,int over){
+	public static final int multiplicationOp(int under,int over){
 		return under*over*div255shift24>>>24;
 	}
 
@@ -33,26 +33,11 @@ public final class ColorOperations {
 		return ((under+over)*255-under*over)*div255shift24>>>24;
 	}
 
-	//TODO どっちの方が速いのか
-//	public static final byte[] overlayTable = new byte[256*256];
-//	static{
-//		for(int under=0;under<256;under++){
-//			for(int over=0;over<128;over++){
-//				overlayTable[under*256+over] = (byte) (under*over*2/255);
-//			}
-//			for(int over=128;over<256;over++){
-//				overlayTable[under*256+over] = (byte) ((2*(under+over-under*over)  -255*255)/255);
-//			}
-//		}
-//	}
-//	public static final int overlayOp(int under,int over){
-//		return overlayTable[under*256+over]&0xff;
-//	}
 
 	public static final int overlayOp(int under,int over){
 		return under<128?
 				under*over*2*div255shift24>>>24:
-				((under+over-under*over  <<1) -255*255)*div255shift24>>>24;
+				((under*255+over*255-under*over  <<1) -255*255)*div255shift24>>>24;
 	}
 
 	public static final byte[] softlightTable = new byte[256*256];//ちょっとメモリをけちるためにbyte

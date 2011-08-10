@@ -244,6 +244,10 @@ public class Canvas {
 		return layerdata.createLayer(name);
 	}
 
+	public InnerLayerHandler getLayer(int id){
+		return layerdata.getLayer(id);
+	}
+
 	public String getLayerLine(){
 		return layerdata.getLayerLine();
 	}

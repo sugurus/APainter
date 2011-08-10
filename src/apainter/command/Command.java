@@ -1,8 +1,11 @@
 package apainter.command;
 
+import static apainter.GlobalKey.*;
 import apainter.APainter;
 import apainter.GlobalKey;
 import apainter.GlobalValue;
+import apainter.canvas.Canvas;
+import apainter.canvas.layerdata.InnerLayerHandler;
 
 /**
  * APainterに対して操作を実行するオブジェクトです。<br>
@@ -23,6 +26,15 @@ public abstract class Command{
 	 */
 	final public APainter getTargetAPainter(){
 		return targetAPainter;
+	}
+
+	public static Canvas getCurrentCanvas(GlobalValue g){
+		return g.get(CurrentCanvas,Canvas.class);
+	}
+
+	public static InnerLayerHandler getSelectedLayer(GlobalValue g){
+		Canvas c =getCurrentCanvas(g);
+		return c!=null?c.getSelectedLayer():null;
 	}
 
 	/**

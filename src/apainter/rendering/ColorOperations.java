@@ -8,6 +8,7 @@ import static java.lang.Math.*;
  * 編集するときはColorOpMakeディレクトリのColorOperations.javaを編集し、ColorOpMaker.classを実行してください。
  * @author nodamushi
  * @see http://ofo.jp/osakana/cgtips/blendmode.phtml
+ * @see http://www.bea.hi-ho.ne.jp/gaku-iwa/color/conjn.html
  */
 public final class ColorOperations {
 
@@ -16,7 +17,7 @@ public final class ColorOperations {
 		return over;
 	}
 
-	public static final int plusOp(int under,int over){
+	public static final int addOp(int under,int over){
 		return under+over>255?255:under+over;
 	}
 
@@ -24,7 +25,7 @@ public final class ColorOperations {
 		return under-over>=0?under-over:0;
 	}
 
-	public static final int multipleOp(int under,int over){
+	public static final int multiplicationOp(int under,int over){
 		return under*over*div255shift24>>>24;
 	}
 
@@ -33,34 +34,34 @@ public final class ColorOperations {
 		return ((under+over)*255-under*over)*div255shift24>>>24;
 	}
 
-	//TODO どっちの方が速いのか
-//	public static final byte[] overlayTable = new byte[256*256];
-//	static{
-//		for(int under=0;under<256;under++){
-//			for(int over=0;over<128;over++){
-//				overlayTable[under*256+over] = (byte) (under*over*2/255);
-//			}
-//			for(int over=128;over<256;over++){
-//				overlayTable[under*256+over] = (byte) ((2*(under+over-under*over)  -255*255)/255);
-//			}
-//		}
-//	}
-//	public static final int overlayOp(int under,int over){
-//		return overlayTable[under*256+over]&0xff;
-//	}
 
 	public static final int overlayOp(int under,int over){
 		return under<128?
 				under*over*2*div255shift24>>>24:
-				((under+over-under*over  <<1) -255*255)*div255shift24>>>24;
+				((under*255+over*255-under*over  <<1) -255*255)*div255shift24>>>24;
 	}
 
 	public static final byte[] softlightTable = new byte[256*256];//ちょっとメモリをけちるためにbyte
 	static{
+		double k =32d/255;
 		for(int under=0;under<256;under++){
+			double u = under/255d;
+			for(int over=0;over<128;over++){
+				double o = over/255d;
+				double dst = u+(u-u*u)*(2*o-1);
+				dst *=255;
+				softlightTable[under*256+over]=(byte) (int)dst;
+			}
 			for(int over=128;over<256;over++){
-				softlightTable[under*256+255-over]=
-				softlightTable[under*256+over]=(byte) (int)(pow(under/255d, over/128d)*255);
+				double o = over/255d;
+				double dst;
+				if(u<=k){
+					dst = u+(u-u*u)*(2*o-1)*(3-8*u);
+				}else{
+					dst = u+(sqrt(u)-u)*(2*o-1);
+				}
+				dst *=255;
+				softlightTable[under*256+over]=(byte) (int)dst;
 			}
 		}
 	}
@@ -137,10 +138,10 @@ public final class ColorOperations {
 		return a<<24 |
 		(uoalpha*defaultOp(ur,or)+u_oalpha*ur+_uoalpha*or)*div>>>24 << 16 |
 		(uoalpha*defaultOp(ug,og)+u_oalpha*ug+_uoalpha*og)*div>>>24 <<8 |
-		(uoalpha*defaultOp(ur,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
+		(uoalpha*defaultOp(ub,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
 	}
 
-	public static final int plusOp(int ua,int ur,int ug,int ub,
+	public static final int addOp(int ua,int ur,int ug,int ub,
 			int oa,int or,int og,int ob){
 		int a = calca(ua, oa);
 		int div = ((1<<24)+a*255-1)/(a*255);
@@ -148,9 +149,9 @@ public final class ColorOperations {
 		int u_oalpha = ua*(255-oa);
 		int _uoalpha = (255-ua)*oa;
 		return a<<24 |
-		(uoalpha*plusOp(ur,or)+u_oalpha*ur+_uoalpha*or)*div>>>24 << 16 |
-		(uoalpha*plusOp(ug,og)+u_oalpha*ug+_uoalpha*og)*div>>>24 <<8 |
-		(uoalpha*plusOp(ur,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
+		(uoalpha*addOp(ur,or)+u_oalpha*ur+_uoalpha*or)*div>>>24 << 16 |
+		(uoalpha*addOp(ug,og)+u_oalpha*ug+_uoalpha*og)*div>>>24 <<8 |
+		(uoalpha*addOp(ub,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
 	}
 
 	public static final int subtractiveOp(int ua,int ur,int ug,int ub,
@@ -163,10 +164,10 @@ public final class ColorOperations {
 		return a<<24 |
 		(uoalpha*subtractiveOp(ur,or)+u_oalpha*ur+_uoalpha*or)*div>>>24 << 16 |
 		(uoalpha*subtractiveOp(ug,og)+u_oalpha*ug+_uoalpha*og)*div>>>24 <<8 |
-		(uoalpha*subtractiveOp(ur,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
+		(uoalpha*subtractiveOp(ub,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
 	}
 
-	public static final int multipleOp(int ua,int ur,int ug,int ub,
+	public static final int multiplicationOp(int ua,int ur,int ug,int ub,
 			int oa,int or,int og,int ob){
 		int a = calca(ua, oa);
 		int div = ((1<<24)+a*255-1)/(a*255);
@@ -174,9 +175,9 @@ public final class ColorOperations {
 		int u_oalpha = ua*(255-oa);
 		int _uoalpha = (255-ua)*oa;
 		return a<<24 |
-		(uoalpha*multipleOp(ur,or)+u_oalpha*ur+_uoalpha*or)*div>>>24 << 16 |
-		(uoalpha*multipleOp(ug,og)+u_oalpha*ug+_uoalpha*og)*div>>>24 <<8 |
-		(uoalpha*multipleOp(ur,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
+		(uoalpha*multiplicationOp(ur,or)+u_oalpha*ur+_uoalpha*or)*div>>>24 << 16 |
+		(uoalpha*multiplicationOp(ug,og)+u_oalpha*ug+_uoalpha*og)*div>>>24 <<8 |
+		(uoalpha*multiplicationOp(ub,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
 	}
 
 	public static final int screenOp(int ua,int ur,int ug,int ub,
@@ -189,7 +190,7 @@ public final class ColorOperations {
 		return a<<24 |
 		(uoalpha*screenOp(ur,or)+u_oalpha*ur+_uoalpha*or)*div>>>24 << 16 |
 		(uoalpha*screenOp(ug,og)+u_oalpha*ug+_uoalpha*og)*div>>>24 <<8 |
-		(uoalpha*screenOp(ur,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
+		(uoalpha*screenOp(ub,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
 	}
 
 	public static final int overlayOp(int ua,int ur,int ug,int ub,
@@ -202,7 +203,7 @@ public final class ColorOperations {
 		return a<<24 |
 		(uoalpha*overlayOp(ur,or)+u_oalpha*ur+_uoalpha*or)*div>>>24 << 16 |
 		(uoalpha*overlayOp(ug,og)+u_oalpha*ug+_uoalpha*og)*div>>>24 <<8 |
-		(uoalpha*overlayOp(ur,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
+		(uoalpha*overlayOp(ub,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
 	}
 
 	public static final int softlightOp(int ua,int ur,int ug,int ub,
@@ -215,7 +216,7 @@ public final class ColorOperations {
 		return a<<24 |
 		(uoalpha*softlightOp(ur,or)+u_oalpha*ur+_uoalpha*or)*div>>>24 << 16 |
 		(uoalpha*softlightOp(ug,og)+u_oalpha*ug+_uoalpha*og)*div>>>24 <<8 |
-		(uoalpha*softlightOp(ur,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
+		(uoalpha*softlightOp(ub,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
 	}
 
 	public static final int hardlightOp(int ua,int ur,int ug,int ub,
@@ -228,7 +229,7 @@ public final class ColorOperations {
 		return a<<24 |
 		(uoalpha*hardlightOp(ur,or)+u_oalpha*ur+_uoalpha*or)*div>>>24 << 16 |
 		(uoalpha*hardlightOp(ug,og)+u_oalpha*ug+_uoalpha*og)*div>>>24 <<8 |
-		(uoalpha*hardlightOp(ur,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
+		(uoalpha*hardlightOp(ub,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
 	}
 
 	public static final int dodgeOp(int ua,int ur,int ug,int ub,
@@ -241,7 +242,7 @@ public final class ColorOperations {
 		return a<<24 |
 		(uoalpha*dodgeOp(ur,or)+u_oalpha*ur+_uoalpha*or)*div>>>24 << 16 |
 		(uoalpha*dodgeOp(ug,og)+u_oalpha*ug+_uoalpha*og)*div>>>24 <<8 |
-		(uoalpha*dodgeOp(ur,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
+		(uoalpha*dodgeOp(ub,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
 	}
 
 	public static final int burnOp(int ua,int ur,int ug,int ub,
@@ -254,7 +255,7 @@ public final class ColorOperations {
 		return a<<24 |
 		(uoalpha*burnOp(ur,or)+u_oalpha*ur+_uoalpha*or)*div>>>24 << 16 |
 		(uoalpha*burnOp(ug,og)+u_oalpha*ug+_uoalpha*og)*div>>>24 <<8 |
-		(uoalpha*burnOp(ur,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
+		(uoalpha*burnOp(ub,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
 	}
 
 	public static final int darkenOp(int ua,int ur,int ug,int ub,
@@ -267,7 +268,7 @@ public final class ColorOperations {
 		return a<<24 |
 		(uoalpha*darkenOp(ur,or)+u_oalpha*ur+_uoalpha*or)*div>>>24 << 16 |
 		(uoalpha*darkenOp(ug,og)+u_oalpha*ug+_uoalpha*og)*div>>>24 <<8 |
-		(uoalpha*darkenOp(ur,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
+		(uoalpha*darkenOp(ub,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
 	}
 
 	public static final int lightOp(int ua,int ur,int ug,int ub,
@@ -280,7 +281,7 @@ public final class ColorOperations {
 		return a<<24 |
 		(uoalpha*lightOp(ur,or)+u_oalpha*ur+_uoalpha*or)*div>>>24 << 16 |
 		(uoalpha*lightOp(ug,og)+u_oalpha*ug+_uoalpha*og)*div>>>24 <<8 |
-		(uoalpha*lightOp(ur,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
+		(uoalpha*lightOp(ub,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
 	}
 
 	public static final int differenceOp(int ua,int ur,int ug,int ub,
@@ -293,7 +294,7 @@ public final class ColorOperations {
 		return a<<24 |
 		(uoalpha*differenceOp(ur,or)+u_oalpha*ur+_uoalpha*or)*div>>>24 << 16 |
 		(uoalpha*differenceOp(ug,og)+u_oalpha*ug+_uoalpha*og)*div>>>24 <<8 |
-		(uoalpha*differenceOp(ur,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
+		(uoalpha*differenceOp(ub,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
 	}
 
 	public static final int exclusionOp(int ua,int ur,int ug,int ub,
@@ -306,7 +307,7 @@ public final class ColorOperations {
 		return a<<24 |
 		(uoalpha*exclusionOp(ur,or)+u_oalpha*ur+_uoalpha*or)*div>>>24 << 16 |
 		(uoalpha*exclusionOp(ug,og)+u_oalpha*ug+_uoalpha*og)*div>>>24 <<8 |
-		(uoalpha*exclusionOp(ur,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
+		(uoalpha*exclusionOp(ub,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
 	}
 
 
