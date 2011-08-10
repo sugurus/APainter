@@ -7,7 +7,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.LayoutManager;
 import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
@@ -20,7 +19,6 @@ import java.awt.geom.NoninvertibleTransformException;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import apainter.GlobalKey;
 import apainter.GlobalValue;
 import apainter.canvas.Canvas;
 import apainter.construct.Angle;
@@ -63,6 +61,7 @@ public final class CanvasView extends JPanel{
 	private CanvasViewRendering canvasRendering;
 	private JComponent background=new JPanel();//背景
 	private JComponent overlayer=new JPanel();//画像を表示するパネルの上のパネル。
+	@SuppressWarnings("unused")
 	private GlobalValue global;
 	private Canvas canvas;
 
@@ -205,7 +204,7 @@ public final class CanvasView extends JPanel{
 	}
 
 	public void renderingFlug(Rectangle r){
-		canvasRendering.renderingFlag(r);
+		canvasRendering.rendering(r);
 	}
 
 	public double getZoom() {

@@ -18,6 +18,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.VolatileImage;
 
 import javax.swing.JComponent;
+import javax.swing.SwingUtilities;
 
 import apainter.construct.Angle;
 import apainter.misc.Util;
@@ -35,29 +36,12 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 		renderingImage = img;
 
 		addComponentListener(new ComponentListener() {
-
-			@Override
-			public void componentShown(ComponentEvent e) {
-				// TODO 自動生成されたメソッド・スタブ
-
-			}
-
-			@Override
 			public void componentResized(ComponentEvent e) {
 				init();
 			}
-
-			@Override
-			public void componentMoved(ComponentEvent e) {
-				// TODO 自動生成されたメソッド・スタブ
-
-			}
-
-			@Override
-			public void componentHidden(ComponentEvent e) {
-				// TODO 自動生成されたメソッド・スタブ
-
-			}
+			public void componentShown(ComponentEvent e) {}
+			public void componentMoved(ComponentEvent e) {}
+			public void componentHidden(ComponentEvent e) {}
 		});
 	}
 
@@ -70,17 +54,33 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 	 * 全てをレンダリングし直します。
 	 */
 	public void rendering(){
-		renderingZoomImage(null);
-		repaint();
+		if(!SwingUtilities.isEventDispatchThread()){
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					rendering();
+				}
+			});
+		}else{
+			renderingZoomImage(null);
+			repaint();
+		}
 	}
 
 	/**
 	 * 指定された範囲レンダリングします。
 	 * @param r
 	 */
-	public void rendering(Rectangle r){
-		renderingZoomImage(r);
-		repaint();
+	public void rendering(final Rectangle r){
+		if(!SwingUtilities.isEventDispatchThread()){
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					rendering(r);
+				}
+			});
+		}else{
+			renderingZoomImage(r);
+			repaint();
+		}
 	}
 
 
@@ -88,22 +88,17 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 	 * 回転画像だけ際レンダリングします
 	 */
 	public void rotation(){
-		renderingRotImage();
+		if(!SwingUtilities.isEventDispatchThread()){
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					rotation();
+				}
+			});
+		}else{
+			renderingRotImage();
+		}
 	}
 
-	private volatile boolean renderingflag = true;
-	private Rectangle re;
-	private Object reloc=new Object();
-	@Override
-	public void renderingFlag(Rectangle r) {
-		synchronized (reloc) {
-			if(re!=null){
-				re = re.union(r);
-			}else re = r;
-		}
-		renderingflag = true;
-		repaint();
-	}
 
 	@Override
 	protected void paintComponent(Graphics g) {
@@ -111,18 +106,8 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 			initVolatile();
 			if(!initedVolatile)return;
 		}
-		if(renderingflag){
-			Rectangle r;
-			synchronized (reloc) {
-				r = re;
-				re =null;
-				renderingflag=false;
-			}
-			renderingZoomImage(r);
-		}else{
-			if(checkVImage(zoomImage)!=0)renderingZoomImage(null);
-			else if(checkVImage(rotImage)!=0)renderingRotImage();
-		}
+		if(checkVImage(zoomImage)!=0)renderingZoomImage(null);
+		else if(checkVImage(rotImage)!=0)renderingRotImage();
 		g.drawImage(rotImage,0,0,null);
 	}
 

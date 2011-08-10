@@ -1,8 +1,6 @@
 package apainter.canvas.cedt.cpu;
 
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -15,14 +13,6 @@ public class RepaintThread{
 	private Timer timer = new Timer();
 	private TimerTask t;
 
-	private static ActionListener lis = new ActionListener() {
-		public void actionPerformed(ActionEvent e) {
-			RepaintThread t = (RepaintThread) e.getSource();
-			if(t.haveJob()){
-				t.exec();
-			}
-		}
-	};
 
 	private ArrayList<Rectangle> bounds
 		= new ArrayList<Rectangle>(30);

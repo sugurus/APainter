@@ -14,11 +14,5 @@ public interface CanvasViewRendering {
 	 */
 	public void rendering(Rectangle r);
 
-	/**
-	 * 指定された範囲レンダリングするフラグを立てます。<br>
-	 * さらにここでここで処理をするか否かはデバイスによります。
-	 * @param r
-	 */
-	public void renderingFlag(Rectangle r);
 
 }

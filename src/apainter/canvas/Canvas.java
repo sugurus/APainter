@@ -4,20 +4,13 @@ import static apainter.misc.Util.*;
 
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Point2D.Double;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.swing.JComponent;
 import javax.swing.event.EventListenerList;
 
-import org.w3c.dom.CDATASection;
-
 import nodamushi.pentablet.PenTabletMouseEvent;
-
 import apainter.APainter;
 import apainter.Device;
 import apainter.GlobalKey;
@@ -27,8 +20,8 @@ import apainter.canvas.cedt.CanvasEventAccepter;
 import apainter.canvas.cedt.cpu.CPUCEA_0;
 import apainter.canvas.event.CanvasEvent;
 import apainter.canvas.layerdata.CPULayerData;
-import apainter.canvas.layerdata.LayerData;
 import apainter.canvas.layerdata.InnerLayerHandler;
+import apainter.canvas.layerdata.LayerData;
 import apainter.drawer.DrawEvent;
 import apainter.gui.canvas.CPUCanvasPanel;
 import apainter.gui.canvas.CanvasMouseListener;

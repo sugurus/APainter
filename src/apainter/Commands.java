@@ -17,6 +17,8 @@ import apainter.command.CommandCenter;
 import apainter.command.CommandDecoder;
 import apainter.gui.canvas.CanvasView;
 
+
+
 class FrontColor implements CommandDecoder {
 	private static final String name = "frontcolor";
 	private static final String help = "frontcolor [r,[g,b]]:::set front color.if only r defined,g and b values equal r value.if no option,show front color.";

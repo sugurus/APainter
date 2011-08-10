@@ -9,7 +9,6 @@ import java.awt.image.ColorModel;
 import java.awt.image.DirectColorModel;
 import java.awt.image.MemoryImageSource;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import javax.swing.JComponent;
 

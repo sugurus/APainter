@@ -47,7 +47,7 @@ run:$(CLASSDIR)/$(APainter).class
 jar:$(JAR)
 
 build:$(SOURCEDIR)/$(APainter).java
-	mkdir -p $(CLASSDIR)
+	mkdir $(CLASSDIR)
 	$(JAVAC) $(CP) $(ENCODING) -d $(CLASSDIR) -sourcepath $(SOURCEDIR) $<
 
 clean:

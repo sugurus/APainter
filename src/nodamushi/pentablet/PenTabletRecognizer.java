@@ -313,19 +313,13 @@ final class JPenRecognizer implements PenListener,Listener{
 	private final Component c;
 	private final PenManager pm;
 	private boolean set;
-	private boolean headpress=false;
-	private boolean tailpress=false;
-	private boolean onpressure=false;
 	private boolean release = true;
-	private boolean sidego=false;
-	private int sidei=0;
-	private boolean side1press=false;
-	private boolean side2press=false;
 	private final LinkedList<ButtonType> mousetype=new LinkedList<ButtonType>();
 	private long waittime=0;
 	private long time;
 	private boolean ansync = true;
 	private MouseAdapter enter_exitListener = new MouseAdapter() {
+
 		@Override
 		public void mouseEntered(MouseEvent e) {
 			PenTabletMouseEvent ae = PenTabletMouseEvent.wrapEvent(e);
@@ -430,13 +424,11 @@ final class JPenRecognizer implements PenListener,Listener{
 		State state = State.NULL;
 		switch(k.getType()){
 		case ERASER:
-			onpressure = pen.getButtonValue(Type.ON_PRESSURE);
-			btype = side1press?ButtonType.SIDE1:side2press?ButtonType.SIDE2:ButtonType.TAIL;
+			btype = ButtonType.TAIL;
 			ctype = CursorDevice.TABLET;
 			break;
 		case STYLUS:
-			onpressure = pen.getButtonValue(Type.ON_PRESSURE);
-			btype =side1press?ButtonType.SIDE1:side2press?ButtonType.SIDE2:ButtonType.HEAD;
+			btype =ButtonType.HEAD;
 			ctype = CursorDevice.TABLET;
 			break;
 		case CUSTOM:
@@ -487,6 +479,7 @@ final class JPenRecognizer implements PenListener,Listener{
 
 
 	public void penKindEvent(PKindEvent e) {
+		System.out.println(e);
 		Pen pen = e.pen;
 		float x,y,r,tx,ty;
 
@@ -553,66 +546,16 @@ final class JPenRecognizer implements PenListener,Listener{
 		case ERASER:
 			if(b){
 				release = false;
-				if(onpressure||tailpress){
-					btype =ButtonType.TAIL;
-					ctype = CursorDevice.TABLET;
-					tailpress = true;
-				}else{
-					if(!sidego){
-						if(sidei < 5){
-							sidei++;
-							release = true;
-							return;
-						}else{
-							sidei = 0;
-							sidego = true;
-						}
-					}
-					if(pen.getButtonValue(Type.LEFT)){
-						btype = ButtonType.SIDE1;
-						side1press=true;
-					}else{
-						btype = ButtonType.SIDE2;
-						side2press = true;
-					}
-					ctype = CursorDevice.TABLET;
-				}
-			}else{
-				btype =ButtonType.TAIL;
-				ctype = CursorDevice.TABLET;
 			}
+			btype =ButtonType.TAIL;
+			ctype = CursorDevice.TABLET;
 			break;
 		case STYLUS:
 			if(b){
 				release = false;
-				if(onpressure || headpress){
-					btype =ButtonType.HEAD;
-					ctype = CursorDevice.TABLET;
-					headpress = true;
-				}else{
-					if(!sidego){
-						if(sidei < 5){
-							sidei++;
-							release = true;
-							return;
-						}else{
-							sidei = 0;
-							sidego = true;
-						}
-					}
-					if(pen.getButtonValue(Type.LEFT)){
-						btype = ButtonType.SIDE1;
-						side1press=true;
-					}else{
-						btype = ButtonType.SIDE2;
-						side2press = true;
-					}
-					ctype = CursorDevice.TABLET;
-				}
-			}else{
-				btype =ButtonType.HEAD;
-				ctype = CursorDevice.TABLET;
 			}
+			btype =ButtonType.HEAD;
+			ctype = CursorDevice.TABLET;
 			break;
 		case CUSTOM:
 			return;
@@ -622,12 +565,8 @@ final class JPenRecognizer implements PenListener,Listener{
 			break;
 		default:
 			ctype = CursorDevice.TABLET;
-			if(pen.getButtonValue(PButton.Type.RIGHT))btype=ButtonType.SIDE1;
-			else if(pen.getButtonValue(PButton.Type.LEFT))btype = ButtonType.SIDE2;
-			else{
-				ctype = CursorDevice.MOUSE;
-				btype = ButtonType.NULL;
-			}
+			ctype = CursorDevice.MOUSE;
+			btype = ButtonType.NULL;
 		}
 
 
@@ -639,6 +578,7 @@ final class JPenRecognizer implements PenListener,Listener{
 
 
 	public void penScrollEvent(PScrollEvent e) {
+		System.out.println(e);
 		int val = e.scroll.value;
 		if(val==0)return;
 		Pen pen = e.pen;
@@ -659,13 +599,6 @@ final class JPenRecognizer implements PenListener,Listener{
 
 	private void memberinit(){
 		release = true;
-		sidego = false;
-		sidei = 0;
-		onpressure = false;
-		headpress = false;
-		tailpress = false;
-		side1press = false;
-		side2press = false;
 		time =0;
 	}
 }

@@ -1,9 +1,6 @@
 package apainter.command;
 
-import static apainter.GlobalKey.*;
-
 import java.util.ArrayList;
-import java.util.Collection;
 
 import apainter.APainter;
 import apainter.GlobalKey;

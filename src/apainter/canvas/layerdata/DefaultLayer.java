@@ -10,7 +10,6 @@ import javax.swing.event.EventListenerList;
 
 import apainter.bind.annotation.BindProperty;
 import apainter.canvas.Canvas;
-import apainter.drawer.DrawAccepter;
 import apainter.rendering.ColorMode;
 abstract class DefaultLayer implements Layer,PixelSetable,MaskContainer{
 
@@ -40,8 +39,8 @@ abstract class DefaultLayer implements Layer,PixelSetable,MaskContainer{
 	public Canvas getCanvas() {
 		return canvas;
 	}
-	
-	
+
+
 
 	@Override
 	final public String getName() {

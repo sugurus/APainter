@@ -1,8 +1,5 @@
 package apainter.pen;
 
-import java.awt.Dimension;
-
-import apainter.Device;
 import apainter.construct.DimensionDouble;
 import apainter.data.PixelDataBuffer;
 

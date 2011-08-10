@@ -1,6 +1,5 @@
 package apainter.canvas.layerdata;
 
-import static apainter.GlobalKey.*;
 import static apainter.misc.Util.*;
 
 import java.awt.Rectangle;
@@ -11,7 +10,6 @@ import java.util.ArrayList;
 import javax.swing.JComponent;
 import javax.swing.event.EventListenerList;
 
-import apainter.GlobalKey;
 import apainter.GlobalValue;
 import apainter.Properties;
 import apainter.canvas.Canvas;

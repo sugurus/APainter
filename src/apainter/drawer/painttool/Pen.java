@@ -1,19 +1,10 @@
 package apainter.drawer.painttool;
 
-import static apainter.misc.Utility_PixelFunction.*;
-
-import java.awt.Point;
-import java.awt.Rectangle;
-
 import nodamushi.pentablet.PenTabletMouseEvent;
 import apainter.Device;
 import apainter.GlobalValue;
-import apainter.data.PixelDataBuffer;
-import apainter.data.PixelDataByteBuffer;
-import apainter.data.PixelDataIntBuffer;
 import apainter.rendering.Renderer;
 import apainter.rendering.RenderingOption;
-import static apainter.rendering.ColorOperations.*;
 
 public class Pen extends BasicDrawer{
 

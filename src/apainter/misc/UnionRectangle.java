@@ -49,6 +49,7 @@ public class UnionRectangle {
 					if(joinend.increase){
 
 						YLine nright = nearestYLine_fromRight(x, ylines);
+						if(nright==null)return new Rectangle[]{area.getBounds()};
 						int w = nright.x-x.end;
 						int h = nright.start-x.y;
 						rect.add(new Rectangle(x.end,x.y,w,h));
@@ -63,12 +64,14 @@ public class UnionRectangle {
 					if(joinend.increase){
 
 						YLine nleft = nearestYLine_fromLeft(x, ylines);
+						if(nleft==null)return new Rectangle[]{area.getBounds()};
 						int w=x.start-nleft.x;
 						int h = nleft.end-x.y;
 						rect.add(new Rectangle(nleft.x,x.y,w,h));
 						nleft.setEnd(x.y);
 
 						YLine nright = nearestYLine_fromRight(x, ylines);
+						if(nright==null)return new Rectangle[]{area.getBounds()};
 						w = nright.x-x.end;
 						h = nright.start-x.y;
 						rect.add(new Rectangle(x.end,x.y,w,h));
@@ -79,6 +82,7 @@ public class UnionRectangle {
 
 					}else{
 						YLine nleft = nearestYLine_fromLeft(x, ylines);
+						if(nleft==null)return new Rectangle[]{area.getBounds()};
 						int w=x.start-nleft.x;
 						int h = nleft.end-x.y;
 						rect.add(new Rectangle(nleft.x,x.y,w,h));
@@ -93,6 +97,7 @@ public class UnionRectangle {
 				if(joinstart.increase){
 					if(joinend.increase){
 						YLine nright = nearestYLine_fromRight(x, ylines);
+						if(nright==null)return new Rectangle[]{area.getBounds()};
 						int w = nright.x-x.end;
 						int h = nright.start-x.y;
 						rect.add(new Rectangle(x.end,x.y,w,h));
@@ -101,6 +106,7 @@ public class UnionRectangle {
 						ylines.add(joinstart);
 					}else{
 						YLine nright = nearestYLine_fromRight(x, ylines),nleft = nearestYLine_fromLeft(x, ylines);
+						if(nright==null||nleft==null)return new Rectangle[]{area.getBounds()};
 						int w = nright.x-nleft.x;
 						int h = nright.start-x.y;
 						rect.add(new Rectangle(nleft.x,x.y,w,h));
@@ -116,6 +122,7 @@ public class UnionRectangle {
 						ylines.remove(joinend);
 					}else{
 						YLine nleft = nearestYLine_fromLeft(x, ylines);
+						if(nleft==null)return new Rectangle[]{area.getBounds()};
 						int w = x.start-nleft.x;
 						int h = nleft.end-x.y;
 						rect.add(new Rectangle(nleft.x,x.y,w,h));

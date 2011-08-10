@@ -7,7 +7,6 @@ import javax.swing.event.EventListenerList;
 
 import apainter.bind.annotation.BindProperty;
 import apainter.misc.Util;
-import apainter.misc.Utility_PixelFunction;
 
 /**
  * ARGBの順に格納されている。<br>

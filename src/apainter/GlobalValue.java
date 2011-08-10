@@ -6,9 +6,7 @@ import static apainter.misc.Util.*;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.swing.event.EventListenerList;
