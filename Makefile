@@ -24,7 +24,8 @@ ENCODING=-encoding utf-8
 
 
 APainter=apainter.APainter
-DEMO=demo.APainterDemo
+DEMO=demo/APainterDemo
+DEMORUN=demo.APainterDemo
 
 JAR=apainter.jar
 MANIFEST=apainter.mf
@@ -37,19 +38,19 @@ MANIFEST=apainter.mf
 CP=-classpath $(JPENPATH)
 
 
-$(CLASSDIR)/$(APainter).class:build
+$(CLASSDIR)/$(DEMO).class:$(SOURCEDIR)/$(DEMO).java
+	mkdir -p $(CLASSDIR)
+	$(JAVAC) -Xlint:unchecked $(CP) $(ENCODING) -d $(CLASSDIR) -sourcepath $(SOURCEDIR) $<
 
 $(JAR):$(CLASSDIR)/$(APainter).class
 	jar cfm $(JAR) $(MANIFEST) -C $(CLASSDIR) apainter -C $(CLASSDIR) nodamushi
 
 run:$(CLASSDIR)/$(DEMO).class
-	java $(CP)$(CLASSPATHSEP)$(CLASSDIR) $(DEMO)
+	java $(CP)$(CLASSPATHSEP)$(CLASSDIR)$(CLASSPATHSEP)./ $(DEMORUN)
 
 jar:$(JAR)
 
-build:$(SOURCEDIR)/$(DEMO).java
-	mkdir $(CLASSDIR)
-	$(JAVAC) $(CP) $(ENCODING) -d $(CLASSDIR) -sourcepath $(SOURCEDIR) $<
+
 
 clean:
 	rm -rf $(CLASSDIR)

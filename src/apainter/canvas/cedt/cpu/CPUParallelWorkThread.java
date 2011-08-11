@@ -83,11 +83,11 @@ public class CPUParallelWorkThread {
 	}
 
 
-	public static <V> Collection<V> exec(Callable<V>... callable){
+	public static <V> Collection<V> exec(Callable<? extends V>... callable){
 		if(callable==null || callable.length==0)return new ArrayList<V>(1);
 		if(!isRunning())runThread();
 		@SuppressWarnings("unchecked")
-		Future<V>[] fs = new Future[callable.length-1];
+		Future<? extends V>[] fs = new Future[callable.length-1];
 		for(int i=0;i<callable.length-1;i++){
 			if(callable[i]==null)continue;
 			fs[i]=thread.submit(callable[i]);
@@ -100,7 +100,7 @@ public class CPUParallelWorkThread {
 		}
 		ArrayList<V> vs = new ArrayList<V>();
 		if(v!=null)vs.add(v);
-		for(Future<V> f:fs){
+		for(Future<? extends V> f:fs){
 			if(f==null)break;
 			try {
 				v =f.get();

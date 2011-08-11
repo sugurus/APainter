@@ -242,8 +242,10 @@ public class APainter {
 			addCommand(new _BackColor());
 			addCommand(new _CreateCanvas());
 			addCommand(new _CreateLayer());
+			addCommand(new _Debag_FillLayer());
 			addCommand(new _Exit());
 			addCommand(new _FrontColor());
+			addCommand(new _LayerColorMode());
 			addCommand(new _LayerLine());
 			addCommand(new _PenColorMode());
 			addCommand(new _Rotation());
@@ -253,6 +255,10 @@ public class APainter {
 
 			StringBuffer sb = new StringBuffer();
 			JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+			if(compiler==null){
+				System.err.println("apainter.APainter.javaのdevelopフラグをfalseにしてください。");
+				System.exit(1);
+			}
 			JavaFileManager fm = compiler.getStandardFileManager(
 					new DiagnosticCollector<JavaFileObject>(), null, null);
 
