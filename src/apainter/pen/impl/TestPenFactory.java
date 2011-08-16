@@ -1,5 +1,6 @@
 package apainter.pen.impl;
 
+import java.awt.Dimension;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -61,7 +62,7 @@ public class TestPenFactory implements PenShapeFactory{
 		for(int i=1;i<21;i++){
 			int[] m = createMap(i);
 			PixelDataIntBuffer p = new PixelDataIntBuffer(i, i, m);
-			cpudata.put(toString(i), p);
+			cpudata.put(toString(i*10), p);
 		}
 		loaded= true;
 	}
@@ -85,21 +86,26 @@ public class TestPenFactory implements PenShapeFactory{
 			width = w;
 		}
 
+
 		@Override
-		public PixelDataBuffer getFootPrint(double x, double y, double w,double h) {
+		public PixelDataBuffer getFootPrint(double x,double y,int size) {
 			if(!loaded)load();
-			return cpudata.get(TestPenFactory.this.toString(w));
+			return cpudata.get(TestPenFactory.this.toString(size));
 		}
 
 
 		@Override
-		public DimensionDouble getSize() {
-			return new DimensionDouble(width,width);
+		public Dimension getMapSize() {
+			return new Dimension(width,width);
+		}
+		@Override
+		public int getSize() {
+			return width*10;
 		}
 
 		@Override
-		public double getIntervalLength(double w, double h) {
-			w = w*0.4*intervalpercent;
+		public double getIntervalLength(int size) {
+			double w= size*0.04*intervalpercent;
 			if(w < 1)return 1;
 			else return (int)w;
 		}

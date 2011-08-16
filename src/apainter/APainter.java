@@ -1,26 +1,29 @@
 package apainter;
 
-import static apainter.GlobalKey.*;
-import static apainter.misc.Util.*;
+import static apainter.GlobalKey.CanvasActionList;
+import static apainter.GlobalKey.CanvasHeadAction;
+import static apainter.GlobalKey.CanvasList;
+import static apainter.GlobalKey.CanvasTailAction;
+import static apainter.GlobalKey.CommandCenter;
+import static apainter.GlobalKey.CommandErrorPrintStream;
+import static apainter.GlobalKey.CommandPrintStream;
+import static apainter.GlobalKey.OnDevice;
+import static apainter.GlobalKey.PenFactoryCenter;
+import static apainter.GlobalKey.Property;
+import static apainter.misc.Util.nullCheack;
 
-import java.io.IOException;
+import java.io.File;
+import java.io.FileFilter;
 import java.io.PrintStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.event.EventListenerList;
-import javax.tools.DiagnosticCollector;
-import javax.tools.JavaCompiler;
-import javax.tools.JavaFileManager;
-import javax.tools.JavaFileManager.Location;
-import javax.tools.JavaFileObject;
-import javax.tools.StandardLocation;
-import javax.tools.ToolProvider;
 
 import apainter.annotation.Version;
 import apainter.canvas.Canvas;
@@ -229,11 +232,11 @@ public class APainter {
 
 
 	//コマンド関連-------------------------------------------------
-	//コマンドの追加が面倒くさいので開発時はJavaFileManagerで
+	//コマンドの追加が面倒くさいので開発時はファイルシステムで
 	//実際にコンパイルするときはfalseに設定。
 	//trueの時addcommandlistコマンドが追加される。
 	//addCommand(new .....の文字列が表示される。
-	private final boolean develop=true;
+	public static final boolean develop=true;
 
 	private void initCommand(){
 		addCommand(new Commands());
@@ -254,59 +257,65 @@ public class APainter {
 		}else{
 
 			StringBuffer sb = new StringBuffer();
-			JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-			if(compiler==null){
-				System.err.println("apainter.APainter.javaのdevelopフラグをfalseにしてください。");
-				System.exit(1);
-			}
-			JavaFileManager fm = compiler.getStandardFileManager(
-					new DiagnosticCollector<JavaFileObject>(), null, null);
 
-			Set<JavaFileObject.Kind> kind = new HashSet<JavaFileObject.Kind>();
-			kind.add(JavaFileObject.Kind.CLASS);
 			try {
-				for(JavaFileObject f:fm.list(StandardLocation.CLASS_PATH, "apainter", kind, false)){
+				URI uri = APainter.class.getResource("Apainter.class").toURI();
+				File apainter = new File(uri);
+				File dir = apainter.getParentFile();
+				File[] fs = dir.listFiles(new FileFilter() {
+
+					@Override
+					public boolean accept(File pathname) {
+						String name = pathname.getName();
+						return name.startsWith("_") && name.endsWith("class") && !name.contains("$");
+					}
+				});
+
+				for(File f:fs){
 					String name = f.getName();
-					if(name.startsWith("_") && name.endsWith("class") && !name.contains("$")){
-						String clname = name.substring(0,name.length()-6);
-						try {
-							Class<?> claz = Class.forName("apainter."+clname);
-							if(claz!=null && CommandDecoder.class.isAssignableFrom(claz)){
-								CommandDecoder cd = (CommandDecoder) claz.newInstance();
-								addCommand(cd);
-								sb.append("addCommand(new ").append(clname).append("());\n");
-							}
-						} catch (ClassNotFoundException e) {
-						} catch (InstantiationException e) {
-						} catch (IllegalAccessException e) {
+					String clname = name.substring(0,name.length()-6);
+					try {
+						Class<?> claz = Class.forName("apainter."+clname);
+						if(claz!=null && CommandDecoder.class.isAssignableFrom(claz)){
+							CommandDecoder cd = (CommandDecoder) claz.newInstance();
+							addCommand(cd);
+							sb.append("addCommand(new ").append(clname).append("());\n");
 						}
+					} catch (ClassNotFoundException e) {
+					} catch (InstantiationException e) {
+					} catch (IllegalAccessException e) {
 					}
 				}
-			} catch (IOException e) {}
-			final String str = sb.toString();
-			addCommand(new CommandDecoder() {
+				final String str = sb.toString();
+				addCommand(new CommandDecoder() {
 
-				@Override
-				public String help() {
-					return "addcommandlist:::make addCommands list";
-				}
+					@Override
+					public String help() {
+						return "addcommandlist:::make addCommands list";
+					}
 
-				@Override
-				public String getCommandName() {
-					return "addcommandlist";
-				}
+					@Override
+					public String getCommandName() {
+						return "addcommandlist";
+					}
 
-				@Override
-				public Command decode(String[] params) {
-					return new Command() {
-						@Override
-						protected Object execution(GlobalValue global) {
-							global.commandPrint(str);
-							return str;
-						}
-					};
-				}
-			});
+					@Override
+					public Command decode(String[] params) {
+						return new Command() {
+							@Override
+							protected Object execution(GlobalValue global) {
+								global.commandPrint(str);
+								return str;
+							}
+						};
+					}
+				});
+
+
+			} catch (Exception e1) {
+				System.err.println("APainter.java のdevelopフラグをfalseにして下さい。");
+			}
+
 		}
 
 	}

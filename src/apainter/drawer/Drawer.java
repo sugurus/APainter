@@ -49,9 +49,9 @@ abstract public class Drawer {
 	private DrawEvent createOneEvent(PenTabletMouseEvent e,InnerLayerHandler target,Device d){
 		Point2D.Double xy=e.getPointDouble();
 		double pressure =e.getPressure();
-		DimensionDouble pensize = pen.getSize();
-		pensize = getPenSize(pensize.width, pensize.height, pressure, xy.x, xy.y);
-		PixelDataBuffer map = pen.getFootPrint(xy.x, xy.y, pensize.width, pensize.height);
+		int pensize = pen.getSize();
+		pensize = getPenSize(pensize, pressure, xy.x, xy.y);
+		PixelDataBuffer map = pen.getFootPrint(xy.x, xy.y, pensize);
 		Rectangle bounds = new Rectangle((int)xy.x, (int)xy.y, map.width, map.height);
 		Color front =getFrontColor(e, pen),back = getBackColor(e, pen);
 		int dens =(int) ((((256-density_min)*pressure)+density_min)*density);
@@ -60,7 +60,7 @@ abstract public class Drawer {
 		DrawEvent de =
 			new DrawEvent(EventConstant.ID_PaintStart, this, target, bounds,
 					getRenderer(d), map, option);
-		length = pen.getIntervalLength(pensize.width, pensize.height);
+		length = pen.getIntervalLength(pensize);
 		return de;
 	}
 
@@ -94,7 +94,7 @@ abstract public class Drawer {
 		}
 		double Opressure =bef.getPressure();
 		double Ppressure = e.getPressure();
-		DimensionDouble pensize = pen.getSize();
+		int pensize = pen.getSize();
 		double cos = (p.x-befp.x)/dl,sin =(p.y-befp.y)/dl;
 		Renderer renderer = getRenderer(dv);
 
@@ -103,8 +103,8 @@ abstract public class Drawer {
 		while(l < dl){
 			double x = l*cos+bx,y = l*sin+by;
 			double pressure =k(Opressure,Ppressure,l,dl);
-			DimensionDouble pensize2 = getPenSize(pensize.width, pensize.height, pressure, x, y);
-			PixelDataBuffer map = pen.getFootPrint(x, y, pensize2.width, pensize2.height);
+			int pensize2 = getPenSize(pensize, pressure, x, y);
+			PixelDataBuffer map = pen.getFootPrint(x, y, pensize2);
 			Rectangle bounds = new Rectangle((int)x, (int)y,
 					map.width, map.height);
 			Color front =getFrontColor(e, pen),back = getBackColor(e, pen);
@@ -115,7 +115,7 @@ abstract public class Drawer {
 				new DrawEvent(EventConstant.ID_Paint, this, target,
 						bounds, renderer,  map, option);
 			es.add(de);
-			double d = pen.getIntervalLength(pensize2.width, pensize2.height);
+			double d = pen.getIntervalLength(pensize2);
 			l += d;
 		}
 		before = e;
@@ -142,10 +142,9 @@ abstract public class Drawer {
 		return (o*(l-t)+p*t)/l;
 	}
 
-	protected DimensionDouble getPenSize(double width,double height,double pressure,double x,double y){
+	protected int getPenSize(int size,double pressure,double x,double y){
 		double t = ((1-smin) * pressure) + smin;
-		double w = width * t, h = height * t;
-		return new DimensionDouble(w, h);
+		return (int) (size*t);
 	}
 
 

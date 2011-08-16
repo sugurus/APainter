@@ -1,8 +1,16 @@
 package apainter.pen;
 
-import apainter.construct.DimensionDouble;
+import java.awt.Dimension;
+
 import apainter.data.PixelDataBuffer;
 
+/**
+ * sizeとは、１０倍された値になっています。
+ * 1 -> 0.1
+ * これは、0.1が浮動小数で表せないためです。
+ * @author nodamushi
+ *
+ */
 public interface PenShape {
 	/**
 	 * CPUの場合はPixelDataIntBuffer
@@ -12,9 +20,10 @@ public interface PenShape {
 	 * @param h
 	 * @return
 	 */
-	public PixelDataBuffer getFootPrint(double x,double y,double w,double h);
-	public DimensionDouble getSize();
-	public double getIntervalLength(double w,double h);
+	public PixelDataBuffer getFootPrint(double x,double y,int size);
+	public Dimension getMapSize();
+	public int getSize();
+	public double getIntervalLength(int size);
 	public void setIntervalLengthPercent(double percent);
 	public String getName();
 	public long getID();

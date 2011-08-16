@@ -37,7 +37,7 @@ public class APainterDemo{
 		frame.add(canvas.getComponent());
 		frame.pack();
 		frame.setDefaultCloseOperation(3);
-		core.debagON();
+		//core.debagON();
 		core.bind(GlobalBindKey.FrontColorBIND, cchose.front);
 		cchose.setVisible(true);
 	}
