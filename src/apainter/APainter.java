@@ -14,9 +14,9 @@ import static apainter.misc.Util.nullCheack;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -44,7 +44,7 @@ import apainter.pen.PenShapeFactory;
 
 
 /**
- * jre1.6以上で動作します。<br>
+ * jre1.6_10以上で動作します。<br>
  * APainterインスタンスはcreateAPainterメソッドを用いて作成します。<br>
  * 一度exitしたインスタンスは再利用できません。
  */
@@ -128,8 +128,13 @@ public class APainter {
 			Pen pen = new Pen(global);
 			Eraser era = new Eraser(global);
 			PenShapeFactory f = p.getPenShapeFactory(0);
-			f.load();
-			PenShape s = f.createPenShape(1, 1);
+			try {
+				f.load();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			//FIXME
+			PenShape s = f.createPenShape(1);
 			pen.setPen(s);
 			era.setPen(s);
 			global.put(CanvasHeadAction, pen);

@@ -26,16 +26,21 @@ abstract class PenCPURendering implements Renderer{
 			Rectangle clip, RenderingOption option) {
 		if(option.alphaFixed){
 			if(option.hasDestinationMask()){
-				renderint_alphfix_dmask(base, (PixelDataIntBuffer)over, p, clip, option,(PixelDataByteBuffer)option.destinationmask);
+				if(over instanceof PixelDataByteBuffer){
+					renderint_alphfix_dmask(base, (PixelDataByteBuffer)over, p, clip, option,(PixelDataByteBuffer)option.destinationmask);
+				}
 			}else{
-				renderint_alphfix(base, (PixelDataIntBuffer)over, p, clip, option);
+				if(over instanceof PixelDataByteBuffer)
+					renderint_alphfix(base, (PixelDataByteBuffer)over, p, clip, option);
 			}
 		}
 		else{
 			if(option.hasDestinationMask()){
-				renderint_dmask(base, (PixelDataIntBuffer)over, p, clip, option,(PixelDataByteBuffer)option.destinationmask);
+				if(over instanceof PixelDataByteBuffer)
+					renderint_dmask(base, (PixelDataByteBuffer)over, p, clip, option,(PixelDataByteBuffer)option.destinationmask);
 			}else{
-				renderint(base, (PixelDataIntBuffer)over, p, clip, option);
+				if(over instanceof PixelDataByteBuffer)
+					renderint(base, (PixelDataByteBuffer)over, p, clip, option);
 			}
 		}
 	}
@@ -52,9 +57,9 @@ abstract class PenCPURendering implements Renderer{
 
 	//TODO mask
 
-	abstract protected void renderint(PixelDataIntBuffer base,PixelDataIntBuffer over,Point p,Rectangle clip,RenderingOption option);
-	abstract protected void renderint_dmask(PixelDataIntBuffer base,PixelDataIntBuffer over,
+	abstract protected void renderint(PixelDataIntBuffer base,PixelDataByteBuffer over,Point p,Rectangle clip,RenderingOption option);
+	abstract protected void renderint_dmask(PixelDataIntBuffer base,PixelDataByteBuffer over,
 			Point p,Rectangle clip,RenderingOption option,PixelDataByteBuffer dmask);
-	abstract protected void renderint_alphfix(PixelDataIntBuffer base,PixelDataIntBuffer over,Point p,Rectangle clip,RenderingOption option);
-	abstract protected void renderint_alphfix_dmask(PixelDataIntBuffer base,PixelDataIntBuffer over,Point p,Rectangle clip,RenderingOption option,PixelDataByteBuffer mask);
+	abstract protected void renderint_alphfix(PixelDataIntBuffer base,PixelDataByteBuffer over,Point p,Rectangle clip,RenderingOption option);
+	abstract protected void renderint_alphfix_dmask(PixelDataIntBuffer base,PixelDataByteBuffer over,Point p,Rectangle clip,RenderingOption option,PixelDataByteBuffer mask);
 }

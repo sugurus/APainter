@@ -58,9 +58,11 @@ class EraserCPURendering implements Renderer{
 			Rectangle clip, RenderingOption option) {
 		if(option.alphaFixed){
 			if(option.hasDestinationMask()){
-				renderint_alphfix_dmask(base, (PixelDataIntBuffer)over, p, clip, option,(PixelDataByteBuffer)option.destinationmask);
+				if(over instanceof PixelDataByteBuffer)
+					renderint_alphfix_dmask(base, (PixelDataByteBuffer)over, p, clip, option,(PixelDataByteBuffer)option.destinationmask);
 			}else{
-				renderint_alphfix(base, (PixelDataIntBuffer)over, p, clip, option);
+				if(over instanceof PixelDataByteBuffer)
+					renderint_alphfix(base, (PixelDataByteBuffer)over, p, clip, option);
 			}
 		}
 		else{
@@ -126,7 +128,7 @@ class EraserCPURendering implements Renderer{
 
 		for(int x,y = clip.y;y<endy;y++){
 			for(x = clip.x;x<endx;x++){
-				final int dmaskv = pixel(dmaskp,x,y,basew)&0xff;
+				final int dmaskv = pixel(dmaskp,x,y,basew);
 				if(dmaskv==0)continue;
 				final int rdmaskv = 255-dmaskv;
 				final int c = pixel(basep,x,y,basew);
@@ -147,13 +149,13 @@ class EraserCPURendering implements Renderer{
 		}
 	}
 
-	final static void renderint_alphfix(PixelDataIntBuffer base,PixelDataIntBuffer over,Point p,Rectangle clip,RenderingOption option){
+	final static void renderint_alphfix(PixelDataIntBuffer base,PixelDataByteBuffer over,Point p,Rectangle clip,RenderingOption option){
 		option.frontColor=option.backColor;
 		pcdr.renderint_alphfix(base, over, p, clip, option);
 	}
 
 
-	final static void renderint_alphfix_dmask(PixelDataIntBuffer base,PixelDataIntBuffer over,Point p,Rectangle clip,RenderingOption option,
+	final static void renderint_alphfix_dmask(PixelDataIntBuffer base,PixelDataByteBuffer over,Point p,Rectangle clip,RenderingOption option,
 			PixelDataByteBuffer mask){
 		option.frontColor=option.backColor;
 		pcdr.renderint_alphfix_dmask(base, over, p, clip, option, mask);

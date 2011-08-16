@@ -1,4 +1,4 @@
-package apainter.drawer.painttool;
+﻿package apainter.drawer.painttool;
 
 import nodamushi.pentablet.PenTabletMouseEvent;
 import apainter.Device;
@@ -10,7 +10,7 @@ import apainter.rendering.RenderingOption;
 public class Pen extends BasicDrawer{
 
 	Renderer cpu8bit = new PenCPUDefaultRendering();
-	private Renderer[] cpuren = new Renderer[]{
+	private static Renderer[] cpuren = new Renderer[]{
 {{cpurenderers}}
 	};
 

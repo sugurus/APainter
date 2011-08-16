@@ -1,9 +1,9 @@
 class PenCPU{{OpClassName}}Rendering extends PenCPURendering{
 	@Override
-	final protected void renderint(PixelDataIntBuffer base,PixelDataIntBuffer over,Point p,Rectangle clip,RenderingOption option){
+	final protected void renderint(PixelDataIntBuffer base,PixelDataByteBuffer over,Point p,Rectangle clip,RenderingOption option){
 		int[] basep = base.getData();
 		int basew = base.width;
-		int[] overp = over.getData();
+		byte[] overp = over.getData();
 		int overw = over.width;
 		int color = option.frontColor.getARGB();
 		int or=r(color);
@@ -37,12 +37,12 @@ class PenCPU{{OpClassName}}Rendering extends PenCPURendering{
 	}
 
 	@Override
-	final protected void renderint_dmask(PixelDataIntBuffer base,PixelDataIntBuffer over,Point p,Rectangle clip,RenderingOption option,
+	final protected void renderint_dmask(PixelDataIntBuffer base,PixelDataByteBuffer over,Point p,Rectangle clip,RenderingOption option,
 			PixelDataByteBuffer dmask){
 		int[] basep = base.getData();
 		int basew = base.width;
 		byte[] dmaskp = dmask.getData();
-		int[] overp = over.getData();
+		byte[] overp = over.getData();
 		int overw = over.width;
 		int color = option.frontColor.getARGB();
 		int or=r(color);
@@ -88,10 +88,10 @@ class PenCPU{{OpClassName}}Rendering extends PenCPURendering{
 	}
 
 	@Override
-	final protected void renderint_alphfix(PixelDataIntBuffer base,PixelDataIntBuffer over,Point p,Rectangle clip,RenderingOption option){
+	final protected void renderint_alphfix(PixelDataIntBuffer base,PixelDataByteBuffer over,Point p,Rectangle clip,RenderingOption option){
 		int[] basep = base.getData();
 		int basew = base.width;
-		int[] overp = over.getData();
+		byte[] overp = over.getData();
 		int overw = over.width;
 		int color = option.frontColor.getARGB();
 		int or=r(color);
@@ -115,12 +115,12 @@ class PenCPU{{OpClassName}}Rendering extends PenCPURendering{
 	}
 
 	@Override
-	final protected void renderint_alphfix_dmask(PixelDataIntBuffer base,PixelDataIntBuffer over,Point p,Rectangle clip,RenderingOption option,
+	final protected void renderint_alphfix_dmask(PixelDataIntBuffer base,PixelDataByteBuffer over,Point p,Rectangle clip,RenderingOption option,
 			PixelDataByteBuffer mask){
 		int[] basep = base.getData();
 		int basew = base.width;
 		byte[] dmaskp = mask.getData();
-		int[] overp = over.getData();
+		byte[] overp = over.getData();
 		int overw = over.width;
 		int color = option.frontColor.getARGB();
 		int or=r(color);
@@ -133,7 +133,7 @@ class PenCPU{{OpClassName}}Rendering extends PenCPURendering{
 
 		for(int y = clip.y;y<endy;y++){
 			for(int x = clip.x;x<endx;x++){
-				int dmaskv = pixel(dmaskp,x,y,basew)&0xff;
+				int dmaskv = pixel(dmaskp,x,y,basew);
 				if(dmaskv==0)continue;
 				int rdmaskv=255-dmaskv;
 				int c = pixel(basep,x,y,basew);

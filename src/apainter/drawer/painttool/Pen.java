@@ -1,7 +1,5 @@
 package apainter.drawer.painttool;
 
-import static apainter.PropertyChangeNames.*;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -15,10 +13,12 @@ import apainter.rendering.ColorMode;
 import apainter.rendering.Renderer;
 import apainter.rendering.RenderingOption;
 
+import static apainter.PropertyChangeNames.*;
 public class Pen extends BasicDrawer{
 
 	Renderer cpu8bit = new PenCPUDefaultRendering();
-	private Renderer[] cpuren = new Renderer[]{
+	private ColorMode mode = ColorMode.Default;
+	private static Renderer[] cpuren = new Renderer[]{
 			new PenCPUDefaultRendering(),
 			new PenCPUAddRendering(),
 			new PenCPUSubtractiveRendering(),
@@ -35,7 +35,6 @@ public class Pen extends BasicDrawer{
 			new PenCPUExclusionRendering()
 	};
 
-	private ColorMode mode = ColorMode.Default;
 
 	public Pen(GlobalValue global) {
 		super(global);
@@ -45,35 +44,7 @@ public class Pen extends BasicDrawer{
 //		}
 	}
 
-
-	public ColorMode getColorMode(){
-		return mode;
-	}
-
-	private boolean cheack(ColorMode mode){
-		switch(mode){
-		case NONGROUPEFFECT:
-		case AlphaDawn:
-		case AlphaPlus:
-		case REPLACEMENT:
-		case NULL:
-		case Del:
-			return false;
-		default:
-			return true;
-		}
-	}
-
-	@BindProperty(PenModePropertyChange)
-	public void setColorMode(String modename){
-		ColorMode m = ColorMode.getColorMode(modename);
-		if(m==null||cheack(m)|| m==mode)return;
-		ColorMode old = mode;
-		mode = old;
-		firePropertyChange(PenModePropertyChange, old, mode);
-	}
-
-	private Renderer getCPURenderer(ColorMode mode){
+	private static Renderer getCPURenderer(ColorMode mode){
 		Renderer r = null;
 		switch(mode){
 		case Default:
@@ -125,7 +96,10 @@ public class Pen extends BasicDrawer{
 
 	@Override
 	protected Renderer getRenderer(Device d) {
-		return getCPURenderer(mode);
+		if(d == Device.CPU){
+			return getCPURenderer(mode);
+		}
+		return null;
 	}
 
 	@Override
@@ -139,25 +113,41 @@ public class Pen extends BasicDrawer{
 
 	}
 
+	public ColorMode getColorMode() {
+		return mode;
+	}
 
-	//property
+	@BindProperty(PenModePropertyChange)
+	public void setColorMode(ColorMode m){
+		if(m==null|| m==ColorMode.AlphaDawn || m==ColorMode.AlphaPlus || m==ColorMode.Del || m==mode)return;
+		ColorMode old = mode;
+		mode = m;
+		firePropertyChange(PenModePropertyChange, old, mode);
+	}
 
-	private EventListenerList eventlistenerlist = new EventListenerList();
+	public void setColorMode(String colormode){
+		ColorMode m = ColorMode.getColorMode(colormode);
+		setColorMode(m);
+	}
+
+	// listener--------------------------------------
+
+	private EventListenerList listener = new EventListenerList();
 
 	public void addPropertyChangeListener(PropertyChangeListener l) {
-		eventlistenerlist.remove(PropertyChangeListener.class, l);
-		eventlistenerlist.add(PropertyChangeListener.class, l);
+		listener.remove(PropertyChangeListener.class, l);
+		listener.add(PropertyChangeListener.class, l);
 	}
 
 	public void removePropertyChangeListener(PropertyChangeListener l) {
-		eventlistenerlist.remove(PropertyChangeListener.class, l);
+		listener.remove(PropertyChangeListener.class, l);
 	}
 
 	public void firePropertyChange(String name, Object oldValue, Object newValue) {
 		PropertyChangeEvent e = new PropertyChangeEvent(this, name, oldValue,
 				newValue);
 
-		Object[] listeners = eventlistenerlist.getListenerList();
+		Object[] listeners = this.listener.getListenerList();
 		for (int i = listeners.length - 2; i >= 0; i -= 2) {
 			if (listeners[i] == PropertyChangeListener.class) {
 				((PropertyChangeListener) listeners[i + 1]).propertyChange(e);

@@ -54,8 +54,8 @@ public final class Utility_PixelFunction {
 	public static final void set(byte[] pixel,byte val,int x,int y,int w){
 		pixel[x+y*w] = val;
 	}
-	public static final byte pixel(byte[] pixel,int x,int y,int w){
-		return pixel[x+y*w];
+	public static final int pixel(byte[] pixel,int x,int y,int w){
+		return pixel[x+y*w]&0xff;
 	}
 
 	public static final int i(byte b){
@@ -63,6 +63,9 @@ public final class Utility_PixelFunction {
 	}
 	public static final int mask(int a,byte b){
 		return a*(b&0xff)/255;
+	}
+	public static final int mask(int a,int b){
+		return a*b/255;
 	}
 
 	public static final int ar(long c){

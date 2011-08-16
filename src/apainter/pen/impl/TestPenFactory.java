@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 import apainter.construct.DimensionDouble;
 import apainter.data.PixelDataBuffer;
+import apainter.data.PixelDataByteBuffer;
 import apainter.data.PixelDataIntBuffer;
 import apainter.pen.PenShape;
 import apainter.pen.PenShapeFactory;
@@ -20,15 +21,15 @@ public class TestPenFactory implements PenShapeFactory{
 	private boolean loaded = false;
 	private static final String PenName ="Test";
 	private long id;
-	private HashMap<String,PixelDataIntBuffer> cpudata = new HashMap<String,PixelDataIntBuffer>();
+	private HashMap<String,PixelDataByteBuffer> cpudata = new HashMap<String,PixelDataByteBuffer>();
 
 	public TestPenFactory(long id) {
 		this.id = id;
 	}
 
-	private int[] createMap(int w){
-		int[] m = new int[w*w];
-		Arrays.fill(m, 255);
+	private byte[] createMap(int w){
+		byte[] m = new byte[w*w];
+		Arrays.fill(m, (byte)255);
 		return m;
 	}
 
@@ -39,9 +40,9 @@ public class TestPenFactory implements PenShapeFactory{
 
 
 	@Override
-	public PenShape createPenShape(double width, double height) {
-		if(width<1)width = 1;
-		return new TestPen((int)width);
+	public PenShape createPenShape(int size) {
+		if(size<10)size = 10;
+		return new TestPen(size/10);
 	}
 
 	@Override
@@ -60,8 +61,8 @@ public class TestPenFactory implements PenShapeFactory{
 	public synchronized void load() {
 		if(loaded)return;
 		for(int i=1;i<21;i++){
-			int[] m = createMap(i);
-			PixelDataIntBuffer p = new PixelDataIntBuffer(i, i, m);
+			byte[] m = createMap(i);
+			PixelDataByteBuffer p = new PixelDataByteBuffer(i, i, m);
 			cpudata.put(toString(i*10), p);
 		}
 		loaded= true;
