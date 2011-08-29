@@ -1,5 +1,5 @@
 APainter
-2011/8/9 nodamushi
+2011/8/30 nodamushi
 
 プロジェクト名:APainter
 Licensing：New BSD License
@@ -12,17 +12,24 @@ CUIコマンドについてはCommands.txtを参照してください。
 現在はCPU動作で作っていますが、そのうちGPUでも動作するようにしたい。
 
 -コンパイル方法
-コンパイルにはJpen2が必要になります。
-Jpenのプロジェクトよりファイルを別にダウンロードし、適当な場所に解凍してください。
-次にMakefileをテキストエディタで開き、2行目にあるJPENPATHをJpenを解凍したディレクトリに変更してください。
-また、OSがUnix系の場合はCLASSPATHSEPを「:」に変更してください。
+コンパイルにはmakeとJavaコンパイラーが必要になります。
+Windowsでのmakeのインストール
+http://gnuwin32.sourceforge.net/packages/make.htm　のComplete package, except sourcesにあるリンクをダウンロードし、実行してインストールしてください。
+
+Javaコンパイラー
+http://www.oracle.com/technetwork/java/javase/downloads/index.html　にあるJDK6またはJDK7をダウンロードしインストールしてください。
+
+以上の二つが準備できたら、コマンドプロンプト（ターミナル、端末）でmakeをタイプするとコンパイルできます。なお、OSがUnix系の場合はMakefileのCLASSPATHSEPを「:」に変更してください。
+
+
+コンパイルにはJpen2が必要になります。makeを実行したとき、Jpen2が見つからない場合はダウンロードします。
+既にjpen-2.jarがある場合MakefileのJPENPATHを書き換えると、不要なダウンロードを行いません。
 コマンドプロンプト（ターミナル、端末）上で「make」を実行することでコンパイルできます。
 また、「make jar」でjarファイルを生成します。
 「make clean」でコンパイルしたクラスファイルを削除します。
 
 -実行方法
-実行するには「make run」でウィンドウにキャンバスを入れただけの簡単なペイントソフトが起動します。
-操作についてはCommands.txtを参考にしてください。
+実行するには「make run」で簡単なペイントソフトが起動します。
 
 ＊＊＊＊＊開発者へ
 まぁ、そのうち何か書きます………

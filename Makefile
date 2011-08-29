@@ -1,5 +1,5 @@
 #jpen-2.jar path
-JPENPATH=C:/javaclasspath/jpen/jpen-2.jar
+JPENPATH=jpen/jpen-2.jar
 #classfile directory
 CLASSDIR=classdir
 #if unix=> :
