@@ -14,10 +14,12 @@ CUIコマンドについてはCommands.txtを参照してください。
 -コンパイル方法
 コンパイルにはmakeとJavaコンパイラーが必要になります。
 Windowsでのmakeのインストール
-http://gnuwin32.sourceforge.net/packages/make.htm　のComplete package, except sourcesにあるリンクをダウンロードし、実行してインストールしてください。
+http://gnuwin32.sourceforge.net/packages/make.htm
+のComplete package, except sourcesにあるリンクをダウンロードし、実行してインストールしてください。
 
 Javaコンパイラー
-http://www.oracle.com/technetwork/java/javase/downloads/index.html　にあるJDK6またはJDK7をダウンロードしインストールしてください。
+http://www.oracle.com/technetwork/java/javase/downloads/index.html
+にあるJDK6またはJDK7をダウンロードしインストールしてください。
 
 以上の二つが準備できたら、コマンドプロンプト（ターミナル、端末）でmakeをタイプするとコンパイルできます。なお、OSがUnix系の場合はMakefileのCLASSPATHSEPを「:」に変更してください。
 
