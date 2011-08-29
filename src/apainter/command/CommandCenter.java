@@ -33,7 +33,16 @@ public class CommandCenter {
 		String[] par = strs.length<2||strs[1]==null?zero:strs[1].split(" ");
 		for(CommandDecoder cd:decoders){
 			if(cd.getCommandName().equals(com)){
-				Command c= cd.decode(par);
+				if(par.length!=0 && par[0].equals("-help")){
+					v.commandPrintln(cd.help());
+					return null;
+				}
+				Command c;
+				try {
+					c = cd.decode(par);
+				} catch (Exception e) {
+					return null;
+				}
 				if(c==null)return null;
 				c.setAPainter(a);
 				return c;

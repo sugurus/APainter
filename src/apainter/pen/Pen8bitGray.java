@@ -2,7 +2,7 @@ package apainter.pen;
 
 import apainter.data.PixelDataByteBuffer;
 
-public class Pen8bitGray extends Pen{
+public class Pen8bitGray extends PenData{
 	byte[] mapdata;
 
 	public Pen8bitGray(int w,int h,int x,int y){

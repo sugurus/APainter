@@ -1,172 +1,103 @@
 package apainter.bind;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-
-import apainter.bind.annotation.BindProperty;
+import java.util.Vector;
 
 public class Bind {
-	private String propertyName;
-	private ArrayList<C> list = new ArrayList<Bind.C>();
-	private PropertyChangeListener listner;
-	private Object newvalue = new Object();
 
-	public Bind(String propertyname){
-		propertyName = propertyname;
+	static final Object rejected=new Object();
 
-		listner = new PropertyChangeListener() {
-
-			public void propertyChange(PropertyChangeEvent evt) {
-				if(evt.getPropertyName().equals(propertyName)){
-					if(newvalue==null && evt.getNewValue()==null)return;
-					if(newvalue!=null&&newvalue.equals(evt.getNewValue()))return;
-
-					newvalue = evt.getNewValue();
-					for(C c:list){
-						if(c.o!=evt.getSource()){
-							c.remove();
-							c.call(newvalue);
-							c.add();
-						}
-					}
-				}
-			}
-
-		};
-
+	BindObject mainObject;
+	final Vector<BindObject> list = new Vector<BindObject>();
+	public Bind(){
+		this(null);
 	}
 
-	public Bind allUnbind(){
-		for(C c:list){
-			c.remove();
+	public Bind(BindObject obj){
+		mainObject = obj;
+		if(mainObject!=null){
+			list.add(obj);
+			obj.bind = this;
+			obj.setBind(true);
 		}
+	}
+
+	/**
+	 * BindObjectを追加します
+	 * @param b
+	 * @return 追加に成功したか否か
+	 */
+	public boolean add(BindObject b){
+		if(b!=null&&!list.contains(b)){
+			if(mainObject!=null){
+
+				Object o=get();
+				try {
+					b.setValue(o);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				b.setPorpertyName(mainObject.getPropertyName());
+			}
+			list.add(b);
+			b.bind=this;
+			b.setBind(true);
+			return true;
+		}
+		return false;
+	}
+
+	public void remove(BindObject b){
+		if(list.contains(b)){
+			list.remove(b);
+			b.bind = null;
+			b.setBind(false);
+		}
+	}
+
+	public void removeAll(){
 		list.clear();
-		return this;
 	}
 
-
-	public Bind unbind(Object o){
-		for(C c:list){
-			if(c.o == o){
-				list.remove(c);
-				c.remove();
-				return this;
-			}
+	void addjust(){
+		if(mainObject!=null){
+			set(get());
 		}
-		return this;
 	}
-	private void add(C c){
-		for(C cc:list){
-			if(cc.o==c.o)return;
+
+
+	Object set(Object newobj){
+		Object o=null;
+		for(BindObject b:list){
+			if(!b.isSettable(newobj))return rejected;
 		}
-		list.add(c);
-	}
-
-
-	public Bind bind(Object o,String bindFunction,Class<?>... parameterTypes){
-		Class<?> clasz = o.getClass();
-		Method add,remove;
-		try {
-			add = clasz.getMethod("addPropertyChangeListener", PropertyChangeListener.class);
-			remove = clasz.getMethod("removePropertyChangeListener", PropertyChangeListener.class);
-			Method me = clasz.getMethod(bindFunction, parameterTypes);
-			C c = new C();
-			c.m = me;
-			c.o = o;
-			c.remove=remove;
-			c.add= add;
-			c.add();
-			add(c);
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
+		if(mainObject!=null){
+			if(!mainObject.isSettable(newobj))return rejected;
+			o=get();
 		}
-		return this;
-	}
 
-	public Bind bind(Object o){
-		Class<?> clasz = o.getClass();
-		Method add,remove;
-		try {
-			add = clasz.getMethod("addPropertyChangeListener", PropertyChangeListener.class);
-			remove = clasz.getMethod("removePropertyChangeListener", PropertyChangeListener.class);
-			Method[] ms = clasz.getMethods();
-			Label:for(Method me:ms){
-				Annotation[] a = me.getAnnotations();
-				for(Annotation an:a){
-					if(an.annotationType() == BindProperty.class){
-						String[] s = ((BindProperty)an).value();
-						for(String str:s){
-							if(str.equals(propertyName)){
-								C c = new C();
-								c.m = me;
-								c.o = o;
-								c.remove=remove;
-								c.add= add;
-								c.add();
-								add(c);
-								break Label;
-							}
-						}
-					}
+		for(BindObject b:list){
+			if(b.isBind()){
+				try {
+					b.setValue(newobj);
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
 		}
-		return this;
+		return o;
+	}
+
+	private int getnum=0;
+	public synchronized Object get() {
+		Object o = null;
+		if(mainObject!=null){
+			getnum++;
+			if(getnum!=1)return null;
+			o = mainObject.get();
+			getnum = 0;
+		}
+		return o;
 	}
 
 
-
-	private class C{
-		Object o;
-		Method m;
-		Method add;
-		Method remove;
-		void call(Object newval){
-			try {
-				m.invoke(o, newval);
-			} catch (IllegalArgumentException e) {
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-			} catch (InvocationTargetException e) {
-				e.printStackTrace();
-			}
-		}
-		void add(){
-			try {
-				add.invoke(o, listner);
-			} catch (IllegalArgumentException e) {
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-			} catch (InvocationTargetException e) {
-				e.printStackTrace();
-			}
-		}
-		void remove(){
-			try {
-				remove.invoke(o, listner);
-			} catch (IllegalArgumentException e) {
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-			} catch (InvocationTargetException e) {
-				e.printStackTrace();
-			}
-		}
-	}
 }

@@ -2,10 +2,18 @@ package apainter.pen;
 
 import java.io.IOException;
 
+import apainter.Device;
+
 public interface PenShapeFactory {
 
 	public String getPenName();
-	public PenShape createPenShape(int size);
+	/**
+	 * サイズは10倍された値です。1サイズは10です。
+	 * @param size
+	 * @param device
+	 * @return
+	 */
+	public PenShape createPenShape(int size,Device device);
 	public long getID();
 
 	/**

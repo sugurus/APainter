@@ -1,21 +1,18 @@
 package apainter.canvas;
 
+import static apainter.PropertyChangeNames.*;
 import static apainter.misc.Util.*;
 
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
-import javax.swing.JComponent;
-import javax.swing.event.EventListenerList;
+import java.awt.image.BufferedImage;
 
 import nodamushi.pentablet.PenTabletMouseEvent;
 import apainter.APainter;
 import apainter.Device;
 import apainter.GlobalKey;
 import apainter.GlobalValue;
-import apainter.bind.annotation.BindProperty;
+import apainter.bind.BindObject;
 import apainter.canvas.cedt.CanvasEventAccepter;
 import apainter.canvas.cedt.cpu.CPUCEA_0;
 import apainter.canvas.event.CanvasEvent;
@@ -29,9 +26,6 @@ import apainter.gui.canvas.CanvasView;
 
 public class Canvas {
 
-	public static final String
-		authorNameChangeProperty ="author",
-		canvasNameChangeProperty="canvasName";
 
 	//property---------------------------------------------------------
 	private int width,height;
@@ -41,6 +35,51 @@ public class Canvas {
 	private long createdTime;//このCanvasが作成された時間
 	private LayerData layerdata;
 	private int id;
+	//bind-------------------------------------------------
+	public final BindObject
+	authorNameBind = new BindObject(AuthorNameChangeProperty) {
+
+		@Override
+		public void setValue(Object value) throws Exception {
+			String s = value!=null?(String) value:"";
+			author = s;
+		}
+
+		@Override
+		public Object get() {
+			return author;
+		}
+
+		public boolean isSettable(Object obj) {
+			return obj==null ||obj instanceof String;
+		}
+	};
+	apainter.bind.Bind authroBind = new apainter.bind.Bind(authorNameBind);
+	public void addAuthorNameBind(BindObject o){authroBind.add(o);}
+	public void removeAuthorNameBind(BindObject o){authroBind.remove(o);}
+
+	public final BindObject
+	canvasNameBind = new BindObject(CanvasNameChangeProperty) {
+
+		@Override
+		public void setValue(Object value) throws Exception {
+			String s = value!=null?(String) value:"";
+			canvasname = s;
+		}
+
+		@Override
+		public Object get() {
+			return canvasname;
+		}
+
+		public boolean isSettable(Object obj) {
+			return obj==null ||obj instanceof String;
+		}
+
+	};
+	apainter.bind.Bind canvasnamebind =new apainter.bind.Bind(canvasNameBind);
+	public void addCanvasNameBind(BindObject o){canvasnamebind.add(o);}
+	public void removeCanvasNameBind(BindObject o){canvasnamebind.remove(o);}
 	//-----------------------------------------------------------------
 
 
@@ -162,14 +201,8 @@ public class Canvas {
 		return author;
 	}
 
-	@BindProperty(authorNameChangeProperty)
 	public void setAuthor(String s){
-		String old = author;
-		if(s!=null)author = s;
-		else author = "";
-		if(!old.equals(author)){
-			firePropertyChange(authorNameChangeProperty, old, author);
-		}
+		authorNameBind.set(s);
 	}
 
 	public long getMakeDay() {
@@ -192,20 +225,14 @@ public class Canvas {
 		return canvasname;
 	}
 
-	@BindProperty(canvasNameChangeProperty)
 	public void setCanvaNname(String canvasname) {
-		String old = this.canvasname;
-		if(canvasname!=null)this.canvasname = canvasname;
-		else this.canvasname = "";
-		if(!old.equals(this.canvasname)){
-			firePropertyChange(canvasNameChangeProperty, old, this.canvasname);
-		}
+		canvasNameBind.set(canvasname);
 	}
 
-	//FIXME TestMethod
-	public JComponent testMethod_getPanel(){
-		return layerdata.testMethod_createViewPanel();
+	public BufferedImage createSaveImage(){
+		return layerdata.createImage();
 	}
+
 
 	public void rendering(Rectangle r){
 		if(r==null || r.isEmpty())return;
@@ -231,6 +258,14 @@ public class Canvas {
 
 	public CanvasHandler getCanvasHandler(){
 		return new CanvasHandler(this, apainter);
+	}
+
+	public void dispose(){
+		layerdata.dispose();
+		shutDownCEDT();
+		global.removeCanvas(this);
+		getCanvasView().removeAllBinds();
+
 	}
 
 
@@ -363,33 +398,6 @@ public class Canvas {
 
 	private void onEnter(PenTabletMouseEvent e) {
 		// TODO enter
-	}
-
-
-	//propertychangelistener-----------------------------------------
-
-
-	private EventListenerList eventlistenerlist = new EventListenerList();
-
-	public void addPropertyChangeListener(PropertyChangeListener l) {
-		eventlistenerlist.remove(PropertyChangeListener.class, l);
-		eventlistenerlist.add(PropertyChangeListener.class, l);
-	}
-
-	public void removePropertyChangeListener(PropertyChangeListener l) {
-		eventlistenerlist.remove(PropertyChangeListener.class, l);
-	}
-
-	public void firePropertyChange(String name, Object oldValue, Object newValue) {
-		PropertyChangeEvent e = new PropertyChangeEvent(this, name, oldValue,
-				newValue);
-
-		Object[] listeners = eventlistenerlist.getListenerList();
-		for (int i = listeners.length - 2; i >= 0; i -= 2) {
-			if (listeners[i] == PropertyChangeListener.class) {
-				((PropertyChangeListener) listeners[i + 1]).propertyChange(e);
-			}
-		}
 	}
 
 }

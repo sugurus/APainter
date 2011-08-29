@@ -1,5 +1,7 @@
 package apainter.drawer;
 
+import static apainter.misc.Util.*;
+
 import java.awt.Point;
 import java.awt.Rectangle;
 
@@ -14,12 +16,13 @@ public class DrawEvent extends CanvasEvent{
 
 	private InnerLayerHandler target;
 	private Rectangle rect;
+	private Point setPoint;
 	private PixelDataBuffer mapdata;
 	private RenderingOption option;
 	private Renderer renderer;
 
 	public DrawEvent(int id, Drawer source,
-			InnerLayerHandler target,Rectangle bounds,
+			InnerLayerHandler target,Rectangle bounds,Point setpoint,
 			Renderer renderer,PixelDataBuffer mapdata,RenderingOption option) {
 		super(id, source,target.getCanvas());
 		if(mapdata==null)throw new NullPointerException("mapdata");
@@ -31,13 +34,14 @@ public class DrawEvent extends CanvasEvent{
 		this.rect = bounds;
 		this.mapdata = mapdata;
 		this.option = option;
+		setPoint  =nullCheack(setpoint);
 	}
 
 	public DrawEvent subsetEvent(Rectangle r){
 		if(!rect.contains(r)){
 			throw new RuntimeException("r isn't subset");
 		}
-		return new DrawEvent(id, getSource(), target, r, renderer,  mapdata, option);
+		return new DrawEvent(id, getSource(), target, r,setPoint, renderer,  mapdata, option);
 	}
 
 
@@ -55,7 +59,7 @@ public class DrawEvent extends CanvasEvent{
 	}
 
 	public Point getLocation(){
-		return rect.getLocation();
+		return setPoint;
 	}
 
 	public RenderingOption getOption(){

@@ -26,7 +26,7 @@ public final class PenTabletMouseEvent extends MouseEvent{
 	//Mouse用
 	private PenTabletMouseEvent(Component source,int id,long when,int modifiers,
             int x,int y,int clickCount,boolean popupTrigger,int button,
-            ButtonType btype,CursorDevice ctype,State state,PenTabletMouseEvent before,PenTabletMouseEvent next)
+            ButtonType btype,CursorDevice ctype,State state)
 	{
 		super(source,id,when,modifiers,x,y,clickCount,popupTrigger,button);
 		dx = x+0.5f;dy=y+0.5f;
@@ -39,7 +39,7 @@ public final class PenTabletMouseEvent extends MouseEvent{
 	private PenTabletMouseEvent(Component source,int id,long when,int modifiers,
             double x,double y,int clickCount,boolean popupTrigger,ButtonType
             btype,CursorDevice ctype,State state,
-            double pres,double rot,double tx,double ty,PenTabletMouseEvent before,PenTabletMouseEvent next)
+            double pres,double rot,double tx,double ty)
 	{
 		super(source,id,when,modifiers,(int)x,(int)y,clickCount,popupTrigger);
 		setPoint(x,y);
@@ -279,12 +279,6 @@ public final class PenTabletMouseEvent extends MouseEvent{
 
 	static public int getDoubleClickMaxTime(){ return doubleclickedMaxTime;}
 
-	/**
-	 * マウスイベントをラッピングします
-	 * @param e 元となるマウスイベント
-	 * @return ラップしたAPainterMouseEvent
-	 */
-	static public PenTabletMouseEvent wrapEvent(MouseEvent e){return wrapEvent(e,null,null);}
 
 	/**
 	 * 前後関係を指定し、マウスイベントをラッピングします
@@ -293,7 +287,7 @@ public final class PenTabletMouseEvent extends MouseEvent{
 	 * @param nex リストの後方
 	 * @return ラップしたAPainterMouseEvent
 	 */
-	static public PenTabletMouseEvent wrapEvent(MouseEvent e,PenTabletMouseEvent befo,PenTabletMouseEvent nex)
+	static public PenTabletMouseEvent wrapEvent(MouseEvent e)
 	{
 		State state;
 		int id = e.getID();
@@ -303,7 +297,7 @@ public final class PenTabletMouseEvent extends MouseEvent{
 		else if(SwingUtilities.isMiddleMouseButton(e))bt = ButtonType.BUTTON2;
 		else if(SwingUtilities.isRightMouseButton(e))bt = ButtonType.BUTTON3;
 		return new PenTabletMouseEvent((Component)e.getSource(), id, e.getWhen(), e.getModifiers(), e.getX(), e.getY(),
-				e.getClickCount(), e.isPopupTrigger(), e.getButton(), bt, CursorDevice.MOUSE, state,befo,nex);
+				e.getClickCount(), e.isPopupTrigger(), e.getButton(), bt, CursorDevice.MOUSE, state);
 	}
 
 	static public PenTabletMouseEvent createEvent(Component source,long when,int modifiers,double x,double y,
@@ -368,7 +362,7 @@ public final class PenTabletMouseEvent extends MouseEvent{
 		else if(pres >1)pres = 1;
 		int id=state.getID();
 		return new PenTabletMouseEvent(source, id, when, modifiers, x, y,
-				clickCount, popupTrigger, btype, ctype, state, pres, rot, tx, ty,befo,nex);
+				clickCount, popupTrigger, btype, ctype, state, pres, rot, tx, ty);
 	}
 
 	static public PenTabletMouseEvent createEvent(Component source,long when,int modifiers,double x,double y,

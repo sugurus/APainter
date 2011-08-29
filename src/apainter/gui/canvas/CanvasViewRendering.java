@@ -13,6 +13,12 @@ public interface CanvasViewRendering {
 	 * @param r
 	 */
 	public void rendering(Rectangle r);
+	public void repaintMove();
+
+	public void rotation();
+	public void qualityRendering(boolean b);
+
+	public void init();
 
 
 }

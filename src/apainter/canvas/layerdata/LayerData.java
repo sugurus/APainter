@@ -3,6 +3,7 @@ package apainter.canvas.layerdata;
 import static apainter.misc.Util.*;
 
 import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -202,7 +203,12 @@ abstract public class LayerData implements DrawAccepter{
 	public abstract void rendering();
 	public abstract void rendering(Rectangle clip);
 
-	public abstract JComponent testMethod_createViewPanel();
+
+	/**
+	 * 保存用のBufferedImage作成、レンダリングし、返します
+	 * @return
+	 */
+	public abstract BufferedImage createImage();
 
 
 
@@ -234,6 +240,8 @@ abstract public class LayerData implements DrawAccepter{
 	public InnerLayerHandler getLayer(int id) {
 		return layerlist.getLayer(id);
 	}
+
+	public abstract void dispose();
 
 
 

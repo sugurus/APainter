@@ -30,7 +30,7 @@ DEMORUN=demo.APainterDemo
 JAR=apainter.jar
 MANIFEST=apainter.mf
 
-
+MOVE=m
 
 
 
@@ -39,8 +39,7 @@ CP=-classpath $(JPENPATH)
 
 
 $(CLASSDIR)/$(DEMO).class:$(SOURCEDIR)/$(DEMO).java
-	mkdir -p $(CLASSDIR)
-	$(JAVAC) -Xlint:unchecked $(CP) $(ENCODING) -d $(CLASSDIR) -sourcepath $(SOURCEDIR) $<
+	java $(CP)$(CLASSPATHSEP)make Make $(CLASSDIR) $(JPENPATH)
 
 $(JAR):$(CLASSDIR)/$(APainter).class
 	jar cfm $(JAR) $(MANIFEST) -C $(CLASSDIR) apainter -C $(CLASSDIR) nodamushi

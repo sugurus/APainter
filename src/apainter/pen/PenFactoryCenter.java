@@ -3,7 +3,7 @@ package apainter.pen;
 import java.net.URL;
 import java.util.ArrayList;
 
-import apainter.pen.impl.TestPenFactory;
+import apainter.pen.impl.CylinderPenFactory;
 import apainter.pen.impl.URLPenFactory;
 
 public class PenFactoryCenter {
@@ -14,7 +14,7 @@ public class PenFactoryCenter {
 
 	public PenFactoryCenter() {
 		PenShapeFactory f;
-		f = new TestPenFactory(id());
+		f = new CylinderPenFactory(id());
 		factory.add(f);
 
 	}

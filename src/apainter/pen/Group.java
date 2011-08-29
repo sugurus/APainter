@@ -9,7 +9,7 @@ import static apainter.pen.APainterPen.*;
 
 public class Group{
 	private int size,width,height,xblocks,yblocks;
-	private Pen[] pens;
+	private PenData[] pens;
 	private int mode;
 
 
@@ -24,12 +24,12 @@ public class Group{
 		this.height = height;
 		this.xblocks=xblocks;
 		this.yblocks=yblocks;
-		pens = new Pen[xblocks*yblocks];
+		pens = new PenData[xblocks*yblocks];
 		if(mode<0 || mode >2)throw new RuntimeException("unsupertedMode "+mode);
 		this.mode = mode;
 	}
 
-	public Pen[] getPens(){
+	public PenData[] getPens(){
 		return pens.clone();
 	}
 
@@ -50,10 +50,10 @@ public class Group{
 		return yblocks;
 	}
 
-	public Pen createPen(int x,int y){
+	public PenData createPen(int x,int y){
 		if(x <0 || x >=xblocks)throw new RuntimeException("x :"+x);
 		if(y<0 || y >=yblocks)throw new RuntimeException("y :"+y);
-		Pen p=null;
+		PenData p=null;
 		if(mode==0){
 			p = new Pen8bitGray(width,height,x,y);
 		}else{
@@ -78,7 +78,7 @@ public class Group{
 	public void write(OutputStream out) throws IOException{
 		if(mode==0){
 			ByteArrayOutputStream b = new ByteArrayOutputStream(10000);
-			for(Pen p :pens){
+			for(PenData p :pens){
 				if(p==null)throw new Error();
 				Pen8bitGray pp = (Pen8bitGray)p;
 				b.write(pp.mapdata);
@@ -107,7 +107,7 @@ public class Group{
 		}
 	}
 
-	public Pen getPen(int x, int y) {
+	public PenData getPen(int x, int y) {
 		return pens[x+y*xblocks];
 	}
 

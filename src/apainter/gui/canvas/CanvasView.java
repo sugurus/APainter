@@ -3,7 +3,6 @@ package apainter.gui.canvas;
 import static apainter.misc.Util.*;
 import static java.lang.Math.*;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -15,17 +14,19 @@ import java.awt.event.ComponentListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
+import java.awt.geom.Point2D;
+import java.awt.geom.Point2D.Double;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import apainter.GlobalValue;
-import apainter.canvas.Canvas;
-import apainter.construct.Angle;
-import java.awt.geom.Point2D.Double;
-
 import nodamushi.pentablet.PenTabletMouseEvent;
 import nodamushi.pentablet.PenTabletRecognizer;
+import apainter.GlobalValue;
+import apainter.bind.Bind;
+import apainter.bind.BindObject;
+import apainter.canvas.Canvas;
+import apainter.misc.Angle;
 
 //注意　Double==>Point2D.Double
 public final class CanvasView extends JPanel{
@@ -82,7 +83,7 @@ public final class CanvasView extends JPanel{
 		canvasRendering = rendering;
 		this.canvas = nullCheack(canvas, "canvas is null!");
 		canvasDafaultSize = new Dimension(width,height);
-		setBackground(Color.white);
+		setOpaque(false);
 		setAffinTransform();
 		addComponentListener(componentlistener);
 		overlayer.setOpaque(false);
@@ -125,12 +126,12 @@ public final class CanvasView extends JPanel{
 
 				background.setBounds(0, 0, w, h);
 				overlayer.setBounds(0, 0, w, h);
+				canvasRendering.init();
 
 			}
 			@Override public void removeLayoutComponent(Component comp) {}
 			@Override public void addLayoutComponent(String name, Component comp) {}
 		});
-
 		installMouseListener();
 
 	}
@@ -196,9 +197,19 @@ public final class CanvasView extends JPanel{
 		};
 	}
 
+
+	public void setQuarityRendering(boolean b){
+		canvasRendering.qualityRendering(b);
+	}
+
 	public void rendering(){
 		canvasRendering.rendering();
 	}
+
+	public void rendering_rotation(){
+		canvasRendering.rotation();
+	}
+
 	public void rendering(Rectangle r){
 		canvasRendering.rendering(r);
 	}
@@ -252,21 +263,16 @@ public final class CanvasView extends JPanel{
 	//----setter--------------------------------------
 	public void setReverse(boolean reverse) {
 		if(reverse==this.reverse){
-			this.reverse = reverse;
-			setAffinTransform();
+			reverseBindObject.set(reverse);
 		}
 	}
 	public void setZoom(double zoom) {
-		if(zoom < 0.05)zoom = 0.05;
-		else if(zoom > 16)zoom = 16;
-		this.zoom = zoom;
-		setAffinTransform();
+		zoomBindObject.set(zoom);
 	}
 
 	public void setAngle(Angle a){
 		if(a==null)return;
-		angle = a;
-		setAffinTransform();
+		angleBindObject.set(a);
 	}
 	public void setAngle(double degree) {
 		setAngle(new Angle(degree));
@@ -296,10 +302,9 @@ public final class CanvasView extends JPanel{
 		setCenterPoint(getCenterX(), y);
 	}
 
-	public void setDefaultCenterPoint(double x,double y){
-		centerR = hypot(x, y);
-		centerAngle = Angle.getAngle(x, y);
-		setAffinTransform();
+	private void setDefaultCenterPoint(double x,double y){
+		Double d = new Double(x,y);
+		posBindObject.set(d);
 	}
 
 	/**
@@ -357,7 +362,6 @@ public final class CanvasView extends JPanel{
 			toComponent = toCanvas.createInverse();
 		} catch (NoninvertibleTransformException e) {
 			//必ず逆行列は存在する。
-			e.printStackTrace();
 		}
 	}
 
@@ -426,5 +430,143 @@ public final class CanvasView extends JPanel{
 	@Override @Deprecated
 	public void setLayout(LayoutManager mgr) {}
 
+
+
+
+
+
+
+
+
+	//----bind-------------------
+
+	public void removeAllBinds(){
+		reverseBind.removeAll();
+		posBind.removeAll();
+		angleBind.removeAll();
+		zoomBind.removeAll();
+	}
+
+	private final BindObject reverseBindObject = new BindObject() {
+
+		@Override
+		public void setValue(Object value) throws Exception {
+			reverse = (Boolean)value;
+			setAffinTransform();
+		}
+
+		@Override
+		public Object get() {
+			return reverse;
+		}
+
+		public boolean isSettable(Object value) {
+			return value instanceof Boolean;
+		}
+	};
+	private final Bind reverseBind = new Bind(reverseBindObject);
+
+	public void addreverseBindObject(BindObject b) {
+		reverseBind.add(b);
+	}
+
+	public void removereverseBindObject(BindObject b) {
+		reverseBind.remove(b);
+	}
+
+	private boolean posset= true;
+	private final BindObject posBindObject = new BindObject() {
+
+		@Override
+		public void setValue(Object value) throws Exception {
+			if(posset){
+				Point2D p = (Point2D) value;
+				double x = p.getX(),y = p.getY();
+				centerR = hypot(x, y);
+				centerAngle = Angle.getAngle(x, y).add(-angle.degree);
+				setAffinTransform();
+			}
+		}
+
+		@Override
+		public Object get() {
+			return new Double(getCenterX(),getCenterY());
+		}
+
+		public boolean isSettable(Object value) {
+			return value instanceof Point2D;
+		}
+	};
+	private final Bind posBind = new Bind(posBindObject);
+
+	public void addposBindObject(BindObject b) {
+		posBind.add(b);
+	}
+
+	public void removeposBindObject(BindObject b) {
+		posBind.remove(b);
+	}
+
+	private final BindObject angleBindObject = new BindObject() {
+
+		@Override
+		public void setValue(Object value) throws Exception {
+			angle = (Angle)value;
+			setAffinTransform();
+			posset  = false;
+			setCenterPoint(getCenterX(), getCenterY());
+			posset = true;
+		}
+
+		@Override
+		public Object get() {
+			return angle;
+		}
+
+		public boolean isSettable(Object value) {
+			return value instanceof Angle;
+		}
+	};
+	private final Bind angleBind = new Bind(angleBindObject);
+
+	public void addangleBindObject(BindObject b) {angleBind.add(b);}
+	public void removeangleBindObject(BindObject b) {angleBind.remove(b);}
+	private final BindObject zoomBindObject = new BindObject() {
+		@Override
+		public void setValue(Object value) throws Exception {
+			double d = (java.lang.Double)value;
+			double old = zoom;
+			zoom = d;
+			double k = zoom/old;
+			centerR *=k;
+			setAffinTransform();
+			posset  = false;
+			setCenterPoint(getCenterX(), getCenterY());
+			posset = true;
+		}
+
+		@Override
+		public Object get() {
+			return zoom;
+		}
+
+		public boolean isSettable(Object obj) {
+			if(obj instanceof java.lang.Double){
+				double d = (java.lang.Double)obj;
+				if(d < 0.20)return false;
+				else if(d > 16)return false;
+				return true;
+			}
+			return false;
+		}
+	};
+	private final Bind zoomBind = new Bind(zoomBindObject);
+	public void addzoomBindObject(BindObject b) {zoomBind.add(b);}
+	public void removezoomBindObject(BindObject b) {zoomBind.remove(b);}
+
+
+	public void repaintMove() {
+		canvasRendering.repaintMove();
+	}
 
 }

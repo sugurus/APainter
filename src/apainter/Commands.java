@@ -3,12 +3,19 @@ package apainter;
 import static apainter.GlobalKey.*;
 import static java.util.regex.Pattern.*;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.imageio.ImageIO;
 
 import apainter.canvas.Canvas;
 import apainter.canvas.CanvasHandler;
@@ -17,12 +24,69 @@ import apainter.canvas.layerdata.LayerHandler;
 import apainter.command.Command;
 import apainter.command.CommandCenter;
 import apainter.command.CommandDecoder;
+import apainter.drawer.Drawer;
+import apainter.drawer.painttool.Eraser;
 import apainter.drawer.painttool.Pen;
+import apainter.gui.canvas.CanvasMouseListener;
 import apainter.gui.canvas.CanvasView;
 import apainter.misc.Utility_PixelFunction;
+import apainter.pen.PenFactoryCenter;
+import apainter.pen.PenShape;
 import apainter.rendering.ColorMode;
 
 //名前の付け方は必ず最初に_を付けること。
+class _GetDrawer implements CommandDecoder {
+	private static final String name = "getdrawer";
+	private static final String help = ":::";
+
+	private static class Com extends Command {
+		int i;
+
+		Com(int i) {
+			this.i = i;
+		}
+
+		@Override
+		public Object execution(GlobalValue global) {
+			@SuppressWarnings("unchecked")
+			ArrayList<CanvasMouseListener> l = (ArrayList<CanvasMouseListener>) global.get(CanvasActionList);
+
+			for(CanvasMouseListener c:l){
+				if(c instanceof Drawer && ((Drawer) c).getID()==i){
+					return c;
+				}
+			}
+			return null;
+		}
+	}
+
+	@Override
+	public String getCommandName() {
+		return name;
+	}
+
+	@Override
+	public String help() {
+		return help;
+	}
+
+	@Override
+	public Command decode(String[] param) {
+
+		if (param.length == 0) {
+			return null;
+		} else {
+			try{
+				int i= Integer.parseInt(param[0]);
+				return new Com(i);
+			}catch(NumberFormatException e){
+				return null;
+			}
+		}
+
+	}
+}
+
 
 class _Debag_FillLayer implements CommandDecoder {
 	private static final String name = "debag{filllayer}";
@@ -117,6 +181,348 @@ class _Debag_FillLayer implements CommandDecoder {
 	}
 }
 
+class _Debag_MinPenDensity implements CommandDecoder {
+	private static final String name = "minpendens";
+	private static final String help = "minpendens drawerid percent:::筆圧によるペンの濃度の変化の最小比率を設定します.drawerid=>0:ペン、1:消しゴム。0 <= percent <= 100.this is a debag command";
+
+	private static class Com extends Command {
+		int p;
+		int id;
+
+		Com(int s,int i) {
+			p = s;
+			id = i;
+			if(p < 0) p = 0;
+			else if(p > 100)p = 100;
+		}
+
+		@Override
+		public Object execution(GlobalValue global) {
+			@SuppressWarnings("unchecked")
+			ArrayList<CanvasMouseListener> l = (ArrayList<CanvasMouseListener>) global.get(CanvasActionList);
+
+			for(CanvasMouseListener c:l){
+				if(c instanceof Drawer && ((Drawer) c).getID() == id){
+					((Drawer)c).setMinDensity(p/100d);
+				}
+			}
+			return null;
+		}
+	}
+
+	@Override
+	public String getCommandName() {
+		return name;
+	}
+
+	@Override
+	public String help() {
+		return help;
+	}
+
+	@Override
+	public Command decode(String[] param) {
+
+		if (param.length == 0) {
+			return null;
+		} else {
+			try{
+				int s = Integer.parseInt(param[1]);
+				int i = Integer.parseInt(param[0]);
+				return new Com(s,i);
+			}catch (NumberFormatException e) {
+				return null;
+			}
+
+		}
+
+	}
+}
+
+
+class _Debag_MinPenSize implements CommandDecoder {
+	private static final String name = "minpensize";
+	private static final String help = "minpensize drawerid percent:::筆圧によるペンのサイズの変化の最小比率を設定します.drawerid=>0:ペン、1:消しゴム。0 <= percent <= 100.this is a debag command";
+
+	private static class Com extends Command {
+		int p;
+		int id;
+
+		Com(int s,int i) {
+			p = s;
+			id = i;
+			if(p < 0) p = 0;
+			else if(p > 100)p = 100;
+		}
+
+		@Override
+		public Object execution(GlobalValue global) {
+			@SuppressWarnings("unchecked")
+			ArrayList<CanvasMouseListener> l = (ArrayList<CanvasMouseListener>) global.get(CanvasActionList);
+
+			for(CanvasMouseListener c:l){
+				if(c instanceof Drawer && ((Drawer) c).getID() == id){
+					((Drawer)c).setMinSize(p/100d);
+				}
+			}
+			return null;
+		}
+	}
+
+	@Override
+	public String getCommandName() {
+		return name;
+	}
+
+	@Override
+	public String help() {
+		return help;
+	}
+
+	@Override
+	public Command decode(String[] param) {
+
+		if (param.length != 2) {
+			return null;
+		} else {
+			try{
+				int s = Integer.parseInt(param[1]);
+				int i = Integer.parseInt(param[0]);
+				return new Com(s,i);
+			}catch (NumberFormatException e) {
+				return null;
+			}
+
+		}
+
+	}
+}
+
+class _GetPenFactory implements CommandDecoder {
+	private static final String name = "getpenf";
+	private static final String help = ":::";
+
+	private static class Com extends Command {
+		int id;
+
+		Com(int i) {
+			id = i;
+		}
+
+		@Override
+		public Object execution(GlobalValue global) {
+			return global.get(PenFactoryCenter,PenFactoryCenter.class).getPenShapeFactory(id);
+		}
+	}
+
+	@Override
+	public String getCommandName() {
+		return name;
+	}
+
+	@Override
+	public String help() {
+		return help;
+	}
+
+	@Override
+	public Command decode(String[] param) {
+
+		if (param.length >= 1) {
+			try{
+				int i = Integer.parseInt(param[0]);
+				return new Com(i);
+			}catch (NumberFormatException e) {
+				return null;
+			}
+		}
+		return null;
+
+	}
+}
+
+class _Debag_SetPenSize implements CommandDecoder {
+	private static final String name = "pensize";
+	private static final String help = "pensize drawerid size:::set pen size.this is a debug command.";
+
+	private static class Com extends Command {
+		int size;
+		int id;
+
+		Com(int s,int i) {
+			size = s;
+			id = i;
+		}
+
+		@Override
+		public Object execution(GlobalValue global) {
+			@SuppressWarnings("unchecked")
+			ArrayList<CanvasMouseListener> l = (ArrayList<CanvasMouseListener>) global.get(CanvasActionList);
+
+			for(CanvasMouseListener c:l){
+				if(c instanceof Drawer && ((Drawer) c).getID()==id){
+					PenShape p=global.get(PenFactoryCenter,PenFactoryCenter.class).getPenShapeFactory(0).createPenShape(size, Device.CPU);
+					((Drawer) c).setPen(p);
+				}
+			}
+
+
+			return null;
+		}
+	}
+
+	@Override
+	public String getCommandName() {
+		return name;
+	}
+
+	@Override
+	public String help() {
+		return help;
+	}
+
+	@Override
+	public Command decode(String[] param) {
+
+		if (param.length != 2) {
+			return null;
+		} else {
+			try{
+				int i = Integer.parseInt(param[0]);
+				int s = Integer.parseInt(param[1]);
+				return new Com(s*10,i);
+			}catch (NumberFormatException e) {
+				return null;
+			}
+
+		}
+
+	}
+}
+
+class _Debag_SaveCanvasImage implements CommandDecoder {
+	private static final String name = "saveci";
+	private static final String help = "saveci filepath filetype:::save the current canvas image as filetype.this is a debug command.filetype -> jpg,jpeg,gif,png,png24,bmp. png24 is a png file that does't have alpha channels.";
+
+	private static class Com extends Command {
+		File path;
+		String type;
+		Com(String[] parameta) {
+			path = new File(parameta[0]);
+			type = parameta[1].toLowerCase();
+		}
+
+		@Override
+		public Object execution(GlobalValue global) {
+			Canvas c = global.get(CurrentCanvas, Canvas.class);
+			if(c!=null){
+				BufferedImage b = c.createSaveImage();
+				if("jpeg".equals(type)||"jpg".equals(type)||"png24".equals(type)||"bmp".equals(type)){
+					int w,h;
+					BufferedImage bb = new BufferedImage(w=b.getWidth(), h=b.getHeight(), BufferedImage.TYPE_INT_RGB);
+					Graphics2D g = bb.createGraphics();
+					g.setColor(Color.white);
+					g.fillRect(0, 0, w, h);
+					g.drawImage(b,0,0,w,h,null);
+					g.dispose();
+					b = bb;
+				}
+				String type = this.type;
+				if("png24".equals(type)){
+					type = "png";
+				}
+				try {
+					ImageIO.write(b, type, path);
+				} catch (IOException e) {
+					e.printStackTrace(global.getCommandPrintStream());
+				}
+			}
+			return null;
+		}
+	}
+
+	@Override
+	public String getCommandName() {
+		return name;
+	}
+
+	@Override
+	public String help() {
+		return help;
+	}
+
+	@Override
+	public Command decode(String[] param) {
+
+		if (param.length != 2) {
+			return null;
+		} else {
+			return new Com(param);
+		}
+
+	}
+}
+
+class _CreateCanvasImage implements CommandDecoder {
+	private static final String name = "canvasi";
+	private static final String help = "canvasi [canvasid]:::render the canvas which id is canvasid,and return a BufferedImage.if canvasid does't be defined,the rendered canvas is the current canvas." +
+			"type of the BufferedImage is type_int_argb.if you will save this image as a jpeg file,you must convert the image to a image which type doesn't have alpha values.";
+
+	private static class Com extends Command {
+		Integer id;
+
+		Com(Integer id) {
+			this.id = id;
+		}
+
+		@Override
+		public Object execution(GlobalValue global) {
+			Canvas c=null;
+			if(id==null){
+				c =global.get(CurrentCanvas, Canvas.class);
+			}else{
+				CanvasList list = global.get(CanvasList,CanvasList.class);
+				for(Canvas ca:list){
+					if(ca.getID() == id){
+						c = ca;
+					}
+				}
+				if(c==null){
+					c = global.get(CurrentCanvas, Canvas.class);
+				}
+			}
+			if(c!=null){
+				return c.createSaveImage();
+			}
+			return null;
+		}
+	}
+
+	@Override
+	public String getCommandName() {
+		return name;
+	}
+
+	@Override
+	public String help() {
+		return help;
+	}
+
+	@Override
+	public Command decode(String[] param) {
+
+		if (param.length == 0) {
+			return new Com(null);
+		} else {
+			try{
+				return new Com(Integer.parseInt(param[0]));
+			}catch(NumberFormatException e){
+				return new Com(null);
+			}
+		}
+
+	}
+}
 class _LayerColorMode implements CommandDecoder {
 	private static final String name = "layercolormode";
 	private static final String help = "layercolormode [modename [layerid]]:::set a color mode of a layer that the current canvas contains.when undefined layerid,target layer is selected layer.";
@@ -690,6 +1096,7 @@ class _Exit implements CommandDecoder{
 	}
 }
 
+
 class Commands implements CommandDecoder {
 	private static final String name = "help";
 	private static final String help="help:::show all commands";
@@ -715,7 +1122,7 @@ class Commands implements CommandDecoder {
 				if(help.length==2){
 					str.append("\n  ").append(help[1]);
 				}
-				str.append("\n");
+				str.append("\n\n");
 			}
 			global.commandPrintln(str);
 			return null;

@@ -1,19 +1,11 @@
 package apainter.drawer.painttool;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
-import javax.swing.event.EventListenerList;
-
 import nodamushi.pentablet.PenTabletMouseEvent;
 import apainter.Device;
 import apainter.GlobalValue;
-import apainter.bind.annotation.BindProperty;
 import apainter.rendering.ColorMode;
 import apainter.rendering.Renderer;
 import apainter.rendering.RenderingOption;
-
-import static apainter.PropertyChangeNames.*;
 public class Pen extends BasicDrawer{
 
 	Renderer cpu8bit = new PenCPUDefaultRendering();
@@ -36,8 +28,8 @@ public class Pen extends BasicDrawer{
 	};
 
 
-	public Pen(GlobalValue global) {
-		super(global);
+	public Pen(GlobalValue global,int id) {
+		super(global,id);
 //		Device d = getDevice();
 //		if(d==Device.GPU){
 //			//GPU
@@ -117,42 +109,15 @@ public class Pen extends BasicDrawer{
 		return mode;
 	}
 
-	@BindProperty(PenModePropertyChange)
 	public void setColorMode(ColorMode m){
 		if(m==null|| m==ColorMode.AlphaDawn || m==ColorMode.AlphaPlus || m==ColorMode.Del || m==mode)return;
 		ColorMode old = mode;
 		mode = m;
-		firePropertyChange(PenModePropertyChange, old, mode);
 	}
 
 	public void setColorMode(String colormode){
 		ColorMode m = ColorMode.getColorMode(colormode);
 		setColorMode(m);
-	}
-
-	// listener--------------------------------------
-
-	private EventListenerList listener = new EventListenerList();
-
-	public void addPropertyChangeListener(PropertyChangeListener l) {
-		listener.remove(PropertyChangeListener.class, l);
-		listener.add(PropertyChangeListener.class, l);
-	}
-
-	public void removePropertyChangeListener(PropertyChangeListener l) {
-		listener.remove(PropertyChangeListener.class, l);
-	}
-
-	public void firePropertyChange(String name, Object oldValue, Object newValue) {
-		PropertyChangeEvent e = new PropertyChangeEvent(this, name, oldValue,
-				newValue);
-
-		Object[] listeners = this.listener.getListenerList();
-		for (int i = listeners.length - 2; i >= 0; i -= 2) {
-			if (listeners[i] == PropertyChangeListener.class) {
-				((PropertyChangeListener) listeners[i + 1]).propertyChange(e);
-			}
-		}
 	}
 
 }

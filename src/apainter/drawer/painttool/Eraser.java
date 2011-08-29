@@ -19,8 +19,8 @@ public class Eraser extends BasicDrawer{
 
 	Renderer cpu8bit = new EraserCPURendering();
 
-	public Eraser(GlobalValue global) {
-		super(global);
+	public Eraser(GlobalValue global,int id) {
+		super(global,id);
 	}
 
 	@Override
@@ -67,9 +67,9 @@ class EraserCPURendering implements Renderer{
 		}
 		else{
 			if(option.hasDestinationMask()){
-				renderint_dmask(base, (PixelDataIntBuffer)over, p, clip, option,(PixelDataByteBuffer)option.destinationmask);
+				renderint_dmask(base, (PixelDataByteBuffer)over, p, clip, option,(PixelDataByteBuffer)option.destinationmask);
 			}else{
-				renderint(base, (PixelDataIntBuffer)over, p, clip, option);
+				renderint(base, (PixelDataByteBuffer)over, p, clip, option);
 			}
 		}
 	}
@@ -85,10 +85,10 @@ class EraserCPURendering implements Renderer{
 
 	}
 
-	final static void renderint(PixelDataIntBuffer base,PixelDataIntBuffer over,Point p,Rectangle clip,RenderingOption option){
+	final static void renderint(PixelDataIntBuffer base,PixelDataByteBuffer over,Point p,Rectangle clip,RenderingOption option){
 		final int[] basep = base.getData();
 		final int basew = base.width;
-		final int[] overp = over.getData();
+		final byte[] overp = over.getData();
 		final int overw = over.width;
 		final int overalph = option.overlayeralph;
 		final int endy = clip.height+clip.y,endx=clip.width+clip.x;
@@ -114,12 +114,12 @@ class EraserCPURendering implements Renderer{
 		}
 	}
 
-	final static void renderint_dmask(PixelDataIntBuffer base,PixelDataIntBuffer over,Point p,Rectangle clip,RenderingOption option,
+	final static void renderint_dmask(PixelDataIntBuffer base,PixelDataByteBuffer over,Point p,Rectangle clip,RenderingOption option,
 			PixelDataByteBuffer dmask){
 		final int[] basep = base.getData();
 		final int basew = base.width;
 		final byte[] dmaskp = dmask.getData();
-		final int[] overp = over.getData();
+		final byte[] overp = over.getData();
 		final int overw = over.width;
 		final int overalph = option.overlayeralph;
 		final int endy = clip.height+clip.y,endx=clip.width+clip.x;

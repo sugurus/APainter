@@ -4,7 +4,11 @@ public enum GlobalKey{
 	APainter(false),
 	FrontColor(false),BackColor(false),
 	CanvasList(false),CurrentCanvas,
-	CanvasActionList(false),CanvasHeadAction,CanvasTailAction,
+	/**
+	 * ArrayListです
+	 */
+	CanvasActionList(false),
+	CanvasHeadAction,CanvasTailAction,
 	PenFactoryCenter(false),OnDevice(false),
 
 	CommandCenter(false),

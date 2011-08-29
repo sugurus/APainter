@@ -1,4 +1,4 @@
-package apainter.construct;
+package apainter.misc;
 
 import java.awt.geom.Dimension2D;
 

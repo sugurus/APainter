@@ -1,13 +1,10 @@
 package apainter.color;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+import java.util.Arrays;
 
-import javax.swing.event.EventListenerList;
-
-import apainter.bind.annotation.BindProperty;
+import apainter.bind.BindObject;
 import apainter.misc.Util;
-import static apainter.PropertyChangeNames.*;
+import apainter.misc.Utility_PixelFunction;
 /**
  * ARGBの順に格納されている。<br>
  * A透明度<br>
@@ -25,8 +22,43 @@ public class Color implements Cloneable{
 	 * 色がないという情報を表すargb値
 	 */
 	public static final int NotColor = 1;
-	private long colorlong=0;
-	private int colorint=0;
+
+	private float a,r,g,b;
+	public final BindObject bindObject = new BindObject() {
+
+		@Override
+		public void setValue(Object value) throws Exception {
+			float[] fs = (float[])value;
+			a = fs[0];
+			r = fs[1];
+			g = fs[2];
+			b = fs[3];
+		}
+
+		@Override
+		public Object get() {
+			return new float[]{a,r,g,b};
+		}
+
+		public boolean isSettable(Object obj) {
+			if(obj instanceof float[]){
+				float[] fs = (float[])obj;
+				if(fs.length >= 4){
+					if(fs[0] > 1)fs[0] = 1;
+					else if(fs[0] < 0) fs[0] = 0;
+					if(fs[1] > 1)fs[1] = 1;
+					else if(fs[1] < 0) fs[1] = 0;
+					if(fs[2] > 1)fs[2] = 1;
+					else if(fs[2] < 0) fs[2] = 0;
+					if(fs[3] > 1)fs[3] = 1;
+					else if(fs[3] < 0) fs[3] = 0;
+					return true;
+				}return false;
+			}else return false;
+
+
+		}
+	};
 
 
 	public static int RGB2YCrCb(int argb){
@@ -90,8 +122,10 @@ public class Color implements Cloneable{
 		set16bitARGB(argb);
 	}
 	public Color(Color c){
-		colorint = c.colorint;
-		colorlong = c.colorlong;
+		a = c.a;
+		r = c.r;
+		g = c.g;
+		b = c.b;
 	}
 
 	@Override
@@ -202,118 +236,71 @@ public class Color implements Cloneable{
 	  * 色要素の値が255の時のみ、16bitでの値を0xffffとし、それ以外の場合下位8bitは0になります。
 	  * @param argb
 	  */
-	 @BindProperty(ColorPropertyChange)
 	 public void setARGB(int argb){
-		 if(colorint==argb)return;
-		 int oldValue = colorint;
-		 int a = argb>>>24;
-		 if(a==0)argb = 0;
-		 colorint = argb;
-		 int r = argb>>16&0xff;
-		 int g = argb>>8&0xff;
-		 int b = argb &0xff;
-		 a <<=8;
-		 r <<=8;
-		 g <<=8;
-		 b <<=8;
-		 if(a==0xff00)a=0xffff;
-		 if(r==0xff00)r=0xffff;
-		 if(g==0xff00)g=0xffff;
-		 if(b==0xff00)b=0xffff;
-		 colorlong = (long)a << 48 | (long)r << 32 | g << 16 | b;
-		 firePropertyChange(ColorPropertyChange, oldValue, colorint);
+		 int a,r,g,b;
+		 a = Utility_PixelFunction.a(argb);
+		 r = Utility_PixelFunction.r(argb);
+		 g = Utility_PixelFunction.g(argb);
+		 b = Utility_PixelFunction.b(argb);
+		 setARGB(a, r, g, b);
 	 }
 
 	 public void setARGB(int a,int r,int g,int b){
-		 setARGB(a<<24 | r << 16|g<<8|b);
+		 float[] f = {a/255f,r/255f,g/255f,b/255f};
+		 bindObject.set(f);
 	 }
 
-	 @BindProperty(LongColorPropertyChange)
 	 public void set16bitARGB(long argb){
-		 if(argb == colorlong)return;
-		 long oldValue = colorlong;
-		 int a = (int) (argb>>>48);
-		 if(a==0)argb = 0;
-		 colorlong = argb;
-		 int r = (int) (argb>>32&0xffff);
-		 int g = (int) (argb>>16&0xffff);
-		 int b = (int) (argb &0xffff);
-		 a >>=8;
-		 r >>=8;
-		 g >>=8;
-		 b >>=8;
-		 colorint =a<<24 | r << 16|g<<8|b;
-		 firePropertyChange(LongColorPropertyChange, oldValue, colorlong);
+		 int a,r,g,b;
+		 a = Utility_PixelFunction.a(argb);
+		 r = Utility_PixelFunction.r(argb);
+		 g = Utility_PixelFunction.g(argb);
+		 b = Utility_PixelFunction.b(argb);
+		 set16bitARGB(a, r, g, b);
 	 }
 
 	 public void set16bitARGB(int a,int r,int g,int b){
-		 set16bitARGB((long)a << 48 | (long)r << 32 | g << 16 | b);
+		 float[] f = {a/65535f,r/65535f,g/65535f,b/65535f};
+		 bindObject.set(f);
 	 }
 
 
 
 	 public int getARGB(){
-		 return colorint;
+		 return getA()<<24 | getR() << 16 | getG() << 8 | getB();
 	 }
 
 	 public long get16bitARGB(){
-		 return colorlong;
+		 return  (long)(get16bitA()<<16 | get16bitR())<<32 | (get16bitG() << 16 | get16bitB());
 	 }
 
 	 public int getA(){
-		 return colorint>>>24;
+		 return (int) (a*255);
 	 }
 	 public int get16bitA(){
-		 return (int) (colorlong >>>48);
+		 return (int) (a*65535);
 	 }
 	 public int getR(){
-		 return colorint>>16&0xff;
+		 return (int) (r*255);
 	 }
 	 public int get16bitR(){
-		 return (int)(colorlong>>>32&0xffff);
+		 return (int) (r*65535);
 	 }
 
 	 public int getG(){
-		 return colorint>>8&0xff;
+		 return (int) (g*255);
 	 }
 	 public int get16bitG(){
-		 return (int)(colorlong>>>16&0xffff);
+		 return (int) (g*65535);
 	 }
 	 public int getB(){
-		 return colorint&0xff;
+		 return (int) (b*255);
 	 }
 	 public int get16bitB(){
-		 return (int)(colorlong&0xffff);
+		 return (int) (b*65535);
 	 }
 
 	 public java.awt.Color toAwtColor(){
-		 return new java.awt.Color(colorint, true);
+		 return new java.awt.Color(r, g, b, a);
 	 }
-
-
-
-
-	private EventListenerList listener = new EventListenerList();
-
-	public void addPropertyChangeListener(PropertyChangeListener l) {
-		listener.remove(PropertyChangeListener.class, l);
-		listener.add(PropertyChangeListener.class, l);
-	}
-
-	public void removePropertyChangeListener(PropertyChangeListener l) {
-		listener.remove(PropertyChangeListener.class, l);
-	}
-
-	public void firePropertyChange(String name, Object oldValue, Object newValue) {
-		PropertyChangeEvent e = new PropertyChangeEvent(this, name, oldValue,
-				newValue);
-
-		Object[] listeners = this.listener.getListenerList();
-		for (int i = listeners.length - 2; i >= 0; i -= 2) {
-			if (listeners[i] == PropertyChangeListener.class) {
-				((PropertyChangeListener) listeners[i + 1]).propertyChange(e);
-			}
-		}
-	}
-
 }

@@ -14,7 +14,7 @@ public interface CommandDecoder {
 	 * @param コマンドのパラメータ文字配列。nullは渡されない。(パラメータがない場合空配列が入る)
 	 * @return Command実行オブジェクト。パラメータが正しくない場合はnull
 	 */
-	public Command decode(String[] params);
+	public Command decode(String[] params) throws Exception;
 
 	/**
 	 * コマンド名を返します。

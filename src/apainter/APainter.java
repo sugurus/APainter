@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
 import javax.swing.event.EventListenerList;
 
 import apainter.annotation.Version;
+import apainter.bind.BindObject;
 import apainter.canvas.Canvas;
 import apainter.canvas.CanvasHandler;
 import apainter.canvas.cedt.cpu.CPUParallelWorkThread;
@@ -52,6 +53,7 @@ import apainter.pen.PenShapeFactory;
 public class APainter {
 
 
+	private static final int maxSize = 2000;
 	private static AtomicInteger apainterid = new AtomicInteger();
 	/**
 	 * 新しいAPainterを起動します。
@@ -125,8 +127,8 @@ public class APainter {
 		{
 			PenFactoryCenter p = new PenFactoryCenter();
 			global.put(PenFactoryCenter, p);
-			Pen pen = new Pen(global);
-			Eraser era = new Eraser(global);
+			Pen pen = new Pen(global,0);
+			Eraser era = new Eraser(global,1);
 			PenShapeFactory f = p.getPenShapeFactory(0);
 			try {
 				f.load();
@@ -134,9 +136,8 @@ public class APainter {
 				e.printStackTrace();
 			}
 			//FIXME
-			PenShape s = f.createPenShape(1);
-			pen.setPen(s);
-			era.setPen(s);
+			pen.setPen(f.createPenShape(10,Device.CPU));
+			era.setPen(f.createPenShape(10,Device.CPU));
 			global.put(CanvasHeadAction, pen);
 			global.put(CanvasTailAction,era);
 			ArrayList<CanvasMouseListener> list = new  ArrayList<CanvasMouseListener>();
@@ -169,8 +170,8 @@ public class APainter {
 		return id;
 	}
 
-	public void bind(GlobalBindKey bkey,Object obj){
-		global.getBind(bkey).bind(obj);
+	public void bind(BindKey bkey,BindObject obj){
+		global.bind(bkey,obj);
 	}
 
 	/**
@@ -356,6 +357,8 @@ public class APainter {
 	private Random random = new Random(System.currentTimeMillis());
 
 	public synchronized CanvasHandler createNewCanvas(int width,int height){
+		if(width>maxSize || height > maxSize)throw new RuntimeException("size over");
+
 		int id=(random.nextInt()&0xffff)<<16;
 		id|=canvasid++;
 		Canvas canvas= new Canvas(width, height, device, global,id,this);
@@ -363,6 +366,10 @@ public class APainter {
 		global.addCanvas(canvas);
 		global.put(GlobalKey.CurrentCanvas, canvas);
 		return canvas.getCanvasHandler();
+	}
+
+	public static int getMaxCanvasSize(){
+		return maxSize;
 	}
 
 	public synchronized CanvasHandler createNewCanvas(int width,int height,

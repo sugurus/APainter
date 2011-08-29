@@ -25,7 +25,6 @@ class PenCPUDefaultRendering extends PenCPURendering{
 		int endy = clip.height+clip.y,endx=clip.width+clip.x;
 		int px=p.x,py=p.y;
 
-
 		for(int x,y = clip.y;y<endy;y++){
 			for(x = clip.x;x<endx;x++){
 				int c = pixel(basep,x,y,basew);

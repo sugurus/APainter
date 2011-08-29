@@ -1,49 +1,75 @@
 package apainter.drawer;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
-
-import javax.swing.event.EventListenerList;
 
 import nodamushi.pentablet.PenTabletMouseEvent;
 import apainter.Device;
-import apainter.bind.annotation.BindProperty;
+import apainter.bind.Bind;
+import apainter.bind.BindObject;
 import apainter.canvas.event.EventConstant;
 import apainter.canvas.layerdata.InnerLayerHandler;
 import apainter.color.Color;
-import apainter.construct.DimensionDouble;
 import apainter.data.PixelDataBuffer;
 import apainter.pen.PenShape;
 import apainter.rendering.Renderer;
 import apainter.rendering.RenderingOption;
 
 abstract public class Drawer {
-	public static final String
-		penShapeChangeProperty = "penshape";
 
-	private double smin;// 筆圧最小時の筆の大きさの割合
-	private int density_min;// 筆圧最小時の筆の濃度（0~256）
-	//private int stabilization = 0;// 手ぶれ補正値
-	private double density = 1;// ペン濃度 0～1
-	private PenTabletMouseEvent before;
-	private double length;//length ペンを書くのに少なくともどれほどの距離が必要か
-	protected PenShape pen;
+	public Drawer(int id) {
+		this.id = id;
+	}
 
 
 	protected void postEvent(DrawEvent e){
-		e.canvas.dispatchEvent(e);
+		if(e==null)return;
+			e.canvas.dispatchEvent(e);
 	}
 	protected void postEvent(DrawEvent[] events){
 		for(DrawEvent e:events){
-			postEvent(e);
+			if(e==null)continue;
+				postEvent(e);
 		}
 	}
 
+	public int getID(){
+		return id;
+	}
+
+	public void setDensity(double d){
+		if(d < 0)d = 0;
+		else if(d > 1)d = 1;
+		density = d;
+	}
+
+	public double getDensity(){
+		return density;
+	}
+
+	public void setMinDensity(double d){
+		if(d < 0)d = 0;
+		else if(d > 1)d = 1;
+		density_min = (int) (256*d);
+	}
+
+	public double getMinDensity(){
+		return density_min/256d;
+	}
+	public void setMinSize(double d){
+		if(d < 0)d = 0;
+		else if(d > 1)d = 1;
+		smin = d;
+	}
+
+	public double getMinSize(){
+		return smin;
+	}
+
 	protected DrawEvent start(PenTabletMouseEvent e,InnerLayerHandler target,Device d){
+		DrawEvent de = createOneEvent(e, target, d);
 		before = e;
-		return createOneEvent(e, target,d);
+		return de;
 	}
 
 	private DrawEvent createOneEvent(PenTabletMouseEvent e,InnerLayerHandler target,Device d){
@@ -51,14 +77,20 @@ abstract public class Drawer {
 		double pressure =e.getPressure();
 		int pensize = pen.getSize();
 		pensize = getPenSize(pensize, pressure, xy.x, xy.y);
+		if(pensize==0){
+			length = 0;
+			return null;
+		}
 		PixelDataBuffer map = pen.getFootPrint(xy.x, xy.y, pensize);
-		Rectangle bounds = new Rectangle((int)xy.x, (int)xy.y, map.width, map.height);
+
+
+		Rectangle bounds = new Rectangle((int)xy.x -(map.width>>1), (int)xy.y-(map.height>>1), map.width, map.height);
 		Color front =getFrontColor(e, pen),back = getBackColor(e, pen);
 		int dens =(int) ((((256-density_min)*pressure)+density_min)*density);
 		RenderingOption option = new RenderingOption(front, back, null, dens);
 		setOption(option,e);
 		DrawEvent de =
-			new DrawEvent(EventConstant.ID_PaintStart, this, target, bounds,
+			new DrawEvent(EventConstant.ID_PaintStart, this, target, bounds,bounds.getLocation(),
 					getRenderer(d), map, option);
 		length = pen.getIntervalLength(pensize);
 		return de;
@@ -72,7 +104,7 @@ abstract public class Drawer {
 		Point2D.Double befp = bef.getPointDouble(),p = e.getPointDouble();
 		double bx=befp.x,by = befp.y;
 		double dl = Math.hypot(bx-p.x, by-p.y),l=length;
-		if(dl < l){
+		if(endDraw&&dl < l){
 			return new DrawEvent[]{createOneEvent(bef, target,d)};
 		}
 
@@ -104,8 +136,12 @@ abstract public class Drawer {
 			double x = l*cos+bx,y = l*sin+by;
 			double pressure =k(Opressure,Ppressure,l,dl);
 			int pensize2 = getPenSize(pensize, pressure, x, y);
+			if(pensize2==0){
+				l += 1/16d;
+				continue;
+			}
 			PixelDataBuffer map = pen.getFootPrint(x, y, pensize2);
-			Rectangle bounds = new Rectangle((int)x, (int)y,
+			Rectangle bounds = new Rectangle((int)x-(map.width>>1), (int)y-(map.height>>1),
 					map.width, map.height);
 			Color front =getFrontColor(e, pen),back = getBackColor(e, pen);
 			int dens =(int) ((((256-density_min)*pressure)+density_min)*density);
@@ -113,7 +149,7 @@ abstract public class Drawer {
 			setOption(option,e);
 			DrawEvent de =
 				new DrawEvent(EventConstant.ID_Paint, this, target,
-						bounds, renderer,  map, option);
+						bounds, bounds.getLocation(),renderer,  map, option);
 			es.add(de);
 			double d = pen.getIntervalLength(pensize2);
 			l += d;
@@ -128,12 +164,11 @@ abstract public class Drawer {
 	abstract protected Color getBackColor(PenTabletMouseEvent e,PenShape pen);
 	abstract protected void setOption(RenderingOption option,PenTabletMouseEvent e);
 
-	@BindProperty(penShapeChangeProperty)
+	//TODO 変更通知
 	public void setPen(PenShape p){
 		if(p!=null){
 			PenShape old  =pen;
 			pen = p;
-			firePropertyChange(penShapeChangeProperty, old, pen);
 		}
 	}
 
@@ -148,30 +183,13 @@ abstract public class Drawer {
 	}
 
 
-
-
-
-	private EventListenerList eventlistenerlist = new EventListenerList();
-
-	public void addPropertyChangeListener(PropertyChangeListener l) {
-		eventlistenerlist.remove(PropertyChangeListener.class, l);
-		eventlistenerlist.add(PropertyChangeListener.class, l);
-	}
-
-	public void removePropertyChangeListener(PropertyChangeListener l) {
-		eventlistenerlist.remove(PropertyChangeListener.class, l);
-	}
-
-	public void firePropertyChange(String name, Object oldValue, Object newValue) {
-		PropertyChangeEvent e = new PropertyChangeEvent(this, name, oldValue,
-				newValue);
-
-		Object[] listeners = eventlistenerlist.getListenerList();
-		for (int i = listeners.length - 2; i >= 0; i -= 2) {
-			if (listeners[i] == PropertyChangeListener.class) {
-				((PropertyChangeListener) listeners[i + 1]).propertyChange(e);
-			}
-		}
-	}
-
+	private final int id;
+	private double smin=0;// 筆圧最小時の筆の大きさの割合
+	private int density_min=256;// 筆圧最小時の筆の濃度（0~256）
+	//private int stabilization = 0;// 手ぶれ補正値
+	private double density = 0.5;// ペン濃度 0～1
+	private PenTabletMouseEvent before;
+	private double length;//length ペンを書くのに少なくともどれほどの距離が必要か
+	protected PenShape pen;
+	private boolean endDraw = false;
 }

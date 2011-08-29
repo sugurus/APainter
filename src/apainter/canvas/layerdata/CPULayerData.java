@@ -5,19 +5,17 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
+import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
+import java.awt.image.DataBufferInt;
 import java.awt.image.DirectColorModel;
 import java.awt.image.MemoryImageSource;
 import java.util.ArrayList;
-
-import javax.swing.JComponent;
 
 import apainter.GlobalValue;
 import apainter.canvas.Canvas;
 import apainter.canvas.cedt.cpu.CPUParallelWorkThread;
 import apainter.data.PixelDataIntBuffer;
-import apainter.gui.test.ImageFrame;
-import apainter.gui.test.ImageView;
 import apainter.hierarchy.Element;
 import apainter.hierarchy.Unit;
 import apainter.misc.Util;
@@ -25,12 +23,10 @@ import apainter.misc.Util;
 public class CPULayerData extends LayerData{
 
 	private PixelDataIntBuffer renderingbuffer;
-	private Image renderingimage;
-	private MemoryImageSource imagesource;
+	private BufferedImage renderingimage;
 	private int core = Runtime.getRuntime().availableProcessors();
 
 	//////////////////////////////FIXME debug
-	private ImageFrame f;
 
 
 
@@ -41,24 +37,14 @@ public class CPULayerData extends LayerData{
 
 	private void init(){
 		int w = getWidth(),h=getHeight();
-		renderingbuffer = PixelDataIntBuffer.create(w,h);
+		renderingimage = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+		int[] pixel =((DataBufferInt)renderingimage.getRaster().getDataBuffer()).getData();
+		renderingbuffer = new PixelDataIntBuffer(w, h, pixel);
 		renderingbuffer.setData(0xffffffff, rect());
-		ColorModel m =
-			new DirectColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB), 32, 0xff0000, 0xff00, 0xff, 0xff000000, true, Transparency.OPAQUE);
-		imagesource = new MemoryImageSource(w,h,m,
-				renderingbuffer.getData(), 0, w);
-		imagesource.setAnimated(true);
-		renderingimage = Toolkit.getDefaultToolkit().createImage(imagesource);
-
 		rendering();
-
-		//FIXME debug
-		f = new ImageFrame(renderingimage, "Debag Canvas");
-		f.setLocation(500, 200);
-		f.setVisible(true);
 	}
 
-	public Image getImage(){
+	public BufferedImage getImage(){
 		return renderingimage;
 	}
 
@@ -88,18 +74,30 @@ public class CPULayerData extends LayerData{
 		ArrayList<Runnable> runs = new ArrayList<Runnable>(core);
 		for(Rectangle r:rects){
 			if(r.isEmpty())continue;
-			runs.add(new _Rendering(r));
+			runs.add(new _Rendering(r,0xffffffff));
 		}
 
 		CPUParallelWorkThread.exec(runs);
-		imagesource.newPixels(clip.x, clip.y, clip.width, clip.height);
 	}
 
 	private class _Rendering implements Runnable{
 		Rectangle clip;
-		_Rendering(Rectangle clip) {this.clip = clip;}
+		PixelDataIntBuffer renderingbuffer;
+		int fill;
+		_Rendering(Rectangle clip,int filldata) {
+			this.clip = clip;
+			fill = filldata;
+			this.renderingbuffer = CPULayerData.this.renderingbuffer;
+		}
+
+		_Rendering(Rectangle clip,int filldata,PixelDataIntBuffer buffer) {
+			this.clip = clip;
+			fill = filldata;
+			this.renderingbuffer = buffer;
+		}
+
 		public void run(){
-			renderingbuffer.setData(0xffffffff, clip);
+			renderingbuffer.setData(fill, clip);
 			Unit<InnerLayerHandler> unit =layerlist.getTopLevelUnit();
 
 			ArrayList<Element<InnerLayerHandler>> elements = unit.getElements();
@@ -109,16 +107,36 @@ public class CPULayerData extends LayerData{
 				Layer l = e.getProperty().getLayer();
 				l.render(renderingbuffer, clip);
 			}
-
-			imagesource.newPixels(clip.x, clip.y, clip.width, clip.height);
 		}
 	}
 
 
 	@Override
-	public JComponent testMethod_createViewPanel() {
-		ImageView view = new ImageView(getImage());
-		return view;
+	public BufferedImage createImage() {
+		Rectangle clip = rect();
+		BufferedImage buf = new BufferedImage(clip.width, clip.height, BufferedImage.TYPE_INT_ARGB);
+		int[] data = ((DataBufferInt)buf.getRaster().getDataBuffer()).getData();
+		PixelDataIntBuffer ibuf = new PixelDataIntBuffer(clip.width, clip.height, data);
+		Rectangle[] rects;
+		if(clip.width*clip.height<core*10){
+			rects = new Rectangle[]{clip};
+		}else{
+			rects = Util.partition(clip, core);
+		}
+		ArrayList<Runnable> runs = new ArrayList<Runnable>(core);
+		for(Rectangle r:rects){
+			if(r.isEmpty())continue;
+			runs.add(new _Rendering(r,0,ibuf));
+		}
+
+		CPUParallelWorkThread.exec(runs);
+		return buf;
+	}
+
+
+	@Override
+	public void dispose() {
+		// TODO dispose
 	}
 
 }

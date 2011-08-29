@@ -8,11 +8,6 @@ import java.util.Comparator;
 @Version("1.0.0")
 public class VersionUtillity {
 
-	public static void main(String[] args) {
-		String v = getVersion(VersionUtillity.class);
-		System.out.println(compare(v, "1.0.0.100"));
-	}
-
 	public static final int
 	/**値が同じ事を示す*/
 		EQUAL=0,

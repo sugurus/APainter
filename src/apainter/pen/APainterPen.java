@@ -41,8 +41,8 @@ public class APainterPen {
 
 	private ArrayList<PenPackage> packagelist = new ArrayList<PenPackage>();
 
-	public PenPackage createPackage(String name){
-		PenPackage p = new PenPackage(name,0);
+	public PenPackage createPackage(String name,int mode){
+		PenPackage p = new PenPackage(name,mode);
 		packagelist.add(p);
 		return p;
 	}
@@ -92,14 +92,14 @@ public class APainterPen {
 			read = in.read();
 			String nm=null;
 			if(read==0x21){//name
-				int ll = readShort(in);
+				int ll = in.read();
 				byte[] bb = new byte[ll];
 				in.read(bb);
 				nm = new String(bb, "utf-8");
 				in.read();
 				read=in.read();
 			}
-			pac = new PenPackage(nm,0);
+			pac=p.createPackage(nm,0);
 			for(int i=0;i<len;i++){
 				if(read!=0x30)throw new IOException();
 				readGroup(in, p,pac);
@@ -149,7 +149,7 @@ public class APainterPen {
 		return new ArrayList<PenPackage>(packagelist);
 	}
 	public PenPackage getPackage(int pos){
-		return pos>packagelist.size()?null:packagelist.get(pos);
+		return pos>=packagelist.size()?null:packagelist.get(pos);
 	}
 	public void write(OutputStream out) throws IOException{
 		if(packagelist.isEmpty())return;

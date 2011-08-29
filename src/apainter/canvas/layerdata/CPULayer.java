@@ -183,9 +183,7 @@ class CPULayer extends DefaultLayer{
 	public boolean paint(DrawEvent e) {
 		//TODO CPUかどうかの判定って必要かな？まぁ、実際にGPU作り始めてからでいっか。
 		Renderer r = e.getRenderer();
-		Rectangle rect =RenderingUtilities.getEnableClipBounds(buffer,
-				e.getMapData(), e.getBounds().getLocation(), null);
-		r.rendering(buffer, e.getMapData(), e.getLocation(), rect, e.getOption());
+		r.rendering(buffer, e.getMapData(), e.getLocation(), e.getBounds(), e.getOption());
 		return true;
 	}
 

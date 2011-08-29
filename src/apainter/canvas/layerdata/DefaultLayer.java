@@ -1,25 +1,12 @@
 package apainter.canvas.layerdata;
 
-import static apainter.canvas.CanvasConstant.*;
 import static apainter.misc.Util.*;
-
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
-import javax.swing.event.EventListenerList;
-
-import apainter.bind.annotation.BindProperty;
+import apainter.bind.Bind;
+import apainter.bind.BindObject;
 import apainter.canvas.Canvas;
 import apainter.rendering.ColorMode;
 abstract class DefaultLayer implements Layer,PixelSetable,MaskContainer{
 
-	private final int id;
-	private String name;
-	protected int transparent;
-	protected boolean visible;
-	protected ColorMode mode;
-	protected final Canvas canvas;
-	protected final LayerData layerdata;
 
 	public DefaultLayer(int id,String name,Canvas canvas,LayerData layerdata) {
 		this.id = id;
@@ -47,27 +34,14 @@ abstract class DefaultLayer implements Layer,PixelSetable,MaskContainer{
 		return name;
 	}
 
-	@BindProperty(NameProperty)
 	@Override
 	final public void setName(String name) {
-		String old = name;
-		if(name==null)name="";
-		this.name = name;
-		if(!old.equals(this.name)){
-			firePropertyChange(NameProperty, old, this.name);
-		}
+		nameBindObject.set(name);
 	}
 
-	@BindProperty(TransparentProperty)
 	@Override
 	final public void setTransparent(int transparent) {
-		int old = transparent;
-		if(transparent < 0 )transparent = 0;
-		else if(transparent > 256)transparent= 256;
-		this.transparent = transparent;
-		if(old!=this.transparent){
-			firePropertyChange(TransparentProperty, old, this.transparent);
-		}
+		transparentBindObject.set(transparent);
 	}
 
 	@Override
@@ -90,13 +64,9 @@ abstract class DefaultLayer implements Layer,PixelSetable,MaskContainer{
 		return visible;
 	}
 
-	@BindProperty(VisibleProperty)
 	@Override
 	public void setVisible(boolean b) {
-		if(b!=visible){
-			visible = b;
-			firePropertyChange(VisibleProperty, !b, b);
-		}
+		visibleBindObject.set(b);
 	}
 
 	@Override
@@ -104,14 +74,9 @@ abstract class DefaultLayer implements Layer,PixelSetable,MaskContainer{
 		return mode;
 	}
 
-	@BindProperty(RenderModeProperty)
 	@Override
 	final public void setRenderingMode(ColorMode mode) {
-		if(this.mode !=mode){
-			ColorMode old = this.mode;
-			this.mode = mode;
-			firePropertyChange(RenderModeProperty, old, this.mode);
-		}
+		modeBindObject.set(mode);
 	}
 
 	@Override
@@ -131,29 +96,100 @@ abstract class DefaultLayer implements Layer,PixelSetable,MaskContainer{
 		return false;
 	}
 
-	//propertychangelistener---------------------------------
 
+	//field----------------------------------------------------------------------
+	private final int id;
+	private String name;
+	protected int transparent;
+	protected boolean visible;
+	protected ColorMode mode;
+	protected final Canvas canvas;
+	protected final LayerData layerdata;
+	//Bind----------
+	private final BindObject modeBindObject = new BindObject() {
 
-	private EventListenerList listener = new EventListenerList();
-
-	public void addPropertyChangeListener(PropertyChangeListener l) {
-		listener.remove(PropertyChangeListener.class, l);
-		listener.add(PropertyChangeListener.class, l);
-	}
-
-	public void removePropertyChangeListener(PropertyChangeListener l) {
-		listener.remove(PropertyChangeListener.class, l);
-	}
-
-	public void firePropertyChange(String name, Object oldValue, Object newValue) {
-		PropertyChangeEvent e = new PropertyChangeEvent(this, name, oldValue,
-				newValue);
-
-		Object[] listeners = this.listener.getListenerList();
-		for (int i = listeners.length - 2; i >= 0; i -= 2) {
-			if (listeners[i] == PropertyChangeListener.class) {
-				((PropertyChangeListener) listeners[i + 1]).propertyChange(e);
-			}
+		@Override
+		public void setValue(Object value) throws Exception {
+			mode = (ColorMode)value;
 		}
-	}
+
+		@Override
+		public Object get() {
+			return mode;
+		}
+
+		public boolean isSettable(Object obj) {
+			if(obj instanceof ColorMode){
+				//TODO モードを受け入れるか否か
+				return true;
+			}else return false;
+		}
+	};
+	private final Bind modeBind = new Bind(modeBindObject);
+	public void addmodeBindObject(BindObject b) {modeBind.add(b);}
+	public void removemodeBindObject(BindObject b) {modeBind.remove(b);}
+	private final BindObject visibleBindObject = new BindObject() {
+
+		@Override
+		public void setValue(Object value) throws Exception {
+			visible = (Boolean)value;
+		}
+
+		@Override
+		public Object get() {
+			return visible;
+		}
+
+		public boolean isSettable(Object obj) {
+			return obj instanceof Boolean;
+		}
+	};
+	private final Bind visibleBind = new Bind(visibleBindObject);
+	public void addvisibleBindObject(BindObject b) {visibleBind.add(b);}
+	public void removevisibleBindObject(BindObject b) {visibleBind.remove(b);}
+
+	private final BindObject transparentBindObject = new BindObject() {
+
+		@Override
+		public void setValue(Object value) throws Exception {
+			Integer i = (Integer)value;
+			if(i < 0) i = 0;
+			else if(i > 256)i = 256;
+			transparent = i;
+		}
+
+		@Override
+		public Object get() {
+			return transparent;
+		}
+
+		public boolean isSettable(Object obj) {
+			return obj instanceof Integer;
+		}
+	};
+	private final Bind transparentBind  = new Bind(transparentBindObject);
+	public void addTransparentBindObject(BindObject b){transparentBind.add(b);}
+	public void removeTransparentBindObject(BindObject b){transparentBind.remove(b);}
+
+	private final BindObject nameBindObject = new BindObject() {
+
+		@Override
+		public void setValue(Object value) throws Exception {
+			String s = value!=null?(String)value:"";
+			name = s;
+		}
+
+		@Override
+		public Object get() {
+			return name;
+		}
+
+		public boolean isSettable(Object obj) {
+			return obj==null || obj instanceof String;
+		}
+	};
+	private final Bind nameBind  = new Bind(nameBindObject);
+	public void addNameBindObject(BindObject b){nameBind.add(b);}
+	public void removeNameBindObject(BindObject b){nameBind.remove(b);}
+	//-------------------end bind------------------------------------------------
 }

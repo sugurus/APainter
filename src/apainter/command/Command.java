@@ -44,11 +44,15 @@ public abstract class Command{
 	 */
 	public Object exe(GlobalValue global){
 		if(targetAPainter==null||targetAPainter!=global.get(GlobalKey.APainter))return null;
-		return execution(global);
+		try {
+			return execution(global);
+		} catch (Exception e) {
+			return null;
+		}
 	}
 	/**
 	 * 実行する処理内容。exeから呼ばれます。
 	 * @param global
 	 */
-	protected abstract Object execution(GlobalValue global);
+	protected abstract Object execution(GlobalValue global) throws Exception;
 }

@@ -1,6 +1,6 @@
 package apainter;
 
-import static apainter.GlobalBindKey.*;
+import static apainter.BindKey.*;
 import static apainter.GlobalKey.*;
 import static apainter.PropertyChangeNames.*;
 import static apainter.misc.Util.*;
@@ -13,6 +13,7 @@ import java.util.HashMap;
 import javax.swing.event.EventListenerList;
 
 import apainter.bind.Bind;
+import apainter.bind.BindObject;
 import apainter.canvas.Canvas;
 import apainter.color.Color;
 /**
@@ -44,18 +45,24 @@ public class GlobalValue extends HashMap<Object, Object>{
 		return back;
 	}
 
-	public Bind getBind(GlobalBindKey key){
+	public Bind getBind(BindKey key){
 		return (Bind)get(key);
 	}
 
-	public void bind(GlobalBindKey key,Object bindtarget){
+	public void bind(BindKey key,BindObject bindtarget){
 		Bind b = getBind(key);
-		b.bind(bindtarget);
+		if(b!=null)
+			b.add(bindtarget);
 	}
 
 	public void addCanvas(Canvas canvas){
 		CanvasList l = (CanvasList)get(CanvasList);
 		if(!l.contains(canvas))l.add(canvas);
+	}
+
+	public void removeCanvas(Canvas canvas){
+		CanvasList l = (CanvasList)get(CanvasList);
+		l.remove(canvas);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -69,7 +76,7 @@ public class GlobalValue extends HashMap<Object, Object>{
 
 	@Override
 	public Object put(Object key, Object value) {
-		if((key instanceof GlobalBindKey && !((GlobalBindKey)key).change) ||
+		if((key instanceof BindKey && !((BindKey)key).change) ||
 		(key instanceof GlobalKey && !((GlobalKey)key).change)){
 			Object o = get(key);
 			if(o!=null){
@@ -90,18 +97,12 @@ public class GlobalValue extends HashMap<Object, Object>{
 		back = new Color(0xffffffff);
 		super.put(FrontColor, front);
 		super.put(BackColor,back);
-		Bind f = new Bind(ColorPropertyChange),
-		f16 = new Bind(LongColorPropertyChange),
-		b = new Bind(ColorPropertyChange),
-		b16 = new Bind(LongColorPropertyChange);
-		f.bind(front);
-		f16.bind(front);
-		b.bind(back);
-		b16.bind(back);
-		super.put(FrontColorBIND,f);
-		super.put(FrontColor16bitBIND,f16);
+		front.bindObject.setPorpertyName(FrontColorChangeProperty);
+		Bind b = new Bind(front.bindObject);
+		super.put(FrontColorBIND,b);
+		back.bindObject.setPorpertyName(BackColorChangeProperty);
+		b = new Bind(back.bindObject);
 		super.put(BackColorBIND,b);
-		super.put(BackColor16bitBIND,b16);
 	}
 
 	public String getProperty(String propertyname){

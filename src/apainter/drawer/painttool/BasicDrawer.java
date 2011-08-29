@@ -15,7 +15,8 @@ public abstract class BasicDrawer extends Drawer implements CanvasMouseListener{
 
 	protected GlobalValue global;
 
-	public BasicDrawer(GlobalValue global) {
+	public BasicDrawer(GlobalValue global,int id) {
+		super(id);
 		this.global = global;
 	}
 

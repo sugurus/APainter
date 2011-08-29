@@ -2,10 +2,10 @@ package apainter.pen;
 
 import apainter.data.PixelDataBuffer;
 
-public abstract class Pen {
+public abstract class PenData {
 	protected final int width ,height,x,y;
 
-	public Pen(int w,int h,int x,int y){
+	public PenData(int w,int h,int x,int y){
 		width = w;
 		height = h;
 		this.x=x;

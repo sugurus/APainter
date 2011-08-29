@@ -84,11 +84,8 @@ public class CPUCEDT implements CanvasEventDispatchThread{
 		}else{
 			Runnable[] runs = new Runnable[s];
 			if(r.width%s==0 || !(r.height%s==0 || r.width < r.height)){
-				int x=r.x;
-				int w = r.width/s;
 				for(int i=0;i<s;i++){
-					Rectangle rect = new Rectangle(x,r.y,w,r.height);
-					x+=w;
+					Rectangle rect = new Rectangle(r.x+(r.width*i/s),r.y,r.width*(i+1)/s-(r.width*i/s),r.height);
 					final DrawEvent e2 = e.subsetEvent(rect);
 					runs[i]=new Runnable() {
 						public void run() {
@@ -97,11 +94,8 @@ public class CPUCEDT implements CanvasEventDispatchThread{
 					};
 				}
 			}else{
-				int y = r.y;
-				int h = r.height/s;
 				for(int i=0;i<s;i++){
-					Rectangle rect = new Rectangle(r.x,y,r.width,h);
-					y+=h;
+					Rectangle rect = new Rectangle(r.x,r.y+r.height*i/s,r.width,r.height*(i+1)/s-r.height*i/s);
 					final DrawEvent e2 = e.subsetEvent(rect);
 					runs[i]=new Runnable() {
 						public void run() {
