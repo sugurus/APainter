@@ -71,17 +71,9 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 		b= !b;
 		if(fastRendering!=b){
 			fastRendering=b;
-			if(SwingUtilities.isEventDispatchThread()){
-				renderingZoomImage(null);
-				repaint();
-			}else{
-				SwingUtilities.invokeLater(new Runnable() {
-					public void run() {
-						renderingZoomImage(null);
-						repaint();
-					}
-				});
-			}
+			if(SwingUtilities.isEventDispatchThread())renderingSmallImage(null);
+			renderingZoomImage(null);
+			repaint();
 		}
 	}
 
@@ -96,16 +88,9 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 	 * 全てをレンダリングし直します。
 	 */
 	public void rendering(){
-		if(!SwingUtilities.isEventDispatchThread()){
-			SwingUtilities.invokeLater(new Runnable() {
-				public void run() {
-					rendering();
-				}
-			});
-		}else{
-			renderingZoomImage(null);
-			repaint();
-		}
+		if(SwingUtilities.isEventDispatchThread())renderingSmallImage(null);
+		renderingZoomImage(null);
+		repaint();
 	}
 
 	/**
@@ -113,16 +98,9 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 	 * @param r
 	 */
 	public void rendering(final Rectangle r){
-		if(!SwingUtilities.isEventDispatchThread()){
-			SwingUtilities.invokeLater(new Runnable() {
-				public void run() {
-					rendering(r);
-				}
-			});
-		}else{
-			renderingZoomImage(r);
-			repaint();
-		}
+		if(SwingUtilities.isEventDispatchThread())renderingSmallImage(null);
+		renderingZoomImage(r);
+		repaint();
 	}
 
 
@@ -144,18 +122,10 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 	boolean moveflag = false;
 	@Override
 	public void repaintMove() {
-		if(!SwingUtilities.isEventDispatchThread()){
-			SwingUtilities.invokeLater(new Runnable() {
-				public void run() {
-					repaintMove();
-				}
-			});
-		}else{
-			moveflag = true;
-			renderingZoomImage(null);
-			moveflag = false;
-			repaint();
-		}
+		moveflag = true;
+		renderingZoomImage(null);
+		moveflag = false;
+		repaint();
 	}
 
 
@@ -203,16 +173,47 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 	}
 
 
-	private void renderingZoomImage(Rectangle rect){
+	private void renderingZoomImage(final Rectangle rect){
 		if(getWidth()==0||getHeight()==0){
 			return;
 		}
-		if(fastRendering){
-			_renderingZoomImageVolatile(rect);
+		if(!SwingUtilities.isEventDispatchThread()){
+			renderingSmallImage(rect);
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					renderingZoomImage(rect);
+				}
+			});
 		}else{
-			_renderingZoomImageBuffered(rect);
+			if(fastRendering){
+				_renderingZoomImageVolatile(rect);
+			}else{
+				_renderingZoomImageBuffered(rect);
+			}
+			renderingRotImage();
 		}
-		renderingRotImage();
+	}
+
+	private void renderingSmallImage(Rectangle rect){
+		double zoom = parent.getZoom();
+		if(!fastRendering&&zoom < 1){
+			if(smallimage.isEqual(zoom)){
+				Dimension s = getImageSize(renderingImage);
+				if(!moveflag){
+					Rectangle clip;
+					if(rect==null){
+						clip = new Rectangle(s);
+					}else{
+						clip = new Rectangle(s).intersection(rect);
+					}
+					if(!clip.isEmpty()){
+						smallimage.update(clip);
+					}
+				}
+			}else{
+				smallimage.setZoom((float)zoom);
+			}
+		}
 	}
 
 	private void _renderingZoomImageBuffered(Rectangle rect){
@@ -225,21 +226,6 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 
 		Dimension s = getImageSize(renderingImage);
 
-		if(smallimage.isEqual(zoom)){
-			if(!moveflag){
-				Rectangle clip;
-				if(rect==null){
-					clip = new Rectangle(s);
-				}else{
-					clip = new Rectangle(s).intersection(rect);
-				}
-				if(!clip.isEmpty()){
-					smallimage.update(clip);
-				}
-			}
-		}else{
-			smallimage.setZoom((float)zoom);
-		}
 
 		//ZoomImageに書き込み。
 		int width = getWidth();

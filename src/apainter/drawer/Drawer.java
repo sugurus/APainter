@@ -188,7 +188,7 @@ abstract public class Drawer {
 	private int density_min=256;// 筆圧最小時の筆の濃度（0~256）
 	//private int stabilization = 0;// 手ぶれ補正値
 	private double density = 0.5;// ペン濃度 0～1
-	private PenTabletMouseEvent before;
+	private PenTabletMouseEvent before=null;
 	private double length;//length ペンを書くのに少なくともどれほどの距離が必要か
 	protected PenShape pen;
 	private boolean endDraw = false;

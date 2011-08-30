@@ -134,7 +134,7 @@ public class SmallImage {
 							rgb = pixel(source, x, y, sw);
 							if(l<=pixelSize){
 								set(obj, argb(255, (r+r(rgb)*l)>>SHIFT,
-										(b+b(rgb)*l)>>SHIFT, (b+b(rgb)*l)>>SHIFT), xpos++, y, sw);
+										(g+g(rgb)*l)>>SHIFT, (b+b(rgb)*l)>>SHIFT), xpos++, y, sw);
 								r=r(rgb)*(pixelSize-l);
 								g=g(rgb)*(pixelSize-l);
 								b=b(rgb)*(pixelSize-l);
@@ -152,7 +152,7 @@ public class SmallImage {
 								if(l<=pixelSize){
 									set(obj,
 											argb(255, (r+r(rgb)*l)>>SHIFT,
-											(b+b(rgb)*l)>>SHIFT, (b+b(rgb)*l)>>SHIFT), xpos, y, sw);
+											(g+g(rgb)*l)>>SHIFT, (b+b(rgb)*l)>>SHIFT), xpos, y, sw);
 									break Label;
 								}else{
 									r+=r(rgb)*pixelSize;
@@ -186,7 +186,7 @@ public class SmallImage {
 							rgb = pixel(obj, x, y, sw);
 							if(l<=pixelSize){
 								set(dst, argb(255, (r+r(rgb)*l)>>SHIFT,
-										(b+b(rgb)*l)>>SHIFT, (b+b(rgb)*l)>>SHIFT), x, ypos++, sw);
+										(g+g(rgb)*l)>>SHIFT, (b+b(rgb)*l)>>SHIFT), x, ypos++, sw);
 								r=r(rgb)*(pixelSize-l);
 								g=g(rgb)*(pixelSize-l);
 								b=b(rgb)*(pixelSize-l);
@@ -203,7 +203,7 @@ public class SmallImage {
 								rgb = pixel(obj, x, y, sw);
 								if(l<=pixelSize){
 									set(dst, argb(255, (r+r(rgb)*l)>>SHIFT,
-											(b+b(rgb)*l)>>SHIFT, (b+b(rgb)*l)>>SHIFT), x, ypos, sw);
+											(g+g(rgb)*l)>>SHIFT, (b+b(rgb)*l)>>SHIFT), x, ypos, sw);
 									break Label;
 								}else{
 									r+=r(rgb)*pixelSize;
