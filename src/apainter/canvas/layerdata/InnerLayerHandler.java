@@ -69,10 +69,15 @@ public abstract class InnerLayerHandler implements LayerHandle,PixelSetable{
 		return lh;
 	}
 
+	@Override
+	public void dispose() {
+		lh.l=null;
+	}
+
 
 	private static class LH2 implements LayerHandler{
 
-		private final InnerLayerHandler l;
+		private InnerLayerHandler l;
 		public LH2(InnerLayerHandler l) {
 			this.l =l;
 		}

@@ -11,7 +11,7 @@ import java.awt.image.DataBuffer;
 import java.awt.image.MemoryImageSource;
 import java.util.Arrays;
 
-import apainter.color.Color;
+import apainter.Color;
 import apainter.data.PixelDataByteBuffer;
 import apainter.drawer.DrawAccepter;
 import apainter.drawer.DrawEvent;
@@ -111,6 +111,12 @@ class CPUMask extends Mask implements DrawAccepter{
 	public boolean paint(DrawEvent e) {
 		// TODO mask paint
 		return false;
+	}
+
+	public void dispose(){
+		buffer.dispose();
+		pixel = null;
+		img.flush();
 	}
 
 }

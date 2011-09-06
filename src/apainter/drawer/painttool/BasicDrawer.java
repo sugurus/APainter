@@ -2,10 +2,10 @@ package apainter.drawer.painttool;
 
 import static apainter.GlobalKey.*;
 import nodamushi.pentablet.PenTabletMouseEvent;
+import apainter.Color;
 import apainter.Device;
 import apainter.GlobalValue;
 import apainter.canvas.Canvas;
-import apainter.color.Color;
 import apainter.drawer.DrawEvent;
 import apainter.drawer.Drawer;
 import apainter.gui.canvas.CanvasMouseListener;

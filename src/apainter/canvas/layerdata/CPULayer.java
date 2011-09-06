@@ -8,9 +8,8 @@ import java.awt.image.ColorModel;
 import java.awt.image.MemoryImageSource;
 import java.util.Arrays;
 
-import apainter.Device;
+import apainter.Color;
 import apainter.canvas.Canvas;
-import apainter.color.Color;
 import apainter.data.PixelDataBuffer;
 import apainter.data.PixelDataIntBuffer;
 import apainter.drawer.DrawEvent;
@@ -57,6 +56,10 @@ class CPULayer extends DefaultLayer{
 
 	@Override
 	public void dispose() {
+		buffer.dispose();
+		mask.dispose();
+		handler.dispose();
+		img.flush();
 		buffer=null;
 		pixel = null;
 		mask = null;

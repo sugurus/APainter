@@ -12,6 +12,7 @@ import static apainter.GlobalKey.PenFactoryCenter;
 import static apainter.GlobalKey.Property;
 import static apainter.misc.Util.nullCheack;
 
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -39,6 +40,7 @@ import apainter.debug.DebugMain;
 import apainter.drawer.painttool.Eraser;
 import apainter.drawer.painttool.Pen;
 import apainter.gui.canvas.CanvasMouseListener;
+import apainter.misc.PropertyChangeHolder;
 import apainter.pen.PenFactoryCenter;
 import apainter.pen.PenShape;
 import apainter.pen.PenShapeFactory;
@@ -398,6 +400,18 @@ public class APainter {
 
 	public void removeExitListener(ExitListener l) {
 		exitlistenerlist.remove(ExitListener.class, l);
+	}
+
+	public void addPropertyChangeListener(PropertyChangeListener l){
+		global.addPropertyChangeListener(l);
+	}
+
+	public void removePropertyChangeListener(PropertyChangeListener l){
+		global.removePropertyChangeListener(l);
+	}
+
+	public void addPropertyChangeListener(PropertyChangeListener l,String propertyname){
+		addPropertyChangeListener(new PropertyChangeHolder(l, propertyname));
 	}
 
 	//----exit-----------------------------------------------------------

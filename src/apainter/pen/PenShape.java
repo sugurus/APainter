@@ -1,6 +1,7 @@
 package apainter.pen;
 
 import java.awt.Dimension;
+import java.awt.Point;
 
 import apainter.data.PixelDataBuffer;
 
@@ -21,6 +22,7 @@ public interface PenShape {
 	 * @return
 	 */
 	public PixelDataBuffer getFootPrint(double x,double y,int size);
+	public Point getCenterPoint(double x,double y,int size);
 	public Dimension getMapSize();
 	public int getSize();
 	public double getIntervalLength(int size);

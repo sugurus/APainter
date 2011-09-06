@@ -48,6 +48,11 @@ public class PixelDataByteBuffer extends PixelDataBuffer{
 		this.pixel = pixel;
 	}
 
+	@Override
+	public void dispose() {
+		pixel = null;
+	}
+
 
 	@Override
 	public byte[] getData() {

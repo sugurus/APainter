@@ -1,7 +1,6 @@
 package apainter.canvas;
 
 import java.awt.image.BufferedImage;
-import java.beans.PropertyChangeListener;
 
 import javax.swing.JComponent;
 
@@ -9,6 +8,7 @@ import apainter.APainter;
 import apainter.BindKey;
 import apainter.bind.BindObject;
 import apainter.canvas.event.CanvasEvent;
+import apainter.canvas.layerdata.LayerHandler;
 import apainter.gui.canvas.CanvasView;
 
 /**
@@ -140,6 +140,10 @@ public class CanvasHandler {
 
 	public BufferedImage getImage(){
 		return canvas.createSaveImage();
+	}
+
+	public LayerHandler[] getLayers(){
+		return canvas.getAllLayers();
 	}
 
 

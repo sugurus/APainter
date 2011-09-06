@@ -36,12 +36,17 @@ abstract class DefaultLayer implements Layer,PixelSetable,MaskContainer{
 
 	@Override
 	final public void setName(String name) {
-		nameBindObject.set(name);
+		if(name==null){
+			name = "";
+		}
+		this.name = name;
 	}
 
 	@Override
 	final public void setTransparent(int transparent) {
-		transparentBindObject.set(transparent);
+		if(transparent < 0) transparent = 0;
+		else if(transparent > 256)transparent = 256;
+		this.transparent = transparent;
 	}
 
 	@Override
@@ -66,7 +71,7 @@ abstract class DefaultLayer implements Layer,PixelSetable,MaskContainer{
 
 	@Override
 	public void setVisible(boolean b) {
-		visibleBindObject.set(b);
+		visible = b;
 	}
 
 	@Override
@@ -76,7 +81,8 @@ abstract class DefaultLayer implements Layer,PixelSetable,MaskContainer{
 
 	@Override
 	final public void setRenderingMode(ColorMode mode) {
-		modeBindObject.set(mode);
+		//TODO モードを受け入れるか否か
+		this.mode =mode;
 	}
 
 	@Override
@@ -105,91 +111,5 @@ abstract class DefaultLayer implements Layer,PixelSetable,MaskContainer{
 	protected ColorMode mode;
 	protected final Canvas canvas;
 	protected final LayerData layerdata;
-	//Bind----------
-	private final BindObject modeBindObject = new BindObject() {
 
-		@Override
-		public void setValue(Object value) throws Exception {
-			mode = (ColorMode)value;
-		}
-
-		@Override
-		public Object get() {
-			return mode;
-		}
-
-		public boolean isSettable(Object obj) {
-			if(obj instanceof ColorMode){
-				//TODO モードを受け入れるか否か
-				return true;
-			}else return false;
-		}
-	};
-	private final Bind modeBind = new Bind(modeBindObject);
-	public void addmodeBindObject(BindObject b) {modeBind.add(b);}
-	public void removemodeBindObject(BindObject b) {modeBind.remove(b);}
-	private final BindObject visibleBindObject = new BindObject() {
-
-		@Override
-		public void setValue(Object value) throws Exception {
-			visible = (Boolean)value;
-		}
-
-		@Override
-		public Object get() {
-			return visible;
-		}
-
-		public boolean isSettable(Object obj) {
-			return obj instanceof Boolean;
-		}
-	};
-	private final Bind visibleBind = new Bind(visibleBindObject);
-	public void addvisibleBindObject(BindObject b) {visibleBind.add(b);}
-	public void removevisibleBindObject(BindObject b) {visibleBind.remove(b);}
-
-	private final BindObject transparentBindObject = new BindObject() {
-
-		@Override
-		public void setValue(Object value) throws Exception {
-			Integer i = (Integer)value;
-			if(i < 0) i = 0;
-			else if(i > 256)i = 256;
-			transparent = i;
-		}
-
-		@Override
-		public Object get() {
-			return transparent;
-		}
-
-		public boolean isSettable(Object obj) {
-			return obj instanceof Integer;
-		}
-	};
-	private final Bind transparentBind  = new Bind(transparentBindObject);
-	public void addTransparentBindObject(BindObject b){transparentBind.add(b);}
-	public void removeTransparentBindObject(BindObject b){transparentBind.remove(b);}
-
-	private final BindObject nameBindObject = new BindObject() {
-
-		@Override
-		public void setValue(Object value) throws Exception {
-			String s = value!=null?(String)value:"";
-			name = s;
-		}
-
-		@Override
-		public Object get() {
-			return name;
-		}
-
-		public boolean isSettable(Object obj) {
-			return obj==null || obj instanceof String;
-		}
-	};
-	private final Bind nameBind  = new Bind(nameBindObject);
-	public void addNameBindObject(BindObject b){nameBind.add(b);}
-	public void removeNameBindObject(BindObject b){nameBind.remove(b);}
-	//-------------------end bind------------------------------------------------
 }

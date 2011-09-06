@@ -3,7 +3,7 @@ package apainter.rendering;
 import java.awt.Point;
 import java.awt.Rectangle;
 
-import apainter.color.Color;
+import apainter.Color;
 import apainter.data.PixelDataBuffer;
 
 public interface Renderer {

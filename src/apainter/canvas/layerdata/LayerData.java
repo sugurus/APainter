@@ -55,10 +55,19 @@ abstract public class LayerData implements DrawAccepter{
 		return layerlist.getSelectLayerHandler();
 	}
 
-	public ArrayList<InnerLayerHandler> getLayerHandlers(){
+	public ArrayList<InnerLayerHandler> getAllInnerLayerHandlers(){
 		return layerlist.getAllLayerHandler();
 	}
 
+	public LayerHandler[] getAllLayerHandlers(){
+		ArrayList<InnerLayerHandler> a = getAllInnerLayerHandlers();
+		LayerHandler[] ret = new LayerHandler[a.size()];
+		int i=0;
+		for(InnerLayerHandler l:a){
+			ret[i++] = l.getLayerHandler();
+		}
+		return ret;
+	}
 
 	protected Rectangle rect(){
 		return new Rectangle(0,0,getWidth(),getHeight());
@@ -86,6 +95,7 @@ abstract public class LayerData implements DrawAccepter{
 	public InnerLayerHandler getSelectedLayer(){
 		return layerlist.getSelectLayerHandler();
 	}
+
 
 
 	/**
@@ -241,7 +251,11 @@ abstract public class LayerData implements DrawAccepter{
 		return layerlist.getLayer(id);
 	}
 
-	public abstract void dispose();
+	public void dispose(){
+		for(InnerLayerHandler l:getAllInnerLayerHandlers()){
+			l.getLayer().dispose();
+		}
+	}
 
 
 

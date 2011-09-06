@@ -6,11 +6,18 @@ public interface PropertyChangeNames {
 
 	FrontColorChangeProperty ="frontcolorchange",
 	BackColorChangeProperty="backcolorchange",
-	SelectedLayerPropertyChange = "selectedLayerchange",
-	SelectedMaskPropertyChange = "selectedMaskchange",
+	SelectedLayerPropertyChange = "selectedlayerchange",
+	SelectedMaskPropertyChange = "selectedmaskchange",
 	PenModePropertyChange="penmodechange",
-	AuthorNameChangeProperty ="author",
-	CanvasNameChangeProperty="canvasName";
+	AuthorNameChangeProperty ="authornamechange",
+	CanvasNameChangeProperty="canvasnamechange",
+
+	/**
+	 * マウスカーソルがキャンパスコンポーネント上にあるとき、マウスカーソルを操作する装置が変更されたときに通知されます。<br>
+	 * このイベントはOldvalueにnullが常に渡されます。<br>
+	 * 渡されるnewvalueは"mouse","head","tail"の文字列です。
+	 */
+	CursorTypeChangeProperty="cursortypechange"
 	;
 
 }

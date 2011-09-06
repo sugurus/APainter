@@ -11,11 +11,6 @@ import apainter.rendering.RenderingOption;
 interface Layer extends LayerHandle,Renderable,DrawAccepter{
 
 	/**
-	 * 保持しているメモリーを解放します。<br>
-	 * 一度呼び出すとインスタンスは二度と利用できません。
-	 */
-	public void dispose();
-	/**
 	 * このレイヤーを操作するためのハンドラーを返します。
 	 * @return
 	 */

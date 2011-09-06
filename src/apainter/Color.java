@@ -1,6 +1,4 @@
-package apainter.color;
-
-import java.util.Arrays;
+package apainter;
 
 import apainter.bind.BindObject;
 import apainter.misc.Util;
@@ -24,6 +22,10 @@ public class Color implements Cloneable{
 	public static final int NotColor = 1;
 
 	private float a,r,g,b;
+
+	GlobalValue gv;
+	String propertyName;
+
 	public final BindObject bindObject = new BindObject() {
 
 		@Override
@@ -57,6 +59,13 @@ public class Color implements Cloneable{
 			}else return false;
 
 
+		}
+
+		@Override
+		public void setend(Object oldobj, Object newobj) {
+			if(gv!=null){
+				gv.firePropertyChange(propertyName, oldobj, newobj, Color.this);
+			}
 		}
 	};
 

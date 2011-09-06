@@ -112,5 +112,7 @@ public abstract class PixelDataBuffer {
 		return new Rectangle(p.x,p.y,width,height);
 	}
 
+
+	public abstract void dispose();
 	abstract Object getData();
 }

@@ -4,9 +4,9 @@ import java.awt.Point;
 import java.awt.Rectangle;
 
 import nodamushi.pentablet.PenTabletMouseEvent;
+import apainter.Color;
 import apainter.Device;
 import apainter.GlobalValue;
-import apainter.color.Color;
 import apainter.data.PixelDataBuffer;
 import apainter.data.PixelDataByteBuffer;
 import apainter.data.PixelDataIntBuffer;

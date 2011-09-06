@@ -3,7 +3,7 @@ package apainter.rendering;
 import java.awt.Point;
 import java.util.HashMap;
 
-import apainter.color.Color;
+import apainter.Color;
 import apainter.data.PixelDataBuffer;
 import apainter.data.PixelDataByteBuffer;
 

@@ -3,6 +3,7 @@ package apainter.pen.impl;
 import static java.lang.Math.*;
 
 import java.awt.Dimension;
+import java.awt.Point;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -134,6 +135,12 @@ public class URLPenFactory implements PenShapeFactory{
 		}
 
 		@Override
+		public Point getCenterPoint(double x, double y, int size) {
+			// TODO 自動生成されたメソッド・スタブ
+			return null;
+		}
+
+		@Override
 		public PixelDataBuffer getFootPrint(double x, double y, int size) {
 			Group gg ;
 			if(g.getSize()==size)gg=g;
@@ -143,7 +150,6 @@ public class URLPenFactory implements PenShapeFactory{
 			int px = (int) (x*gg.getXBlocks());
 			int py = (int) (y*gg.getYBlocks());
 			PenData p = gg. getPen(px,py);
-			byte[] b =((PixelDataByteBuffer) p.getDataBuffer()).getData();
 			return p.getDataBuffer();
 		}
 

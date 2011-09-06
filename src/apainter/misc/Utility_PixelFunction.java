@@ -1,6 +1,6 @@
 package apainter.misc;
 
-import apainter.color.Color;
+import apainter.Color;
 
 public final class Utility_PixelFunction {
 	public static final int div255shift23 = 3289;//((1<<23))/255

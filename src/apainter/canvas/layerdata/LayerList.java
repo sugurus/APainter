@@ -5,8 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import apainter.bind.Bind;
-import apainter.bind.BindObject;
 import apainter.hierarchy.Element;
 import apainter.hierarchy.Hierarchy;
 import apainter.hierarchy.Unit;
@@ -17,57 +15,17 @@ public class LayerList extends Hierarchy<InnerLayerHandler>{
 	private Map<Integer, InnerLayerHandler> alllayer = new HashMap<Integer, InnerLayerHandler>();
 	private InnerLayerHandler selectedLayer;
 	private boolean selectedMask=false;
-	private final BindObject selectMaskBindObject = new BindObject() {
 
-		@Override
-		public void setValue(Object value) throws Exception {
-			selectedMask = (Boolean)value;
-		}
 
-		@Override
-		public Object get() {
-			return selectedMask;
-		}
-
-		public boolean isSettable(Object obj) {
-			if( obj instanceof Boolean){
-				boolean b = (Boolean)obj;
-				return b!=selectedMask && (( b && selectedLayer.isEnableMask()) || !b);
-			}else return false;
-		}
-	};
-	private final Bind selectMaskBind = new Bind(selectMaskBindObject);
-	public void addselectMaskBindObject(BindObject b) {selectMaskBind.add(b);}
-	public void removeselectMaskBindObject(BindObject b) {selectMaskBind.remove(b);}
-
-	private final BindObject selectedLayerBindObject = new BindObject() {
-
-		@Override
-		public void setValue(Object value) throws Exception {
-			selectedLayer = (InnerLayerHandler)value;
-			if(selectedLayer.getElement().isUnit()){
-				setCurrentUnit((Unit<InnerLayerHandler>)selectedLayer.getElement());
-			}else{
-				setCurrentUnit(selectedLayer.getElement().getUnit());
-			}
-		}
-
-		@Override
-		public Object get() {
-			return selectedLayer;
-		}
-
-		public boolean isSettable(Object obj) {
-			return obj instanceof InnerLayerHandler;
-		}
-	};
-	private final Bind selectedLayerBind = new Bind(selectedLayerBindObject);
-	public void addselectedLayerBindObject(BindObject b) {selectedLayerBind.add(b);}
-	public void removeselectedLayerBindObject(BindObject b) {selectedLayerBind.remove(b);}
 
 
 	public void setSelectLayer(InnerLayerHandler l){
-		selectedLayerBindObject.set(l);
+		selectedLayer = l;
+		if(selectedLayer.getElement().isUnit()){
+			setCurrentUnit((Unit<InnerLayerHandler>)selectedLayer.getElement());
+		}else{
+			setCurrentUnit(selectedLayer.getElement().getUnit());
+		}
 	}
 
 	public ArrayList<InnerLayerHandler> getAllLayerHandler(){
@@ -156,7 +114,9 @@ public class LayerList extends Hierarchy<InnerLayerHandler>{
 
 
 	public void setSelectedMask(boolean b){
-		selectedLayerBindObject.set(b);
+		if(b!=selectedMask && (( b && selectedLayer.isEnableMask()) || !b)){
+			selectedMask = b;
+		}
 	}
 
 

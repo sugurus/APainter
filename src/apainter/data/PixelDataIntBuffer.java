@@ -43,6 +43,11 @@ public class PixelDataIntBuffer extends PixelDataBuffer{
 		this.pixel = pixel;
 	}
 
+	@Override
+	public void dispose() {
+		pixel = null;
+	}
+
 	public void setData(int b,Rectangle r){
 		r = getBounds().intersection(r);
 		for(int y=r.y,e = r.y+r.height,ex = r.x+r.width;y<e;y++){

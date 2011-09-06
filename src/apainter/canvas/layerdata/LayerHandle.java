@@ -76,5 +76,10 @@ public interface LayerHandle{
 	public boolean isLayer();
 	public Canvas getCanvas();
 
+	/**
+	 * このレイヤーデータを完全に破棄します。
+	 */
+	public void dispose();
+
 
 }

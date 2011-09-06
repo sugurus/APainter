@@ -4,12 +4,12 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 import nodamushi.pentablet.PenTabletMouseEvent;
+import apainter.Color;
 import apainter.Device;
 import apainter.bind.Bind;
 import apainter.bind.BindObject;
 import apainter.canvas.event.EventConstant;
 import apainter.canvas.layerdata.InnerLayerHandler;
-import apainter.color.Color;
 import apainter.data.PixelDataBuffer;
 import apainter.pen.PenShape;
 import apainter.rendering.Renderer;

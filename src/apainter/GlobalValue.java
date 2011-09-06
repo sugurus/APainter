@@ -15,7 +15,7 @@ import javax.swing.event.EventListenerList;
 import apainter.bind.Bind;
 import apainter.bind.BindObject;
 import apainter.canvas.Canvas;
-import apainter.color.Color;
+import apainter.misc.PropertyChangeUtility;
 /**
  *初期化スレッド以外（AWTスレッドなど）からのインスタンスの取得はできないので、<br>
  *必要ならば、mainスレッドから呼ばれる初期化時に取得しておくこと。
@@ -87,7 +87,7 @@ public class GlobalValue extends HashMap<Object, Object>{
 			}
 		}
 		Object old= super.put(key, value);
-		firePropertyChange(key.toString(), old, value);
+		firePropertyChange(key.toString(), old, value,this);
 		return old;
 	}
 
@@ -98,6 +98,10 @@ public class GlobalValue extends HashMap<Object, Object>{
 		super.put(FrontColor, front);
 		super.put(BackColor,back);
 		front.bindObject.setPorpertyName(FrontColorChangeProperty);
+		front.gv = this;
+		back.gv = this;
+		front.propertyName = FrontColorChangeProperty;
+		back.propertyName = BackColorChangeProperty;
 		Bind b = new Bind(front.bindObject);
 		super.put(FrontColorBIND,b);
 		back.bindObject.setPorpertyName(BackColorChangeProperty);
@@ -122,24 +126,15 @@ public class GlobalValue extends HashMap<Object, Object>{
 	private EventListenerList eventlistenerlist = new EventListenerList();
 
 	public void addPropertyChangeListener(PropertyChangeListener l) {
-		eventlistenerlist.remove(PropertyChangeListener.class, l);
-		eventlistenerlist.add(PropertyChangeListener.class, l);
+		PropertyChangeUtility.addPropertyChangeListener(l, eventlistenerlist);
 	}
 
 	public void removePropertyChangeListener(PropertyChangeListener l) {
-		eventlistenerlist.remove(PropertyChangeListener.class, l);
+		PropertyChangeUtility.removePropertyChangeListener(l, eventlistenerlist);
 	}
 
-	public void firePropertyChange(String name, Object oldValue, Object newValue) {
-		PropertyChangeEvent e = new PropertyChangeEvent(this, name, oldValue,
-				newValue);
-
-		Object[] listeners = eventlistenerlist.getListenerList();
-		for (int i = listeners.length - 2; i >= 0; i -= 2) {
-			if (listeners[i] == PropertyChangeListener.class) {
-				((PropertyChangeListener) listeners[i + 1]).propertyChange(e);
-			}
-		}
+	public void firePropertyChange(String name, Object oldValue, Object newValue,Object source) {
+		PropertyChangeUtility.firePropertyChange(name, oldValue, newValue, source, eventlistenerlist);
 	}
 
 

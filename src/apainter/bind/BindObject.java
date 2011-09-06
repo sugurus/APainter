@@ -130,4 +130,8 @@ public abstract class BindObject {
 		return true;
 	}
 
+	public void setend(Object oldobj,Object newobj){
+
+	}
+
 }

@@ -134,9 +134,4 @@ public class CPULayerData extends LayerData{
 	}
 
 
-	@Override
-	public void dispose() {
-		// TODO dispose
-	}
-
 }
