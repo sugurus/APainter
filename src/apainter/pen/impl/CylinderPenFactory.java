@@ -29,7 +29,11 @@ public class CylinderPenFactory extends URLPenFactory{
 
 	@Override
 	protected double getIntervalLength(int size, double intervalpercent) {
-		if(size < 80)
+		if(size < 10){
+			double w= size*0.01*intervalpercent;
+			if(w < 0.5)return 0.5;
+			else return w;
+		}else if(size < 80)
 			return super.getIntervalLength(size, intervalpercent);
 		return super.getIntervalLength((int) ((size-80) *0.4 + 80), intervalpercent);
 
@@ -49,12 +53,12 @@ public class CylinderPenFactory extends URLPenFactory{
 		if(g!=null)return g;
 
 		double r = size/20d,rr_=(r-k/2)*(r-k/2),rr=(r+k/2)*(r+k/2);
-		int w = 1 + (((size/10)+1)/2)*2;;
+		int w = 1 + (((size/10)+1)/2)*2;
 		double c = (w-1>>1);
 
 		int bl = size < 1000?3:1;
 
-		g = new Group(size, w, w, bl, bl, 0);
+		g = new Group(size, w, w,(w-1)>>1,(w-1)>>1, bl, bl, 0);
 
 		for(int yb=0;yb<bl;yb++){
 			double cyb = (c+(2*yb+1)/6d);

@@ -115,7 +115,9 @@ public class APainterPen {
 	}
 
 	private static void readGroup(InputStream in,APainterPen p,PenPackage pac) throws IOException, DataFormatException{
-		int size=readShort(in),width=readShort(in),height=readShort(in),xblocks=readShort(in),yblocks=readShort(in);
+		int size=readShort(in),width=readShort(in),height=readShort(in),
+				centerx = readShort(in),centery=readShort(in),
+				xblocks=readShort(in),yblocks=readShort(in);
 		if(readShort(in)!=0xff31)throw new IOException();
 		int l = readInt(in);
 		byte[] zipdata=new byte[l];
@@ -133,7 +135,7 @@ public class APainterPen {
 		inf.end();
 		byte[] data = out.toByteArray();
 
-		Group g = pac.createGroup(size, width, height, xblocks, yblocks);
+		Group g = pac.createGroup(size, width, height,centerx,centery,xblocks, yblocks);
 		int pos = 0;
 		for(int y=0;y<yblocks;y++){
 			for(int x=0;x<xblocks;x++){

@@ -22,10 +22,10 @@ public interface PenShape {
 	 * @return
 	 */
 	public PixelDataBuffer getFootPrint(double x,double y,int size);
-	public Point getCenterPoint(double x,double y,int size);
+	public Point getCenterPoint(int size);
 	public Dimension getMapSize();
 	public int getSize();
-	public double getIntervalLength(int size);
+	public double getMoveDistance(int size);
 	public void setIntervalLengthPercent(double percent);
 	public String getName();
 	public long getID();

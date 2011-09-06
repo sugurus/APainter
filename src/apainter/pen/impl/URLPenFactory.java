@@ -118,8 +118,8 @@ public class URLPenFactory implements PenShapeFactory{
 
 	protected double getIntervalLength(int size,double intervalpercent) {
 		double w= size*0.025*intervalpercent;
-		if(w < 1)return 1;
-		else return (int)w;
+		if(w < 0.01)return 0.01;
+		else return w;
 	}
 
 
@@ -135,9 +135,11 @@ public class URLPenFactory implements PenShapeFactory{
 		}
 
 		@Override
-		public Point getCenterPoint(double x, double y, int size) {
-			// TODO 自動生成されたメソッド・スタブ
-			return null;
+		public Point getCenterPoint(int size) {
+			Group gg ;
+			if(g.getSize()==size)gg=g;
+			else gg= findGroup(size);
+			return new Point(gg.getCenterX(),gg.getCenterY());
 		}
 
 		@Override
@@ -164,7 +166,7 @@ public class URLPenFactory implements PenShapeFactory{
 		}
 
 		@Override
-		public double getIntervalLength(int size) {
+		public double getMoveDistance(int size) {
 			return URLPenFactory.this.getIntervalLength(size, intervalpercent);
 		}
 

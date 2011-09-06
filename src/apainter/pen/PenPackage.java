@@ -23,8 +23,8 @@ public class PenPackage{
 	}
 
 
-	public Group createGroup(int size,int width,int height,int xblocks,int yblocks){
-		Group g = new Group(size, width, height, xblocks, yblocks,colormode);
+	public Group createGroup(int size,int width,int height,int centerx,int centery,int xblocks,int yblocks){
+		Group g = new Group(size, width, height,centerx,centery, xblocks, yblocks,colormode);
 		groups.add(g);
 		return g;
 	}

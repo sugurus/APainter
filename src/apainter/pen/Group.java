@@ -8,19 +8,23 @@ import java.util.zip.Deflater;
 import static apainter.pen.APainterPen.*;
 
 public class Group{
-	private int size,width,height,xblocks,yblocks;
+	private int size,width,height,centerx,centery,xblocks,yblocks;
 	private PenData[] pens;
 	private int mode;
 
 
-	public Group(int size,int width,int height,int xblocks,int yblocks,int mode) {
+	public Group(int size,int width,int height,int centerx,int centery,int xblocks,int yblocks,int mode) {
 		if(size < 1)throw new RuntimeException("size error");
 		if(width<1)throw new RuntimeException("width"+width);
 		if(height<1)throw new RuntimeException("height:"+height);
+		if(centerx<0|| centerx>width)throw new RuntimeException("centerx:"+centerx);
+		if(centery<0|| centery>height)throw new RuntimeException("centery:"+centery);
 		if(xblocks<1)throw new RuntimeException("xblocks"+xblocks);
 		if(yblocks<1)throw new RuntimeException("yblocks"+yblocks);
 		this.size = size;
 		this.width=width;
+		this.centerx=centerx;
+		this.centery=centery;
 		this.height = height;
 		this.xblocks=xblocks;
 		this.yblocks=yblocks;
@@ -40,6 +44,14 @@ public class Group{
 
 	public int getHeight(){
 		return height;
+	}
+
+	public int getCenterX(){
+		return centerx;
+	}
+
+	public int getCenterY(){
+		return centery;
 	}
 
 	public int getXBlocks(){
@@ -98,6 +110,8 @@ public class Group{
 			writeShort(out,size);
 			writeShort(out,width);
 			writeShort(out,height);
+			writeShort(out,centerx);
+			writeShort(out,centery);
 			writeShort(out,xblocks);
 			writeShort(out,yblocks);
 			writeShort(out,0xff31);

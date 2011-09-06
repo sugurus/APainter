@@ -1,4 +1,7 @@
 package apainter.drawer;
+import static java.lang.Math.*;
+
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -67,24 +70,31 @@ abstract public class Drawer {
 	}
 
 	protected DrawEvent start(PenTabletMouseEvent e,InnerLayerHandler target,Device d){
+		plot.begin(e);
+		pressure.begin(e.getPressure());
 		DrawEvent de = createOneEvent(e, target, d);
 		before = e;
 		return de;
 	}
 
 	private DrawEvent createOneEvent(PenTabletMouseEvent e,InnerLayerHandler target,Device d){
-		Point2D.Double xy=e.getPointDouble();
-		double pressure =e.getPressure();
+		Point2D plotpoint;
+		double pressure =this.pressure.getPressure(0);
 		int pensize = pen.getSize();
-		pensize = getPenSize(pensize, pressure, xy.x, xy.y);
+		pensize = getPenSize(pensize, pressure);
 		if(pensize==0){
-			length = 0;
 			return null;
 		}
-		PixelDataBuffer map = pen.getFootPrint(xy.x, xy.y, pensize);
+		double length = pen.getMoveDistance(pensize);
+		plotpoint = plot.getNext();
+		plot.move(length);
+		double x = plotpoint.getX(),y=plotpoint.getY();
+		PixelDataBuffer map = pen.getFootPrint(x, y, pensize);
+		Point center = pen.getCenterPoint(pensize);
 
 
-		Rectangle bounds = new Rectangle((int)xy.x -(map.width>>1), (int)xy.y-(map.height>>1), map.width, map.height);
+
+		Rectangle bounds = new Rectangle((int)floor(x) -center.x, (int)floor(y)-center.y, map.width, map.height);
 		Color front =getFrontColor(e, pen),back = getBackColor(e, pen);
 		int dens =(int) ((((256-density_min)*pressure)+density_min)*density);
 		RenderingOption option = new RenderingOption(front, back, null, dens);
@@ -92,73 +102,92 @@ abstract public class Drawer {
 		DrawEvent de =
 			new DrawEvent(EventConstant.ID_PaintStart, this, target, bounds,bounds.getLocation(),
 					getRenderer(d), map, option);
-		length = pen.getIntervalLength(pensize);
 		return de;
 	}
 
 	abstract protected Renderer getRenderer(Device d);
 	abstract protected Device[] getUsableDevices();
 
-	protected DrawEvent[] end(PenTabletMouseEvent e,InnerLayerHandler target,Device d){
-		PenTabletMouseEvent bef = before;
-		Point2D.Double befp = bef.getPointDouble(),p = e.getPointDouble();
-		double bx=befp.x,by = befp.y;
-		double dl = Math.hypot(bx-p.x, by-p.y),l=length;
-		if(endDraw&&dl < l){
-			return new DrawEvent[]{createOneEvent(bef, target,d)};
+	protected DrawEvent[] end(PenTabletMouseEvent e,InnerLayerHandler target,Device dv){
+		plot.end(e);
+		pressure.end(e.getPressure(),plot.getDistance());
+		ArrayList<DrawEvent> des = createEvents(e, target, dv);
+		if(endDraw) IF:{
+			double rato = plot.getMoveRato();
+			if(rato<1){
+				Point2D p = plot.getPoint(1);
+				double x = p.getX(),y=p.getY();
+				int pensize = pen.getSize();
+				double pres =pressure.getPressure(plot.getMoveRato());
+				int pensize2 = getPenSize(pensize, pres);
+				Renderer renderer = getRenderer(dv);
+				if(pensize2==0){
+					break IF;
+				}
+				PixelDataBuffer map = pen.getFootPrint(x, y, pensize2);
+				Point center = pen.getCenterPoint(pensize2);
+				Rectangle bounds = new Rectangle((int)x-center.x, (int)y-center.y,
+						map.width, map.height);
+				Color front =getFrontColor(e, pen),back = getBackColor(e, pen);
+				int dens =(int) ((((256-density_min)*pres)+density_min)*density);
+				RenderingOption option = new RenderingOption(front, back, null, dens);
+				setOption(option,e);
+				DrawEvent de =
+					new DrawEvent(EventConstant.ID_Paint, this, target,
+							bounds, bounds.getLocation(),renderer,  map, option);
+				des.add(de);
+			}
 		}
 
-		DrawEvent[] ret = paint(bef, target,d);
-
-		length = 0;
-		before = null;
-
-		return ret;
+		return toArray(des);
+	}
+	protected DrawEvent[] paint(PenTabletMouseEvent e,InnerLayerHandler target,Device dv){
+		plot.setNextPoint(e);
+		pressure.setNextPressure(e.getPressure(), plot.getDistance());
+		ArrayList<DrawEvent> es= createEvents(e, target, dv);
+		before = e;
+		return toArray(es);
 	}
 
-	protected DrawEvent[] paint(PenTabletMouseEvent e,InnerLayerHandler target,Device dv){
-		PenTabletMouseEvent bef = before;
-		Point2D.Double befp = bef.getPointDouble(),p = e.getPointDouble();
-		double bx=befp.x,by = befp.y;
-		double dl = Math.hypot(bx-p.x, by-p.y),l=length;
-		if(dl < l){
-			return new DrawEvent[0];
-		}
-		double Opressure =bef.getPressure();
-		double Ppressure = e.getPressure();
+	private static DrawEvent[] toArray(ArrayList<DrawEvent> l){
+		return l.toArray(new DrawEvent[l.size()]);
+	}
+
+	protected ArrayList<DrawEvent> createEvents(PenTabletMouseEvent e,InnerLayerHandler target,Device dv){
+		if(!plot.hasNext())return new ArrayList<DrawEvent>();
+		Point2D plotpoint;
 		int pensize = pen.getSize();
-		double cos = (p.x-befp.x)/dl,sin =(p.y-befp.y)/dl;
 		Renderer renderer = getRenderer(dv);
 
 		ArrayList<DrawEvent> es = new ArrayList<DrawEvent>();
 		Device[] device = getUsableDevices();
-		while(l < dl){
-			double x = l*cos+bx,y = l*sin+by;
-			double pressure =k(Opressure,Ppressure,l,dl);
-			int pensize2 = getPenSize(pensize, pressure, x, y);
-			if(pensize2==0){
-				l += 1/16d;
+		while(plot.hasNext()){
+			plotpoint = plot.getNext();
+			double x = plotpoint.getX(),y = plotpoint.getY();
+			double pres =pressure.getPressure(plot.getMoveRato());
+			int size = getPenSize(pensize, pres);
+			if(size==0){
+				plot.move(1/16d);
 				continue;
 			}
-			PixelDataBuffer map = pen.getFootPrint(x, y, pensize2);
-			Rectangle bounds = new Rectangle((int)x-(map.width>>1), (int)y-(map.height>>1),
+			PixelDataBuffer map = pen.getFootPrint(x, y, size);
+			Point center = pen.getCenterPoint(size);
+			Rectangle bounds = new Rectangle((int)x-center.x, (int)y-center.y,
 					map.width, map.height);
 			Color front =getFrontColor(e, pen),back = getBackColor(e, pen);
-			int dens =(int) ((((256-density_min)*pressure)+density_min)*density);
+			int dens =(int) ((((256-density_min)*pres)+density_min)*density);
 			RenderingOption option = new RenderingOption(front, back, null, dens);
 			setOption(option,e);
 			DrawEvent de =
 				new DrawEvent(EventConstant.ID_Paint, this, target,
 						bounds, bounds.getLocation(),renderer,  map, option);
 			es.add(de);
-			double d = pen.getIntervalLength(pensize2);
-			l += d;
+			double d = pen.getMoveDistance(size);
+			plot.move(d);
 		}
-		before = e;
-		length = l-dl;
-
-		return es.toArray(new DrawEvent[es.size()]);
+		return es;
 	}
+
 
 	abstract protected Color getFrontColor(PenTabletMouseEvent e,PenShape pen);
 	abstract protected Color getBackColor(PenTabletMouseEvent e,PenShape pen);
@@ -173,11 +202,7 @@ abstract public class Drawer {
 	}
 
 
-	private double k(double o,double p,double t,double l){
-		return (o*(l-t)+p*t)/l;
-	}
-
-	protected int getPenSize(int size,double pressure,double x,double y){
+	protected int getPenSize(int size,double pressure){
 		double t = ((1-smin) * pressure) + smin;
 		return (int) (size*t);
 	}
@@ -189,7 +214,9 @@ abstract public class Drawer {
 	//private int stabilization = 0;// 手ぶれ補正値
 	private double density = 0.5;// ペン濃度 0～1
 	private PenTabletMouseEvent before=null;
-	private double length;//length ペンを書くのに少なくともどれほどの距離が必要か
+	private PlotPointMaker plot=new DefaultPlot();
+	private PressureValueMaker pressure = new DefaultPressure();
+
 	protected PenShape pen;
 	private boolean endDraw = false;
 }

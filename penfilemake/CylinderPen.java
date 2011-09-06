@@ -58,7 +58,7 @@ public class CylinderPen {
 				bl = 2+1;
 			}
 		}
-		final Group g = pac.createGroup(size, w, w, bl, bl);
+		final Group g = pac.createGroup(size, w, w,(w-1)>>1,(w-1)>>1, bl, bl);
 		final int c = w-1>>1;
 		Future<?>[] fs = new Future[core];
 		for(int ii =0;ii<core;ii++){
