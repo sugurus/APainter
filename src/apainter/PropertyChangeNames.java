@@ -17,7 +17,17 @@ public interface PropertyChangeNames {
 	 * このイベントはOldvalueにnullが常に渡されます。<br>
 	 * 渡されるnewvalueは"mouse","head","tail"の文字列です。
 	 */
-	CursorTypeChangeProperty="cursortypechange"
+	CursorTypeChangeProperty="cursortypechange",
+
+	//drawer系統
+	PenShapeChangeProperty="penshapechange",
+	PlotEndPointChangeProperty="plotendpointchange",
+	PlotChangeProperty="plotchange",
+	PressureAdjusterChangeProperty="penadjusterchange",
+	DrawerDensityChangeProperty="drawerdensitychange",
+	DrawerMinDensityChangeProperty="drawermindensitychange",
+	DrawerMinPenSizeChangeProperty="drawerminpensizechange"
+
 	;
 
 }

@@ -1,34 +1,73 @@
 package apainter.drawer;
 import static java.lang.Math.*;
+import static apainter.PropertyChangeNames.*;
 
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+
+import javax.swing.event.EventListenerList;
 
 import nodamushi.pentablet.PenTabletMouseEvent;
 import apainter.Color;
 import apainter.Device;
-import apainter.bind.Bind;
-import apainter.bind.BindObject;
 import apainter.canvas.event.EventConstant;
 import apainter.canvas.layerdata.InnerLayerHandler;
 import apainter.data.PixelDataBuffer;
+import apainter.misc.PropertyChangeUtility;
 import apainter.pen.PenShape;
 import apainter.rendering.Renderer;
 import apainter.rendering.RenderingOption;
 
+/**
+ * プロパティー<br><br>
+ * ペンの形状の変化。<br>
+ * 　PenShapeChangeProperty="penshapechange"<br>
+ * マウスのリリース点に必ずプロットするかどうかのフラグの変化<br>
+ *  　PlotEndPointChangeProperty="plotendpointchange"<br>
+ * Plotの変化<br>
+ * 　PlotChangeProperty="plotchange"<br>
+ * PressureAdjusterの変化<br>
+ *　PressureAdjusterChangeProperty="penadjusterchange"<br>
+ *筆の基本濃度の変化<br>
+ *　DrawerDensityChangeProperty="drawerdensitychange"<br>
+ *筆圧最小時の密度の変化<br>
+ *　DrawerMinDensityChangeProperty="drawermindensitychange"<br>
+ *筆圧最小時のペンサイズの変化
+ *　DrawerMinPenSizeChangeProperty="drawerminpensizechange"
+
+ */
 abstract public class Drawer {
 
 	public Drawer(int id) {
 		this.id = id;
 	}
 
+	protected DrawEvent start(PenTabletMouseEvent e,InnerLayerHandler target,Device d){
+		plot.begin(e);
+		DrawEvent de = createOneEvent(e, target, d);
+		return de;
+	}
+	protected DrawEvent[] drawLine(PenTabletMouseEvent e,InnerLayerHandler target,Device dv){
+		plot.setNextPoint(e);
+		ArrayList<DrawEvent> es= createEvents(e, target, dv);
+		return toArray(es);
+	}
+	protected DrawEvent[] end(PenTabletMouseEvent e,InnerLayerHandler target,Device dv){
+		plot.end(e);
+		ArrayList<DrawEvent> des = createEvents(e, target, dv);
+		return toArray(des);
+	}
+
+
 
 	protected void postEvent(DrawEvent e){
 		if(e==null)return;
 			e.canvas.dispatchEvent(e);
 	}
+
 	protected void postEvent(DrawEvent[] events){
 		for(DrawEvent e:events){
 			if(e==null)continue;
@@ -36,57 +75,16 @@ abstract public class Drawer {
 		}
 	}
 
-	public int getID(){
-		return id;
-	}
-
-	public void setDensity(double d){
-		if(d < 0)d = 0;
-		else if(d > 1)d = 1;
-		density = d;
-	}
-
-	public double getDensity(){
-		return density;
-	}
-
-	public void setMinDensity(double d){
-		if(d < 0)d = 0;
-		else if(d > 1)d = 1;
-		density_min = (int) (256*d);
-	}
-
-	public double getMinDensity(){
-		return density_min/256d;
-	}
-	public void setMinSize(double d){
-		if(d < 0)d = 0;
-		else if(d > 1)d = 1;
-		smin = d;
-	}
-
-	public double getMinSize(){
-		return smin;
-	}
-
-	protected DrawEvent start(PenTabletMouseEvent e,InnerLayerHandler target,Device d){
-		plot.begin(e);
-		pressure.begin(e.getPressure());
-		DrawEvent de = createOneEvent(e, target, d);
-		before = e;
-		return de;
-	}
-
 	private DrawEvent createOneEvent(PenTabletMouseEvent e,InnerLayerHandler target,Device d){
 		Point2D plotpoint;
-		double pressure =this.pressure.getPressure(0);
+		double pressure =plot.getPressure();
 		int pensize = pen.getSize();
 		pensize = getPenSize(pensize, pressure);
 		if(pensize==0){
 			return null;
 		}
 		double length = pen.getMoveDistance(pensize);
-		plotpoint = plot.getNext();
+		plotpoint = plot.getPlotPoint();
 		plot.move(length);
 		double x = plotpoint.getX(),y=plotpoint.getY();
 		PixelDataBuffer map = pen.getFootPrint(x, y, pensize);
@@ -105,49 +103,8 @@ abstract public class Drawer {
 		return de;
 	}
 
-	abstract protected Renderer getRenderer(Device d);
-	abstract protected Device[] getUsableDevices();
 
-	protected DrawEvent[] end(PenTabletMouseEvent e,InnerLayerHandler target,Device dv){
-		plot.end(e);
-		pressure.end(e.getPressure(),plot.getDistance());
-		ArrayList<DrawEvent> des = createEvents(e, target, dv);
-		if(endDraw) IF:{
-			double rato = plot.getMoveRato();
-			if(rato<1){
-				Point2D p = plot.getPoint(1);
-				double x = p.getX(),y=p.getY();
-				int pensize = pen.getSize();
-				double pres =pressure.getPressure(plot.getMoveRato());
-				int pensize2 = getPenSize(pensize, pres);
-				Renderer renderer = getRenderer(dv);
-				if(pensize2==0){
-					break IF;
-				}
-				PixelDataBuffer map = pen.getFootPrint(x, y, pensize2);
-				Point center = pen.getCenterPoint(pensize2);
-				Rectangle bounds = new Rectangle((int)x-center.x, (int)y-center.y,
-						map.width, map.height);
-				Color front =getFrontColor(e, pen),back = getBackColor(e, pen);
-				int dens =(int) ((((256-density_min)*pres)+density_min)*density);
-				RenderingOption option = new RenderingOption(front, back, null, dens);
-				setOption(option,e);
-				DrawEvent de =
-					new DrawEvent(EventConstant.ID_Paint, this, target,
-							bounds, bounds.getLocation(),renderer,  map, option);
-				des.add(de);
-			}
-		}
 
-		return toArray(des);
-	}
-	protected DrawEvent[] paint(PenTabletMouseEvent e,InnerLayerHandler target,Device dv){
-		plot.setNextPoint(e);
-		pressure.setNextPressure(e.getPressure(), plot.getDistance());
-		ArrayList<DrawEvent> es= createEvents(e, target, dv);
-		before = e;
-		return toArray(es);
-	}
 
 	private static DrawEvent[] toArray(ArrayList<DrawEvent> l){
 		return l.toArray(new DrawEvent[l.size()]);
@@ -162,9 +119,9 @@ abstract public class Drawer {
 		ArrayList<DrawEvent> es = new ArrayList<DrawEvent>();
 		Device[] device = getUsableDevices();
 		while(plot.hasNext()){
-			plotpoint = plot.getNext();
+			plotpoint = plot.getPlotPoint();
 			double x = plotpoint.getX(),y = plotpoint.getY();
-			double pres =pressure.getPressure(plot.getMoveRato());
+			double pres =plot.getPressure();
 			int size = getPenSize(pensize, pres);
 			if(size==0){
 				plot.move(1/16d);
@@ -192,31 +149,112 @@ abstract public class Drawer {
 	abstract protected Color getFrontColor(PenTabletMouseEvent e,PenShape pen);
 	abstract protected Color getBackColor(PenTabletMouseEvent e,PenShape pen);
 	abstract protected void setOption(RenderingOption option,PenTabletMouseEvent e);
+	abstract protected Renderer getRenderer(Device d);
+	abstract protected Device[] getUsableDevices();
 
 	//TODO 変更通知
 	public void setPen(PenShape p){
 		if(p!=null){
 			PenShape old  =pen;
 			pen = p;
+			firePropertyChange(PenShapeChangeProperty, old, p);
 		}
 	}
 
+	public boolean isPlotEnd(){
+		return plot.isEndPointPlot();
+	}
+
+	public void setPlotEnd(boolean b){
+		if(plot.isEndPointPlot()!=b){
+			plot.setEndPointPlot(b);
+			firePropertyChange(PlotEndPointChangeProperty, !b, b);
+		}
+	}
+
+	public void setPlot(Plot plot){
+		if(plot==null||plot==this.plot)return;
+		Object old = this.plot;
+		boolean b = this.plot.isEndPointPlot();
+		plot.setEndPointPlot(b);
+		plot.setPressureAdjuster(padj);
+		this.plot = plot;
+		firePropertyChange(PlotChangeProperty, old, plot);
+	}
 
 	protected int getPenSize(int size,double pressure){
 		double t = ((1-smin) * pressure) + smin;
 		return (int) (size*t);
 	}
 
+	public void setPressureAdjuster(PressureAdjuster p){
+		if(p==null||padj==p)return;
+		Object old = padj;
+		padj = p;
+		plot.setPressureAdjuster(p);
+		firePropertyChange(PressureAdjusterChangeProperty, old, p);
+	}
+
+	public int getID(){
+		return id;
+	}
+
+	public void setDensity(double d){
+		if(density==d)return;
+		if(d < 0)d = 0;
+		else if(d > 1)d = 1;
+		double old = density;
+		density = d;
+		firePropertyChange(DrawerDensityChangeProperty, old, d);
+	}
+
+	public double getDensity(){
+		return density;
+	}
+
+	public void setMinDensity(double d){
+		if(density_min==d)return;
+		if(d < 0)d = 0;
+		else if(d > 1)d = 1;
+		double old = density_min;
+		density_min = (int) (256*d);
+		firePropertyChange(DrawerMinDensityChangeProperty, old, d);
+	}
+
+	public double getMinDensity(){
+		return density_min/256d;
+	}
+	public void setMinSize(double d){
+		if(smin==d)return;
+		if(d < 0)d = 0;
+		else if(d > 1)d = 1;
+		double old = smin;
+		smin = d;
+		firePropertyChange(DrawerMinPenSizeChangeProperty, old, d);
+	}
+
+	public double getMinSize(){
+		return smin;
+	}
 
 	private final int id;
 	private double smin=0;// 筆圧最小時の筆の大きさの割合
 	private int density_min=256;// 筆圧最小時の筆の濃度（0~256）
-	//private int stabilization = 0;// 手ぶれ補正値
 	private double density = 0.5;// ペン濃度 0～1
-	private PenTabletMouseEvent before=null;
-	private PlotPointMaker plot=new DefaultPlot();
-	private PressureValueMaker pressure = new DefaultPressure();
+	private Plot plot=new LinerPlot();
+	private PressureAdjuster padj=NormalPressureAdjuster.obj;
 
 	protected PenShape pen;
-	private boolean endDraw = false;
+
+
+	private EventListenerList elist = new EventListenerList();
+	public void addPropertyChangeEventListener(PropertyChangeListener l){
+		PropertyChangeUtility.addPropertyChangeListener(l, elist);
+	}
+	public void removePropertyChangeEventListener(PropertyChangeListener l){
+		PropertyChangeUtility.removePropertyChangeListener(l, elist);
+	}
+	protected void firePropertyChange(String name,Object oldValue,Object newValue){
+		PropertyChangeUtility.firePropertyChange(name, oldValue, newValue, this, elist);
+	}
 }

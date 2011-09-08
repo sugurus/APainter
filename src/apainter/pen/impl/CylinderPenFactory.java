@@ -29,7 +29,7 @@ public class CylinderPenFactory extends URLPenFactory{
 
 	@Override
 	protected double getIntervalLength(int size, double intervalpercent) {
-		if(size < 10){
+		if(size <= 15){
 			double w= size*0.01*intervalpercent;
 			if(w < 0.5)return 0.5;
 			else return w;
