@@ -25,11 +25,15 @@ import apainter.canvas.layerdata.CPULayerData;
 import apainter.canvas.layerdata.InnerLayerHandler;
 import apainter.canvas.layerdata.LayerData;
 import apainter.canvas.layerdata.LayerHandler;
+import apainter.data.PixelDataByteBuffer;
+import apainter.data.PixelDataIntBuffer;
 import apainter.drawer.DrawEvent;
 import apainter.gui.canvas.CPUCanvasPanel;
 import apainter.gui.canvas.CanvasMouseListener;
 import apainter.gui.canvas.CanvasView;
 import apainter.misc.PropertyChangeUtility;
+import apainter.resorce.LimitedResource;
+import apainter.resorce.Resource;
 
 public class Canvas {
 
@@ -50,6 +54,9 @@ public class Canvas {
 
 
 	private CPUCanvasPanel cpucanvas;
+	
+	private final LimitedResource<PixelDataIntBuffer> intbuffer;
+	private final LimitedResource<PixelDataByteBuffer> bytebuffer;
 
 
 	public Canvas(int width,int height,Device device,GlobalValue globalvalue,int canvasid,APainter ap){
@@ -83,6 +90,16 @@ public class Canvas {
 		this.workTime  = workTime;
 		this.actionCount = actionCount;
 		this.apainter = nullCheack(ap, "apainter is null");
+		this.intbuffer=new LimitedResource<PixelDataIntBuffer>(5,new LimitedResource.ResourceFactory<PixelDataIntBuffer>(){
+			public PixelDataIntBuffer create() {
+				return PixelDataIntBuffer.create(Canvas.this.width, Canvas.this.height);
+			}
+		});
+		this.bytebuffer=new LimitedResource<PixelDataByteBuffer>(5,new LimitedResource.ResourceFactory<PixelDataByteBuffer>(){
+			public PixelDataByteBuffer create() {
+				return PixelDataByteBuffer.create(Canvas.this.width, Canvas.this.height);
+			}
+		});
 		id = canvasid;
 		createdTime = System.currentTimeMillis();
 
@@ -193,6 +210,12 @@ public class Canvas {
 		return layerdata.createImage();
 	}
 
+	public LimitedResource<PixelDataIntBuffer> getPixelDataIntBufferResource(){
+		return intbuffer;
+	}
+	public LimitedResource<PixelDataByteBuffer> getPixelDataByteBuffereResource(){
+		return bytebuffer;
+	}
 
 	public void rendering(Rectangle r){
 		if(r==null || r.isEmpty())return;

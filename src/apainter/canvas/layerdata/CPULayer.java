@@ -42,7 +42,8 @@ class CPULayer extends DefaultLayer{
 		return pixel;
 	}
 
-	PixelDataIntBuffer getPixelDataBuffer(){
+	@Override
+	public PixelDataBuffer getDataBuffer() {
 		return buffer;
 	}
 
@@ -229,7 +230,7 @@ class CPULayer extends DefaultLayer{
 
 		@Override
 		PixelDataBuffer getOriginalData() {
-			return h.getPixelDataBuffer();
+			return h.getDataBuffer();
 		}
 
 		@Override

@@ -62,6 +62,21 @@ public abstract class HistoryObject {
 	}
 
 	/**
+	 * 使用するメモリーが多く、圧縮できる場合はこれをオーバーライドし、実装してください。<br>
+	 * 実装した場合はisCompressed関数もオーバーライドしてください。<br>
+	 * この関数は必ず実装する必要はありません。
+	 * 
+	 */
+	public void compress(){}
+	/**
+	 * 圧縮できる場合、データーが圧縮されているかどうかを返します。
+	 * @return
+	 */
+	public boolean isCompressed(){
+		return false;
+	}
+	
+	/**
 	 * 履歴のアンドゥを実装します。<br>
 	 * Historyクラスが管理できなくなるので、この関数を呼び出さないでください。
 	 * @return アンドゥに成功したかどうか

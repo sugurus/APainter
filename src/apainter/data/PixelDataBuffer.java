@@ -11,7 +11,7 @@ import java.awt.geom.Point2D;
  * @author nodamushi
  *
  */
-public abstract class PixelDataBuffer {
+public abstract class PixelDataBuffer implements Cloneable{
 	private static Class<?> intarr = (new int[1]).getClass(),bytearr = (new byte[1]).getClass();
 
 
@@ -115,4 +115,5 @@ public abstract class PixelDataBuffer {
 
 	public abstract void dispose();
 	abstract Object getData();
+	public abstract PixelDataBuffer clone();
 }

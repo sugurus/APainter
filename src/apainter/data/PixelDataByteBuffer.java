@@ -39,6 +39,11 @@ public class PixelDataByteBuffer extends PixelDataBuffer{
 	public static PixelDataByteBuffer copyBuffer(int w,int h,byte[] b){
 		return new PixelDataByteBuffer(w, h, b.clone());
 	}
+	
+	@Override
+	public PixelDataBuffer clone() {
+		return new PixelDataByteBuffer(width, height, pixel.clone());
+	}
 
 	private byte[] pixel;
 
@@ -111,6 +116,30 @@ public class PixelDataByteBuffer extends PixelDataBuffer{
 			}
 		}
 		return distination;
+	}
+	
+	public byte[] copy(byte[] distination,Rectangle r){
+		if(distination==null ||distination.length < r.width*r.height){
+			distination = new byte[r.width*r.height];
+		}
+		for(int x,y=r.y,ex=r.x+r.width,ey=r.y+r.height,i=0;y<ey;y++){
+			for(x = r.x;x<ex;i++,x++){
+				distination[i] = pixel[x+y*width];
+			}
+		}
+		return distination;
+	}
+
+	public void draw(PixelDataByteBuffer p) {
+		int w = p.getWidth(),h=p.getHeight();
+		int rw,rh;
+		if(getWidth()<w)rw=getWidth();
+		else rw=w;
+		if(getHeight()<h)rh=getHeight();
+		else rh=h;
+		for(int y=0;y<rh;y++){
+			System.arraycopy(p.pixel, rh*w, pixel, y*getWidth(), rw);
+		}
 	}
 
 }

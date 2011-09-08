@@ -53,6 +53,10 @@ public abstract class CompressedPixelData {
 	public int height(){
 		return height;
 	}
+	
+	public int dataSize(){
+		return binarySize;
+	}
 
 
 	/**

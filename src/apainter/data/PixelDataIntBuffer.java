@@ -42,6 +42,11 @@ public class PixelDataIntBuffer extends PixelDataBuffer{
 		if(pixel.length!=w*h)throw new RuntimeException(String.format("pixel length(%d) != w(%d)*h(%d)",pixel.length,w,h));
 		this.pixel = pixel;
 	}
+	
+	@Override
+	public PixelDataBuffer clone() {
+		return new PixelDataIntBuffer(width, height, pixel.clone());
+	}
 
 	@Override
 	public void dispose() {
@@ -86,6 +91,19 @@ public class PixelDataIntBuffer extends PixelDataBuffer{
 		if(!contains(x,y))throw new OutBoundsException(getBounds(), x, y);
 		return pixel[x+y*width];
 	}
+	
+	public void draw(PixelDataIntBuffer p){
+		int w = p.getWidth(),h=p.getHeight();
+		int rw,rh;
+		if(getWidth()<w)rw=getWidth();
+		else rw=w;
+		if(getHeight()<h)rh=getHeight();
+		else rh=h;
+		for(int y=0;y<rh;y++){
+			System.arraycopy(p.pixel, rh*w, pixel, y*getWidth(), rw);
+		}
+	}
+	
 
 	public int[] copy(int[] distination){
 		if(distination ==null || distination.length < pixel.length)distination = new int[pixel.length];
