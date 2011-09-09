@@ -14,7 +14,6 @@ public class UndoEvent extends CanvasEvent{
 		History h = getSource();
 		boolean b=h.hasNextHistory();
 		if(!h.current._undo())return;
-		System.out.print("undo 実行="+h.current);
 		h.current = h.current.before;
 		if(h.current==h.top){
 			h.firePropertyChange(HaveUndoHistoryChangeProperty,
@@ -24,7 +23,6 @@ public class UndoEvent extends CanvasEvent{
 			h.firePropertyChange(HaveRedoHistoryChangeProperty,
 					false, true);
 		}
-		System.out.println(" current="+h.current);
 	}
 
 

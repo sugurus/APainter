@@ -23,7 +23,6 @@ public class RedoEvent extends CanvasEvent{
 			h.firePropertyChange(HaveUndoHistoryChangeProperty,
 					false, true);
 		}
-		System.out.println("redo 実行&current="+h.current);
 	}
 
 

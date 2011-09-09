@@ -50,11 +50,10 @@ abstract public class Drawer {
 
 		PaintLastEvent le=null;
 		if(nowDrawing){
-			System.out.println("リリースされてない。。。");
-			le = new PaintLastEvent(0, this, drawTTTTTTarget);
+			le = new PaintLastEvent(0, this, drawTarget);
 		}
 
-		drawTTTTTTarget=target;
+		drawTarget=target;
 
 
 		nowDrawing=true;
@@ -65,7 +64,7 @@ abstract public class Drawer {
 				new CanvasEvent[]{new PaintStartEvent(0, this, target),de};
 	}
 	protected synchronized CanvasEvent[] drawLine(PenTabletMouseEvent e,InnerLayerHandler target,Device dv){
-		if(!nowDrawing||drawTTTTTTarget!=target){
+		if(!nowDrawing||drawTarget!=target){
 			return new CanvasEvent[0];
 		}
 		plot.setNextPoint(e);
@@ -73,7 +72,7 @@ abstract public class Drawer {
 		return es.toArray(new CanvasEvent[es.size()]);
 	}
 	protected synchronized CanvasEvent[] end(PenTabletMouseEvent e,InnerLayerHandler target,Device dv){
-		if(!nowDrawing||drawTTTTTTarget!=target)return new CanvasEvent[0];
+		if(!nowDrawing||drawTarget!=target)return new CanvasEvent[0];
 		plot.end(e);
 		ArrayList<DrawEvent> des = createEvents(e, target, dv);
 		CanvasEvent[] ret =des.toArray(new CanvasEvent[des.size()+1]);
@@ -257,7 +256,7 @@ abstract public class Drawer {
 	private int density_min=256;// 筆圧最小時の筆の濃度（0~256）
 	private double density = 0.5;// ペン濃度 0～1
 	private boolean nowDrawing=false;
-	private InnerLayerHandler drawTTTTTTarget=null;
+	private InnerLayerHandler drawTarget=null;
 	private Plot plot=new LinerPlot();
 	{
 		plot.setEndPointPlot(true);
