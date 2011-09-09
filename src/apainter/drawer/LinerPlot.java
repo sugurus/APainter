@@ -67,6 +67,8 @@ public class LinerPlot implements Plot{
 		nowy = nexty;
 		nextx = nx;
 		nexty = ny;
+		nowp=nextp;
+		nextp=e.getPressure();
 		if(distance < 0.00001){
 			this.distance=0;
 			cos=1;

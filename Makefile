@@ -1,5 +1,6 @@
 #jpen-2.jar path
-JPENPATH=jpen/jpen-2.jar
+JPENFOLDER=jpen
+JPENPATH=$(JPENFOLDER)/jpen-2.jar
 #classfile directory
 CLASSDIR=classdir
 #if unix=> :
@@ -45,7 +46,7 @@ $(JAR):$(CLASSDIR)/$(APainter).class
 	jar cfm $(JAR) $(MANIFEST) -C $(CLASSDIR) apainter -C $(CLASSDIR) nodamushi
 
 run:$(CLASSDIR)/$(DEMO).class
-	java $(CP)$(CLASSPATHSEP)$(CLASSDIR)$(CLASSPATHSEP)./ $(DEMORUN)
+	java -Djava.library.path=$(JPENFOLDER) $(CP)$(CLASSPATHSEP)$(CLASSDIR)$(CLASSPATHSEP)./ $(DEMORUN)
 
 jar:$(JAR)
 

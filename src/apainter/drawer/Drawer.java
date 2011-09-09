@@ -107,12 +107,6 @@ abstract public class Drawer {
 	}
 
 
-
-
-	private static DrawEvent[] toArray(ArrayList<DrawEvent> l){
-		return l.toArray(new DrawEvent[l.size()]);
-	}
-
 	protected ArrayList<DrawEvent> createEvents(PenTabletMouseEvent e,InnerLayerHandler target,Device dv){
 		if(!plot.hasNext())return new ArrayList<DrawEvent>();
 		Point2D plotpoint;
