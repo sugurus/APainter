@@ -8,7 +8,7 @@ import apainter.canvas.Canvas;
 
 public class History {
 
-
+	private volatile int id=0;
 
 	public void clear(){
 		top.removeNext();
@@ -27,6 +27,11 @@ public class History {
 
 	public synchronized void addHistory(HistoryObject o){
 		if(o==null)return;
+		if(o.holded){
+			throw new Error(o.toString());
+		}
+		o.id = id++;
+		o.holded = true;
 		if(nowGroup){
 			addGrouop(o);
 			return;
@@ -102,40 +107,18 @@ public class History {
 	}
 
 
-	public synchronized boolean undo(){
+	public synchronized void undo(){
 		if(hasBeforeHistory()){
-			boolean b=hasNextHistory();
-			if(!current._undo())return false;
-			current = current.before;
-			if(current==top){
-				firePropertyChange(HaveUndoHistoryChangeProperty,
-						true, false);
-			}
-			if(!b){
-				firePropertyChange(HaveRedoHistoryChangeProperty,
-						false, true);
-			}
-			return true;
+			UndoEvent e = new UndoEvent(0, this, canvas);
+			canvas.dispatchEvent(e);
 		}
-		return false;
 	}
 
-	public synchronized boolean redo(){
+	public synchronized void redo(){
 		if(hasNextHistory()){
-			boolean b=hasBeforeHistory();
-			if(!current._redo())return false;
-			if(!hasNextHistory()){
-				firePropertyChange(HaveRedoHistoryChangeProperty,
-						true, false);
-			}
-			if(!b){
-				firePropertyChange(HaveUndoHistoryChangeProperty,
-						false, true);
-			}
-			current = current.next;
-			return true;
+			RedoEvent e = new RedoEvent(0, this, canvas);
+			canvas.dispatchEvent(e);
 		}
-		return false;
 	}
 
 	public void markGroup(){
@@ -162,16 +145,27 @@ public class History {
 		canvas = c;
 	}
 
-	private void firePropertyChange(String name,Object oldValue,Object newValue){
+	void firePropertyChange(String name,Object oldValue,Object newValue){
 		canvas.firePropertyChange(name, oldValue, newValue, canvas);
 	}
 
-	private Canvas canvas;
-	private final TopHistory top = new TopHistory();
-	private HistoryObject current = top;
-	private ArrayList<HistoryObject> grouphistory = new ArrayList<HistoryObject>();
-	private boolean nowGroup=false;
-	private long maxMemory=20*1000*1000;//byte
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		HistoryObject o = top;
+		while(o.next!=null){
+			o = o.next;
+			sb.append(o.toString()).append("\n");
+		}
+		return sb.toString();
+	}
+
+	Canvas canvas;
+	final TopHistory top = new TopHistory();
+	HistoryObject current = top;
+	ArrayList<HistoryObject> grouphistory = new ArrayList<HistoryObject>();
+	boolean nowGroup=false;
+	long maxMemory=20*1000*1000;//byte
 }
 
 

@@ -146,12 +146,12 @@ public class CanvasHandler {
 		return canvas.getAllLayers();
 	}
 
-	public boolean undo(){
-		return canvas.undo();
+	public void undo(){
+		canvas.undo();
 	}
 
-	public boolean redo(){
-		return canvas.redo();
+	public void redo(){
+		canvas.redo();
 	}
 
 	public boolean hasUndo(){

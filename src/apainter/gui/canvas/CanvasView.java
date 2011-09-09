@@ -194,6 +194,9 @@ public final class CanvasView extends JPanel{
 				canvas.dispatchEvent(e);
 			}
 
+			public void pressKey(PenTabletMouseEvent e) {}
+			public void releaseKey(PenTabletMouseEvent e) {}
+
 		};
 	}
 

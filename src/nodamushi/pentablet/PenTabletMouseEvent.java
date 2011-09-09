@@ -36,6 +36,7 @@ public final class PenTabletMouseEvent extends MouseEvent{
 		this.state = state;
 	}
 
+
 	private PenTabletMouseEvent(Component source,int id,long when,int modifiers,
             double x,double y,int clickCount,boolean popupTrigger,ButtonType
             btype,CursorDevice ctype,State state,
@@ -54,6 +55,14 @@ public final class PenTabletMouseEvent extends MouseEvent{
 			rotation = rot;
 		}
 	}
+
+
+	public boolean isTypedKeyBord(){
+		return buttontype==ButtonType.CONTROL||
+				buttontype==ButtonType.SHIFT||
+				buttontype==ButtonType.ALT;
+	}
+
 
 	/**
 	 * 筆圧がクリック最低圧を超えているかどうかを返します。<br>
@@ -385,7 +394,9 @@ public final class PenTabletMouseEvent extends MouseEvent{
 		/**ペン先*/HEAD,/**ペンの後ろ（消しゴム）*/TAIL,
 		/**ペンのサイドボタン*/SIDE1,/**ペンのサイドボタン*/SIDE2,
 		/**マウスの左（であることが多い）*/BUTTON1,/**マウスの右（であることが多い）*/BUTTON3,/**マウスの中（であることが多い）*/BUTTON2,
-		/**カスタムボタン*/CUSTOM,/**判別不能の時（nullの代用）*/NULL,
+		/**カスタムボタン*/CUSTOM,
+		/**ALTボタンが押されました**/ALT,/**SHIFTが押されました**/SHIFT,/**CONTROLが押されました。**/CONTROL,
+		/**判別不能の時（nullの代用）*/NULL,
 	}
 	/**
 	 * カーソルを動かしているデバイス

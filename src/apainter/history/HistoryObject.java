@@ -3,6 +3,8 @@ package apainter.history;
 public abstract class HistoryObject {
 
 	HistoryObject next,before;
+	int id;
+	boolean holded=false;
 
 
 	final synchronized boolean _undo(){
@@ -21,10 +23,10 @@ public abstract class HistoryObject {
 	}
 
 	final synchronized boolean _redo(){
-		if(next.isCorrect()){
+		if(isCorrect()){
 			boolean b=false;
 			try{
-				b=next.redo();
+				b=redo();
 			}catch(Exception e){
 				e.printStackTrace();
 				b=false;
@@ -111,4 +113,8 @@ public abstract class HistoryObject {
 	public abstract String getHistoryName();
 	boolean hasNext(){return next!=null;}
 	boolean hasBefore(){return before!=null;}
+	@Override
+	public String toString() {
+		return "id:"+id+" "+getHistoryName();
+	}
 }

@@ -19,4 +19,6 @@ public abstract class PenTabletAdapter extends PenTabletRecognizer{
 	@Override public void operatorChanged(PenTabletMouseEvent e) {}
 	@Override public void onEnter(PenTabletMouseEvent e) {}
 	@Override public void onExit(PenTabletMouseEvent e) {}
+	@Override public void pressKey(PenTabletMouseEvent e) {}
+	@Override public void releaseKey(PenTabletMouseEvent e) {}
 }

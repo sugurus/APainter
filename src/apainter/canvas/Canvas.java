@@ -275,16 +275,16 @@ public class Canvas {
 		history.finishGroup();
 	}
 
-	public boolean redo(){
-		return history.redo();
+	public void redo(){
+		history.redo();
 	}
 
 	public boolean hasBeforeHistory(){
 		return history.hasBeforeHistory();
 	}
 
-	public boolean undo(){
-		return history.undo();
+	public void undo(){
+		history.undo();
 	}
 	public boolean hasNextHistory(){
 		return history.hasNextHistory();

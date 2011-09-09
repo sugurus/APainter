@@ -134,8 +134,8 @@ public abstract class PenTabletRecognizer{
 	 * ただし、ここで0が返ってきた場合でもタブレットをまだ動作させていないだけの可能性があります。<br>
 	 * タブレットを動かした後も0が返る場合は読みこまれてないかも
 	 * @return 0:ネイティブライブラリが読み込まれていない可能性があります<br>
-	 * 			1:利用可能です。<br>
-	 * 			-1:jpen2が使えません。
+	 * 1:利用可能です。<br>
+	 * -1:jpen2が使えません。
 	 */
 	public final int isjpenloadnative(){
 		return listener.canusetablet();
@@ -208,7 +208,7 @@ public abstract class PenTabletRecognizer{
 	 * ドラッグが起こると呼び出される関数です。
 	 *
 	 * @param e
-	 *            マウスイベント
+	 * マウスイベント
 	 */
 	public abstract void onDragged(PenTabletMouseEvent e);
 
@@ -237,7 +237,7 @@ public abstract class PenTabletRecognizer{
 	 * スクロールされた時に呼び出される関数です。
 	 *
 	 * @param e
-	 *            スクロールイベント
+	 * スクロールイベント
 	 */
 	public abstract void onScroll(MouseWheelEvent e);
 
@@ -262,6 +262,20 @@ public abstract class PenTabletRecognizer{
 	 */
 	public abstract void onExit(PenTabletMouseEvent e);
 
+
+	/**
+	 * あり得ないことにJpen2がjpen2-3以降からshift,alt,controlが押されたイベントでも
+	 * イベントが発生するようになってしまっていた<br>
+	 * @param e
+	 */
+	public abstract void pressKey(PenTabletMouseEvent e);
+	/**
+	 * あり得ないことにJpen2がjpen2-3以降からshift,alt,controlが押されたイベントでも
+	 * イベントが発生するようになってしまっていた<br>
+	 * @param e
+	 */
+	public abstract void releaseKey(PenTabletMouseEvent e);
+
 }
 interface Listener{
 	void set();
@@ -280,7 +294,7 @@ final class JPenRecognizer implements PenListener,Listener{
 
 	private static int modify=0;
 
-	private static final KeyEventDispatcher dispatch  = new KeyEventDispatcher(){
+	private static final KeyEventDispatcher dispatch = new KeyEventDispatcher(){
 		private int t = InputEvent.SHIFT_DOWN_MASK|InputEvent.ALT_DOWN_MASK|InputEvent.META_DOWN_MASK|InputEvent.CTRL_DOWN_MASK;
 		public boolean dispatchKeyEvent(KeyEvent e) {
 			modify =e.getModifiers()&t;
@@ -296,7 +310,7 @@ final class JPenRecognizer implements PenListener,Listener{
 	 * ただし、ここで0が返ってきた場合でもタブレットをまだ動作させていないだけの可能性があります。<br>
 	 * タブレットを動かした後も0が返る場合は読みこまれてないかも
 	 * @return 0:ネイティブライブラリが読み込まれていない可能性があります<br>
-	 * 			1:利用可能です。<br>
+	 * 1:利用可能です。<br>
 	 */
 	public int canusetablet(){
 		Collection<PenDevice> c = pm.getDevices();
@@ -347,10 +361,16 @@ final class JPenRecognizer implements PenListener,Listener{
 				t.onMove(e);
 				break;
 			case PRESSED:
-				t.onPressed(e);
+				if(e.isTypedKeyBord()){
+					t.pressKey(e);
+				}else
+					t.onPressed(e);
 				break;
 			case RELEASED:
-				t.onReleased(e);
+				if(e.isTypedKeyBord()){
+					t.releaseKey(e);
+				}else
+					t.onReleased(e);
 				break;
 			case ENTERED:
 				t.onEnter(e);
@@ -418,7 +438,7 @@ final class JPenRecognizer implements PenListener,Listener{
 		Pen pen = e.pen;
 		float x,y,p,r,tx,ty;
 		PKind k = pen.getKind();
-		boolean b =  pen.hasPressedButtons();
+		boolean b = pen.hasPressedButtons();
 		ButtonType btype;
 		CursorDevice ctype;
 		State state = State.NULL;
@@ -426,10 +446,35 @@ final class JPenRecognizer implements PenListener,Listener{
 		case ERASER:
 			btype = ButtonType.TAIL;
 			ctype = CursorDevice.TABLET;
+
+			switch(e.button.getType()){
+			case ALT:
+				state = State.PRESSED;
+				btype = ButtonType.ALT;break;
+			case SHIFT:
+				state = State.PRESSED;
+				btype = ButtonType.SHIFT;break;
+			case CONTROL:
+				state = State.PRESSED;
+				btype = ButtonType.CONTROL;break;
+			}
+
 			break;
 		case STYLUS:
 			btype =ButtonType.HEAD;
 			ctype = CursorDevice.TABLET;
+
+			switch(e.button.getType()){
+			case ALT:
+				state = State.PRESSED;
+				btype = ButtonType.ALT;break;
+			case SHIFT:
+				state = State.PRESSED;
+				btype = ButtonType.SHIFT;break;
+			case CONTROL:
+				state = State.PRESSED;
+				btype = ButtonType.CONTROL;break;
+			}
 			break;
 		case CUSTOM:
 			return;
@@ -437,10 +482,22 @@ final class JPenRecognizer implements PenListener,Listener{
 			state = State.PRESSED;
 			ctype = CursorDevice.MOUSE;
 			release = false;
-			if(e.button.getType() == Type.CENTER)btype = ButtonType.BUTTON2;
-			else if(e.button.getType() == Type.RIGHT)btype=ButtonType.BUTTON3;
-			else if(e.button.getType() == Type.LEFT)btype = ButtonType.BUTTON1;
-			else btype = ButtonType.NULL;
+			switch(e.button.getType()){
+			case LEFT:
+				btype = ButtonType.BUTTON1;break;
+			case CENTER:
+				btype = ButtonType.BUTTON2;break;
+			case RIGHT:
+				btype = ButtonType.BUTTON3;break;
+			case ALT:
+				btype = ButtonType.ALT;break;
+			case SHIFT:
+				btype = ButtonType.SHIFT;break;
+			case CONTROL:
+				btype = ButtonType.CONTROL;break;
+			default:
+				btype=ButtonType.NULL;
+			}
 			if(b){
 				if(!e.button.value){
 					state = State.RELEASED;
@@ -461,11 +518,13 @@ final class JPenRecognizer implements PenListener,Listener{
 			btype = ButtonType.NULL;
 		}
 		time=0;
-		if(!b&&!release){
+		if(!(b&&(pen.getButtonValue(Type.ON_PRESSURE)||
+				pen.getButtonValue(Type.LEFT)||
+				pen.getButtonValue(Type.RIGHT)||
+				pen.getButtonValue(Type.CENTER)))&&!release){
 			state = State.RELEASED;
 			memberinit();
 		}
-
 		x = pen.getLevelValue(PLevel.Type.X);//x取得
 		y = pen.getLevelValue(PLevel.Type.Y);//y取得
 		p = pen.getLevelValue(PLevel.Type.PRESSURE);//筆圧取得
@@ -533,24 +592,35 @@ final class JPenRecognizer implements PenListener,Listener{
 		ButtonType btype;
 		CursorDevice ctype;
 		State state;
-		if(b){
+		if(b&&(pen.getButtonValue(Type.ON_PRESSURE)||
+				pen.getButtonValue(Type.LEFT)||
+				pen.getButtonValue(Type.RIGHT)||
+				pen.getButtonValue(Type.CENTER))){
 			if(release){
 				state = State.PRESSED;
-			}else state = State.DRAGGED;
+			}else{
+				state = State.DRAGGED;
+			}
 		}else {
 			state = State.MOVE;
-
 		}
 		switch(k.getType()){
 		case ERASER:
-			if(b){
+			if(b&&(pen.getButtonValue(Type.ON_PRESSURE)||
+					pen.getButtonValue(Type.LEFT)||
+					pen.getButtonValue(Type.RIGHT)||
+					pen.getButtonValue(Type.CENTER))){
 				release = false;
 			}
 			btype =ButtonType.TAIL;
 			ctype = CursorDevice.TABLET;
+
 			break;
 		case STYLUS:
-			if(b){
+			if(b&&(pen.getButtonValue(Type.ON_PRESSURE)||
+					pen.getButtonValue(Type.LEFT)||
+					pen.getButtonValue(Type.RIGHT)||
+					pen.getButtonValue(Type.CENTER))){
 				release = false;
 			}
 			btype =ButtonType.HEAD;
@@ -610,7 +680,7 @@ final class JPenRecognizer implements PenListener,Listener{
 //------------------------------------------------
 //ただのリスナー
 //------------------------------------------------
-final class MouseRecognizer  implements MouseListener,MouseMotionListener,MouseWheelListener,Listener{
+final class MouseRecognizer implements MouseListener,MouseMotionListener,MouseWheelListener,Listener{
 	MouseRecognizer(PenTabletRecognizer t){this.t=t;set();}
 
 	public void mousePressed(MouseEvent e) {
@@ -667,3 +737,4 @@ final class MouseRecognizer  implements MouseListener,MouseMotionListener,MouseW
 
 	final PenTabletRecognizer t;
 }
+

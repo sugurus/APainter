@@ -14,12 +14,25 @@ import apainter.drawer.PaintLastEvent;
 import apainter.drawer.PaintStartEvent;
 import apainter.history.HisotryReduceEvent;
 import apainter.history.History;
+import apainter.history.RedoEvent;
+import apainter.history.UndoEvent;
 
 public class CPUCEDT implements CanvasEventDispatchThread{
 
 	private ExecutorService anyThread,drawThread,historyReduceThread;
 	RepaintThread repaint;
 	private Canvas canvas;
+	private boolean lockdraw=false;
+
+	private synchronized void lockDraw(){
+		lockdraw = true;
+	}
+	private synchronized boolean isLockedDraw(){
+		return lockdraw;
+	}
+	private synchronized void unlockDraw(){
+		lockdraw = false;
+	}
 
 	public CPUCEDT(Canvas c) {
 		canvas = c;
@@ -67,6 +80,7 @@ public class CPUCEDT implements CanvasEventDispatchThread{
 		Runnable r = new Runnable() {
 			public void run() {
 				if (e instanceof PaintStartEvent) {
+					lockDraw();
 					PaintStartEvent pse = (PaintStartEvent) e;
 					InnerLayerHandler h = pse.getTarget();
 					h.startPaint(e.getSource());
@@ -78,10 +92,39 @@ public class CPUCEDT implements CanvasEventDispatchThread{
 				}else if(e instanceof HisotryReduceEvent){
 					HisotryReduceEvent h = (HisotryReduceEvent)e;
 					submitReduceHistory(h);
+				}else if(e instanceof UndoEvent){
+					UndoEvent ue =(UndoEvent)e;
+					submitUndo(ue);
+				}else if(e instanceof RedoEvent){
+					submitRedo((RedoEvent)e);
 				}
 			}
 		};
 		anyThread.submit(r);
+	}
+	private void submitRedo(final RedoEvent e){
+		drawThread.submit(new Runnable() {
+			public void run() {
+				synchronized (CPUCEDT.this) {
+					if(isLockedDraw()){
+						return;
+					}
+					e.redo();
+				}
+			}
+		});
+	}
+	private void submitUndo(final UndoEvent e){
+		drawThread.submit(new Runnable() {
+			public void run() {
+				synchronized (CPUCEDT.this) {
+					if(isLockedDraw()){
+						return;
+					}
+					e.undo();
+				}
+			}
+		});
 	}
 
 	private void submitDraw(final DrawEvent e){
@@ -96,6 +139,7 @@ public class CPUCEDT implements CanvasEventDispatchThread{
 			public void run() {
 				InnerLayerHandler h = pe.getTarget();
 				h.endPaint(pe.getSource());
+				unlockDraw();
 			}
 		});
 
