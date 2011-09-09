@@ -20,21 +20,21 @@ public abstract class PixelChangeHistory extends HistoryObject{
 	private PixelDataBuffer copy;
 	private int width,height;
 	private boolean inited1=false;
-	
-	
+
+
 	//基本データ////////////////
 	private boolean inited=false;
 	protected boolean compressed=false;
-	
+
 	protected Rectangle bounds;
 	protected PixelDataBuffer beforebuffer,afterbuffer;
 	protected CompressedPixelData compressbefore,compressafter;
 	protected Class<?> dataclass;
-	
+
 	public PixelChangeHistory(Canvas canvas) {
 		this.canvas = canvas;
 	}
-	
+
 	/**
 	 * 画素を変更する前にコピーを作成します<br>
 	 * この関数は一度しか呼べません。<br>
@@ -80,7 +80,7 @@ public abstract class PixelChangeHistory extends HistoryObject{
 		}
 		copy = before.clone();
 	}
-	
+
 	/**
 	 * 更新後の画素の状態をセットし、この履歴を使えるようにします。<br>
 	 * この関数はcopyBeforePixelが完了していない場合と、
@@ -113,15 +113,15 @@ public abstract class PixelChangeHistory extends HistoryObject{
 		}else{
 			copy.dispose();
 		}
-		copy=null;
 		if(copy instanceof PixelDataIntBuffer){
 			afterbuffer = new PixelDataIntBuffer(r.width, r.height, ((PixelDataIntBuffer)after).copy(null, r));
 		}else if(copy instanceof PixelDataByteBuffer){
 			afterbuffer = new PixelDataByteBuffer(r.width, r.height, ((PixelDataByteBuffer)after).copy((byte[])null, r));
 		}
+		copy=null;
 		inited = true;
 	}
-	
+
 	@Override
 	public synchronized void compress(){
 		if(compressed)return;
@@ -132,12 +132,12 @@ public abstract class PixelChangeHistory extends HistoryObject{
 		beforebuffer=afterbuffer=null;
 		compressed=true;
 	}
-	
+
 	@Override
 	public boolean isCompressed() {
 		return compressed;
 	}
-	
+
 	protected void rendering(){
 		if(!canvas.isGPUCanvas()){
 			Rectangle[] rs = Util.partition(bounds, CPUParallelWorkThread.getThreadSize());
@@ -146,7 +146,7 @@ public abstract class PixelChangeHistory extends HistoryObject{
 			canvas.rendering(bounds);
 		}
 	}
-	
+
 	/**
 	 * 渡されたpとafterbufferのクラスが一致する場合、書き込みます。
 	 * @param p
@@ -162,13 +162,15 @@ public abstract class PixelChangeHistory extends HistoryObject{
 			}
 		}else{
 			if(p instanceof PixelDataIntBuffer){
-				((PixelDataIntBuffer)p).setData(((PixelDataIntBuffer)afterbuffer).getData(), bounds);
+				((PixelDataIntBuffer)p).
+				setData(((PixelDataIntBuffer)afterbuffer).getData(),
+						bounds);
 			}else if(p instanceof PixelDataByteBuffer){
 				((PixelDataByteBuffer)p).setData(((PixelDataByteBuffer)afterbuffer).getData(), bounds);
 			}
 		}
 	}
-	
+
 	protected void drawBeforeData(PixelDataBuffer p){
 		if(!isCorrect()||!dataclass.equals(p.getClass()))return;
 		if(compressed){
@@ -199,9 +201,9 @@ public abstract class PixelChangeHistory extends HistoryObject{
 			return m;
 		}
 		if(dataclass.equals(PixelDataIntBuffer.class))
-			return bounds.width*bounds.height*4;
+			return bounds.width*bounds.height*4*2;
 		else
-			return bounds.width*bounds.height;
+			return bounds.width*bounds.height*2;
 	}
 
 	@Override

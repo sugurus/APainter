@@ -11,13 +11,11 @@ import java.beans.PropertyChangeListener;
 import javax.swing.event.EventListenerList;
 
 import nodamushi.pentablet.PenTabletMouseEvent;
-import nodamushi.pentablet.PenTabletMouseEvent.ButtonType;
 import nodamushi.pentablet.PenTabletMouseEvent.CursorDevice;
 import apainter.APainter;
 import apainter.Device;
 import apainter.GlobalKey;
 import apainter.GlobalValue;
-import apainter.bind.BindObject;
 import apainter.canvas.cedt.CanvasEventAccepter;
 import apainter.canvas.cedt.cpu.CPUCEA_0;
 import apainter.canvas.event.CanvasEvent;
@@ -31,9 +29,10 @@ import apainter.drawer.DrawEvent;
 import apainter.gui.canvas.CPUCanvasPanel;
 import apainter.gui.canvas.CanvasMouseListener;
 import apainter.gui.canvas.CanvasView;
+import apainter.history.History;
+import apainter.history.HistoryObject;
 import apainter.misc.PropertyChangeUtility;
 import apainter.resorce.LimitedResource;
-import apainter.resorce.Resource;
 
 public class Canvas {
 
@@ -52,9 +51,11 @@ public class Canvas {
 	private CanvasView view;
 	private APainter apainter;
 
+	private History history;
+
 
 	private CPUCanvasPanel cpucanvas;
-	
+
 	private final LimitedResource<PixelDataIntBuffer> intbuffer;
 	private final LimitedResource<PixelDataByteBuffer> bytebuffer;
 
@@ -102,7 +103,7 @@ public class Canvas {
 		});
 		id = canvasid;
 		createdTime = System.currentTimeMillis();
-
+		history = new History(this);
 		switch(device){
 
 		case CPU:
@@ -129,6 +130,7 @@ public class Canvas {
 	private void initGPU(){
 		//TODO いつの日か実装したいね。
 	}
+
 
 	public boolean paint(DrawEvent e){
 		return layerdata.paint(e);
@@ -260,6 +262,33 @@ public class Canvas {
 
 
 
+	//履歴操作-------------------------------------------------------
+	public void addHistory(HistoryObject historyobj){
+		history.addHistory(historyobj);
+	}
+
+	public void markGroupHistory(){
+		history.markGroup();
+	}
+
+	public void finishGroupHistory(){
+		history.finishGroup();
+	}
+
+	public boolean redo(){
+		return history.redo();
+	}
+
+	public boolean hasBeforeHistory(){
+		return history.hasBeforeHistory();
+	}
+
+	public boolean undo(){
+		return history.undo();
+	}
+	public boolean hasNextHistory(){
+		return history.hasNextHistory();
+	}
 
 	//LayerData操作--------------------------------------------------
 

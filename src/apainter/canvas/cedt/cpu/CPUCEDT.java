@@ -1,17 +1,23 @@
 package apainter.canvas.cedt.cpu;
 
 import java.awt.Rectangle;
+import java.awt.event.PaintEvent;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import apainter.canvas.Canvas;
 import apainter.canvas.cedt.CanvasEventDispatchThread;
 import apainter.canvas.event.CanvasEvent;
+import apainter.canvas.layerdata.InnerLayerHandler;
 import apainter.drawer.DrawEvent;
+import apainter.drawer.PaintLastEvent;
+import apainter.drawer.PaintStartEvent;
+import apainter.history.HisotryReduceEvent;
+import apainter.history.History;
 
 public class CPUCEDT implements CanvasEventDispatchThread{
 
-	private ExecutorService anyThread,drawThread;
+	private ExecutorService anyThread,drawThread,historyReduceThread;
 	RepaintThread repaint;
 	private Canvas canvas;
 
@@ -31,6 +37,9 @@ public class CPUCEDT implements CanvasEventDispatchThread{
 			anyThread = Executors.newSingleThreadExecutor();
 		if(drawThread==null || drawThread.isShutdown())
 			drawThread = Executors.newSingleThreadExecutor();
+		if(historyReduceThread==null || historyReduceThread.isShutdown()){
+			historyReduceThread =Executors.newSingleThreadExecutor();
+		}
 		if(repaint==null || !repaint.isRunning())
 			repaint = new RepaintThread(1000/60, canvas);
 		repaint.start();
@@ -40,6 +49,7 @@ public class CPUCEDT implements CanvasEventDispatchThread{
 	public boolean isRunning() {
 		return anyThread!=null && !anyThread.isShutdown()&&
 		drawThread!=null && !drawThread.isShutdown()&&
+		historyReduceThread!=null && !historyReduceThread.isShutdown()&&
 		repaint!=null && repaint.isRunning();
 	}
 
@@ -56,9 +66,18 @@ public class CPUCEDT implements CanvasEventDispatchThread{
 		if(e==null||e.canvas!=canvas)return;
 		Runnable r = new Runnable() {
 			public void run() {
-				if (e instanceof DrawEvent) {
+				if (e instanceof PaintStartEvent) {
+					PaintStartEvent pse = (PaintStartEvent) e;
+					InnerLayerHandler h = pse.getTarget();
+					h.startPaint(e.getSource());
+				}else if (e instanceof PaintLastEvent) {
+					submitDrawEnd((PaintLastEvent)e);
+				}else if (e instanceof DrawEvent) {
 					DrawEvent d = (DrawEvent) e;
 					submitDraw(d);
+				}else if(e instanceof HisotryReduceEvent){
+					HisotryReduceEvent h = (HisotryReduceEvent)e;
+					submitReduceHistory(h);
 				}
 			}
 		};
@@ -72,8 +91,27 @@ public class CPUCEDT implements CanvasEventDispatchThread{
 			}
 		});
 	}
+	private void submitDrawEnd(final PaintLastEvent pe){
+		drawThread.submit(new Runnable() {
+			public void run() {
+				InnerLayerHandler h = pe.getTarget();
+				h.endPaint(pe.getSource());
+			}
+		});
 
-	private void draw(DrawEvent de){
+	}
+
+	private void submitReduceHistory(final HisotryReduceEvent e){
+		historyReduceThread.submit(new Runnable() {
+			public void run() {
+				History h = e.getSource();
+				h.tryCompress();
+				h.reduceHistory();
+			}
+		});
+	}
+
+	private void draw(final DrawEvent de){
 		DrawEvent e = de.canvas.subsetEvent(de);
 		if(e ==null)return;
 
@@ -107,8 +145,6 @@ public class CPUCEDT implements CanvasEventDispatchThread{
 			CPUParallelWorkThread.exec(runs);
 		}
 		repaint.addJob(r);
-		//TODO HistoryEventを投げる
-
 	}
 
 }

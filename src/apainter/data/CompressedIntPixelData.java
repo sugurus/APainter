@@ -109,29 +109,38 @@ public class CompressedIntPixelData extends CompressedPixelData{
 	public synchronized PixelDataIntBuffer inflate() {
 		if(flushed)throw new RuntimeException("flushed");
 		try{
-			byte[] bytes = new byte[2];
 			Inflater inf = new Inflater();
+			int bsize = 100000;
+			byte[] buffer = new byte[bsize];
 			inf.setInput(binary, 0, binarySize);
 			int[] data = new int[size];
 			int shift = 24;
 			int imp,read,index=0;
+			int blength=inf.inflate(buffer);
+			int bpos=0;
 
 			for(int i=4;i>0;i--){
 				//1列目　横差分
 				imp = 0;
 				for(index=0;index<width;index++){
-					inf.inflate(bytes, 0, 2);
-					read = ((bytes[0]&0xff)<<8)|(bytes[1]&0xff);
+					read = ((buffer[bpos++]&0xff)<<8)|(buffer[bpos++]&0xff);
 					imp = imp-read+255;
 					data[index] |= imp<<shift;
+					if(bpos==blength){
+						blength=inf.inflate(buffer);
+						bpos=0;
+					}
 				}
 
 				//2列目以降　縦差分
 				while(index<size){
-					inf.inflate(bytes, 0, 2);
-					read = ((bytes[0]&0xff)<<8)|(bytes[1]&0xff);
+					read = ((buffer[bpos++]&0xff)<<8)|(buffer[bpos++]&0xff);
 					data[index] |= ((data[index-width]>>shift &0xff)-read+255)<<shift;
 					index++;
+					if(bpos==blength){
+						blength=inf.inflate(buffer);
+						bpos=0;
+					}
 				}
 
 				shift -=8;

@@ -55,7 +55,13 @@ public class LinerPlot implements Plot{
 		Point2D.Double d = e.getPointDouble();
 		double nx =d.x,ny =d.y;
 		double distance = hypot(nx-nextx, ny-nexty);
-		if(exl >distance)return;
+		if(exl >distance){
+			if(isend){
+				l=0;
+				this.distance=distance;
+			}
+			return;
+		}
 		l=exl;
 		nowx = nextx;
 		nowy = nexty;
@@ -82,9 +88,7 @@ public class LinerPlot implements Plot{
 
 	@Override
 	public void move(double length) {
-		if(isend && l < distance && l+length >distance){
-			l =distance;
-		}else l+=length;
+		l+=length;
 	}
 
 	@Override

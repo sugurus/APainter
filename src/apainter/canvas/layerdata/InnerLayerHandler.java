@@ -32,7 +32,17 @@ public abstract class InnerLayerHandler implements LayerHandle,PixelSetable{
 	public abstract ColorMode[] getUsableModes();
 	public abstract String getLayerTypeName();
 
+	/**
+	 * ピクセルに対し変更を加えることを通知します。<br>
+	 * @param source
+	 */
+	public abstract void startPaint(Object source);
 
+	/**
+	 * イベントの生成がされずペイントが終わるときに呼び出されます。<br>
+	 * @param source
+	 */
+	public abstract void endPaint(Object source);
 
 
 	abstract Layer getLayer();

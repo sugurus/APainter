@@ -6,7 +6,7 @@ import apainter.Color;
 import apainter.Device;
 import apainter.GlobalValue;
 import apainter.canvas.Canvas;
-import apainter.drawer.DrawEvent;
+import apainter.canvas.event.CanvasEvent;
 import apainter.drawer.Drawer;
 import apainter.gui.canvas.CanvasMouseListener;
 import apainter.pen.PenShape;
@@ -22,7 +22,7 @@ public abstract class BasicDrawer extends Drawer implements CanvasMouseListener{
 
 	@Override
 	public void press(PenTabletMouseEvent e,Canvas canvas) {
-		DrawEvent de=start(e, canvas.getSelectedLayer(),getDevice());
+		CanvasEvent[] de=start(e, canvas.getSelectedLayer(),getDevice());
 		postEvent(de);
 	}
 
@@ -32,13 +32,13 @@ public abstract class BasicDrawer extends Drawer implements CanvasMouseListener{
 
 	@Override
 	public void drag(PenTabletMouseEvent e,Canvas canvas) {
-		DrawEvent[] de=drawLine(e, canvas.getSelectedLayer(),getDevice());
+		CanvasEvent[] de=drawLine(e, canvas.getSelectedLayer(),getDevice());
 		postEvent(de);
 	}
 
 	@Override
 	public void release(PenTabletMouseEvent e,Canvas canvas) {
-		DrawEvent[] de=end(e, canvas.getSelectedLayer(),getDevice());
+		CanvasEvent[] de=end(e, canvas.getSelectedLayer(),getDevice());
 		postEvent(de);
 	}
 

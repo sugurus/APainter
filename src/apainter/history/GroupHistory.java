@@ -6,6 +6,7 @@ public final class GroupHistory extends HistoryObject{
 	//動作の順に格納。
 	//undo時は逆順で実行
 	HistoryObject[] histories;
+	boolean compressed=false;
 
 	public GroupHistory(HistoryObject... history) {
 		histories = history.clone();
@@ -46,6 +47,20 @@ public final class GroupHistory extends HistoryObject{
 			m+=h.memorySize();
 		}
 		return m;
+	}
+
+	@Override
+	public void compress() {
+		if(compressed)return;
+		compressed=true;
+		for(HistoryObject o:histories){
+			o.compress();
+		}
+	}
+
+	@Override
+	public boolean isCompressed() {
+		return compressed;
 	}
 
 	@Override

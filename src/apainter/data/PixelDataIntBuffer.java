@@ -42,7 +42,7 @@ public class PixelDataIntBuffer extends PixelDataBuffer{
 		if(pixel.length!=w*h)throw new RuntimeException(String.format("pixel length(%d) != w(%d)*h(%d)",pixel.length,w,h));
 		this.pixel = pixel;
 	}
-	
+
 	@Override
 	public PixelDataBuffer clone() {
 		return new PixelDataIntBuffer(width, height, pixel.clone());
@@ -91,7 +91,7 @@ public class PixelDataIntBuffer extends PixelDataBuffer{
 		if(!contains(x,y))throw new OutBoundsException(getBounds(), x, y);
 		return pixel[x+y*width];
 	}
-	
+
 	public void draw(PixelDataIntBuffer p){
 		int w = p.getWidth(),h=p.getHeight();
 		int rw,rh;
@@ -103,7 +103,7 @@ public class PixelDataIntBuffer extends PixelDataBuffer{
 			System.arraycopy(p.pixel, rh*w, pixel, y*getWidth(), rw);
 		}
 	}
-	
+
 
 	public int[] copy(int[] distination){
 		if(distination ==null || distination.length < pixel.length)distination = new int[pixel.length];
@@ -116,7 +116,7 @@ public class PixelDataIntBuffer extends PixelDataBuffer{
 			distination = new int[r.width*r.height];
 		}
 		for(int y=r.y,ey=r.y+r.height,i=0;y<ey;y++){
-			System.arraycopy(pixel, y*width, distination, i, r.width);
+			System.arraycopy(pixel, y*width+r.x, distination, i, r.width);
 			i+=r.width;
 		}
 		return distination;

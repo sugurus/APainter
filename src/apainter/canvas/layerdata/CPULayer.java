@@ -27,6 +27,10 @@ class CPULayer extends DefaultLayer{
 	private MemoryImageSource imagesource;
 	private Image img;
 
+	private Object paintsource;
+	private Rectangle paintrect;
+	private PaintLayerHistory painthistory;
+
 	public CPULayer(int id, String name,int width,int height,Canvas canvas,CPULayerData layerData) {
 		super(id, name,canvas,layerData);
 		buffer = PixelDataIntBuffer.create(width, height);
@@ -186,9 +190,32 @@ class CPULayer extends DefaultLayer{
 	@Override
 	public boolean paint(DrawEvent e) {
 		//TODO CPUかどうかの判定って必要かな？まぁ、実際にGPU作り始めてからでいっか。
+		Object source = e.source;
+		if(source!=paintsource)return false;
 		Renderer r = e.getRenderer();
-		r.rendering(buffer, e.getMapData(), e.getLocation(), e.getBounds(), e.getOption());
+		Rectangle rect;
+		r.rendering(buffer, e.getMapData(), e.getLocation(),rect= e.getBounds(), e.getOption());
+		if(paintrect==null){
+			paintrect=rect;
+		}else{
+			paintrect = paintrect.union(rect);
+		}
 		return true;
+	}
+
+	public void endPaint(Object o){
+		painthistory.finishPaint(paintrect);
+		canvas.addHistory(painthistory);
+		paintsource=null;
+		paintrect=null;
+		painthistory = null;
+	}
+
+
+	@Override
+	public void startPaint(Object source) {
+		paintsource=source;
+		painthistory = new PaintLayerHistory(canvas, handler);
 	}
 
 
@@ -201,6 +228,17 @@ class CPULayer extends DefaultLayer{
 			canvas = ca;
 			h = c;
 		}
+
+		@Override
+		public void startPaint(Object source) {
+			h.startPaint(source);
+		}
+
+		@Override
+		public void endPaint(Object source) {
+			h.endPaint(source);
+		}
+
 
 		@Override
 		public boolean paint(DrawEvent e) {

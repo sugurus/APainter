@@ -67,6 +67,9 @@ import apainter.pen.PenShape;
 import apainter.pen.PenShapeFactory;
 import demo.colorpicker.hsv.BoxH;
 import demo.colorpicker.hsv.SVIcon;
+import javax.swing.KeyStroke;
+import java.awt.event.KeyEvent;
+import java.awt.event.InputEvent;
 
 public class APainterDemo extends JFrame {
 	int canvaswidth = 400,canvasheight = 400;
@@ -195,6 +198,27 @@ public class APainterDemo extends JFrame {
 		});
 		menu.add(newcanvasmenu);
 		menu.add(savefilemenu);
+
+		menu_1 = new JMenu("履歴");
+		menuBar.add(menu_1);
+
+		undomenu = new JMenuItem("戻る");
+		undomenu.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				canvash.undo();
+			}
+		});
+		undomenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_MASK));
+		menu_1.add(undomenu);
+
+		redomenu = new JMenuItem("進む");
+		redomenu.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				canvash.redo();
+			}
+		});
+		redomenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK));
+		menu_1.add(redomenu);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -651,6 +675,9 @@ public class APainterDemo extends JFrame {
 	private JSlider minnoudo;
 	private JMenuItem newcanvasmenu;
 	private JMenuItem savefilemenu;
+	private JMenu menu_1;
+	private JMenuItem undomenu;
+	private JMenuItem redomenu;
 	private void initAPainter(){
 		apainter = APainter.createAPainter(Device.CPU);
 		apainter.addExitListener(new EL());

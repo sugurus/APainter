@@ -146,6 +146,21 @@ public class CanvasHandler {
 		return canvas.getAllLayers();
 	}
 
+	public boolean undo(){
+		return canvas.undo();
+	}
+
+	public boolean redo(){
+		return canvas.redo();
+	}
+
+	public boolean hasUndo(){
+		return canvas.hasBeforeHistory();
+	}
+
+	public boolean hasRedo(){
+		return canvas.hasNextHistory();
+	}
 
 	public void dispose() {
 		canvas.dispose();

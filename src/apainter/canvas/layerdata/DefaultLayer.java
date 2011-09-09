@@ -103,6 +103,7 @@ abstract class DefaultLayer implements Layer,PixelSetable,MaskContainer{
 	}
 
 
+
 	//field----------------------------------------------------------------------
 	private final int id;
 	private String name;

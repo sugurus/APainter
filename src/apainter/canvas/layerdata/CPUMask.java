@@ -119,4 +119,16 @@ class CPUMask extends Mask implements DrawAccepter{
 		img.flush();
 	}
 
+
+	@Override
+	public void startPaint(Object source) {
+		// TODO 自動生成されたメソッド・スタブ
+
+	}
+	@Override
+	public void endPaint(Object source) {
+		// TODO 自動生成されたメソッド・スタブ
+
+	}
+
 }

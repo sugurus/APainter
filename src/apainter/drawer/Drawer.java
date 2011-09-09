@@ -13,6 +13,7 @@ import javax.swing.event.EventListenerList;
 import nodamushi.pentablet.PenTabletMouseEvent;
 import apainter.Color;
 import apainter.Device;
+import apainter.canvas.event.CanvasEvent;
 import apainter.canvas.event.EventConstant;
 import apainter.canvas.layerdata.InnerLayerHandler;
 import apainter.data.PixelDataBuffer;
@@ -45,31 +46,33 @@ abstract public class Drawer {
 		this.id = id;
 	}
 
-	protected DrawEvent start(PenTabletMouseEvent e,InnerLayerHandler target,Device d){
+	protected CanvasEvent[] start(PenTabletMouseEvent e,InnerLayerHandler target,Device d){
 		plot.begin(e);
 		DrawEvent de = createOneEvent(e, target, d);
-		return de;
+		return new CanvasEvent[]{new PaintStartEvent(0, this, target),de};
 	}
-	protected DrawEvent[] drawLine(PenTabletMouseEvent e,InnerLayerHandler target,Device dv){
+	protected CanvasEvent[] drawLine(PenTabletMouseEvent e,InnerLayerHandler target,Device dv){
 		plot.setNextPoint(e);
 		ArrayList<DrawEvent> es= createEvents(e, target, dv);
-		return toArray(es);
+		return es.toArray(new CanvasEvent[es.size()]);
 	}
-	protected DrawEvent[] end(PenTabletMouseEvent e,InnerLayerHandler target,Device dv){
+	protected CanvasEvent[] end(PenTabletMouseEvent e,InnerLayerHandler target,Device dv){
 		plot.end(e);
 		ArrayList<DrawEvent> des = createEvents(e, target, dv);
-		return toArray(des);
+		CanvasEvent[] ret =des.toArray(new CanvasEvent[des.size()+1]);
+		ret[ret.length-1] = new PaintLastEvent(0, this, target);
+		return ret;
 	}
 
 
 
-	protected void postEvent(DrawEvent e){
+	protected void postEvent(CanvasEvent e){
 		if(e==null)return;
-			e.canvas.dispatchEvent(e);
+		e.canvas.dispatchEvent(e);
 	}
 
-	protected void postEvent(DrawEvent[] events){
-		for(DrawEvent e:events){
+	protected void postEvent(CanvasEvent[] events){
+		for(CanvasEvent e:events){
 			if(e==null)continue;
 				postEvent(e);
 		}
@@ -242,6 +245,9 @@ abstract public class Drawer {
 	private int density_min=256;// 筆圧最小時の筆の濃度（0~256）
 	private double density = 0.5;// ペン濃度 0～1
 	private Plot plot=new LinerPlot();
+	{
+		plot.setEndPointPlot(true);
+	}
 	private PressureAdjuster padj=NormalPressureAdjuster.obj;
 
 	protected PenShape pen;

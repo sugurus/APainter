@@ -73,5 +73,4 @@ public class DrawEvent extends CanvasEvent{
 	public PixelDataBuffer getMapData(){
 		return mapdata;
 	}
-
 }

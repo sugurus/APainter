@@ -73,26 +73,35 @@ public class CompressedBytePixelData extends CompressedPixelData{
 	public PixelDataByteBuffer inflate() {
 		if(flushed)throw new RuntimeException("flushed");
 		try{
-			byte[] bytes = new byte[2];
 			Inflater inf = new Inflater();
 			inf.setInput(binary, 0, binarySize);
 			byte[] data = new byte[size];
 			int imp=0,read,index=0;
+			int bsize = 100000;
+			byte[] buffer = new byte[bsize];
+			int blength=inf.inflate(buffer);
+			int bpos=0;
 
 			//1行目　横差分
 			for(index=0;index<width;index++){
-				inf.inflate(bytes, 0, 2);
-				read = ((bytes[0]&0xff)<<8)|(bytes[1]&0xff);
+				read = ((buffer[bpos++]&0xff)<<8)|(buffer[bpos++]&0xff);
 				imp = imp-read+255;
 				data[index] = (byte) imp;
+				if(bpos==blength){
+					blength=inf.inflate(buffer);
+					bpos=0;
+				}
 			}
 
 			//2行目　縦差分
 			while(index<size){
-				inf.inflate(bytes, 0, 2);
-				read = ((bytes[0]&0xff)<<8)|(bytes[1]&0xff);
+				read = ((buffer[bpos++]&0xff)<<8)|(buffer[bpos++]&0xff);
 				data[index] = (byte) ((data[index-width] &0xff)-read+255);
 				index++;
+				if(bpos==blength){
+					blength=inf.inflate(buffer);
+					bpos=0;
+				}
 			}
 			inf.end();
 			PixelDataByteBuffer p = new PixelDataByteBuffer(width, height, data);

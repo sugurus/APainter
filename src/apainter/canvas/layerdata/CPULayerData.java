@@ -28,6 +28,13 @@ public class CPULayerData extends LayerData{
 
 	//////////////////////////////FIXME debug
 
+	public void endPaint(Object source) {};
+	@Override
+	public void startPaint(Object source) {
+		// TODO 自動生成されたメソッド・スタブ
+
+	}
+
 
 
 	public CPULayerData(Canvas canvas,GlobalValue globalvalue) {
