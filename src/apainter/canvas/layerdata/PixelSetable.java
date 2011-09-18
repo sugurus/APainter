@@ -2,9 +2,9 @@ package apainter.canvas.layerdata;
 
 import java.awt.Rectangle;
 
-import apainter.drawer.DrawAccepter;
+import apainter.drawer.DrawTarget;
 
-interface PixelSetable extends PixelContainer,DrawAccepter{
+interface PixelSetable extends PixelContainer{
 
 	public void setPixel(int color,int x,int y);
 	public void setPixels(int[] colors,int x,int y,int width,int height);

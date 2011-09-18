@@ -13,19 +13,22 @@ import javax.swing.event.EventListenerList;
 import nodamushi.pentablet.PenTabletMouseEvent;
 import nodamushi.pentablet.PenTabletMouseEvent.CursorDevice;
 import apainter.APainter;
+import apainter.CreateHandler;
 import apainter.Device;
 import apainter.GlobalKey;
 import apainter.GlobalValue;
+import apainter.Handler;
 import apainter.canvas.cedt.CanvasEventAccepter;
 import apainter.canvas.cedt.cpu.CPUCEA_0;
 import apainter.canvas.event.CanvasEvent;
+import apainter.canvas.event.PaintEvent;
 import apainter.canvas.layerdata.CPULayerData;
 import apainter.canvas.layerdata.InnerLayerHandler;
 import apainter.canvas.layerdata.LayerData;
 import apainter.canvas.layerdata.LayerHandler;
 import apainter.data.PixelDataByteBuffer;
 import apainter.data.PixelDataIntBuffer;
-import apainter.drawer.DrawEvent;
+import apainter.drawer.DrawTarget;
 import apainter.gui.canvas.CPUCanvasPanel;
 import apainter.gui.canvas.CanvasMouseListener;
 import apainter.gui.canvas.CanvasView;
@@ -34,7 +37,7 @@ import apainter.history.HistoryObject;
 import apainter.misc.PropertyChangeUtility;
 import apainter.resorce.LimitedResource;
 
-public class Canvas {
+public class Canvas implements CreateHandler{
 
 
 	//property---------------------------------------------------------
@@ -132,7 +135,7 @@ public class Canvas {
 	}
 
 
-	public boolean paint(DrawEvent e){
+	public boolean paint(PaintEvent e){
 		return layerdata.paint(e);
 	}
 
@@ -144,7 +147,7 @@ public class Canvas {
 		ceaccepter.passEvent(e);
 	}
 
-	public DrawEvent subsetEvent(DrawEvent e){
+	public PaintEvent subsetEvent(PaintEvent e){
 		Rectangle r = e.getBounds();
 		Rectangle size = new Rectangle(0,0,width,height);
 		Rectangle k = size.intersection(r);
@@ -240,10 +243,11 @@ public class Canvas {
 		view.renderingFlug(union);
 	}
 
-
-	public CanvasHandler getCanvasHandler(){
+	@Override
+	public CanvasHandler getHandler(){
 		return new CanvasHandler(this, apainter);
 	}
+
 
 	public LayerHandler[] getAllLayers(){
 		return layerdata.getAllLayerHandlers();
@@ -311,6 +315,13 @@ public class Canvas {
 
 	public void setSelectedLayer(int layerid){
 		layerdata.setSelectLayer(layerid);
+	}
+
+	/**
+	 * 選択されている書き込み可能なレイヤー（もしくはマスク）があればそれを返します。
+	 */
+	public DrawTarget getDrawTarget(){
+		return layerdata.getDrawTarget();
 	}
 
 

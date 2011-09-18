@@ -1,18 +1,21 @@
 package apainter.canvas.layerdata;
 
-import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.Toolkit;
-import java.awt.image.ColorModel;
-import java.awt.image.MemoryImageSource;
 import java.util.Arrays;
 
 import apainter.Color;
 import apainter.canvas.Canvas;
+import apainter.canvas.event.EventConstant;
+import apainter.canvas.event.PaintEvent;
+import apainter.canvas.event.PaintLastEvent;
+import apainter.canvas.event.PaintStartEvent;
 import apainter.data.PixelDataBuffer;
 import apainter.data.PixelDataIntBuffer;
-import apainter.drawer.DrawEvent;
+import apainter.drawer.event.DrawEvent;
+import apainter.drawer.event.DrawLastEvent;
+import apainter.drawer.event.DrawStartEvent;
+import apainter.drawer.event.DrawerEvent;
 import apainter.rendering.ColorMode;
 import apainter.rendering.Renderer;
 import apainter.rendering.RenderingOption;
@@ -24,8 +27,6 @@ class CPULayer extends DefaultLayer{
 	private int[] pixel;
 	private CPUMask mask;
 	private CPULayerHandler handler;
-	private MemoryImageSource imagesource;
-	private Image img;
 
 	private Object paintsource;
 	private Rectangle paintrect;
@@ -35,11 +36,8 @@ class CPULayer extends DefaultLayer{
 		super(id, name,canvas,layerData);
 		buffer = PixelDataIntBuffer.create(width, height);
 		pixel = buffer.getData();
-		mask = new CPUMask(width, height);
+		mask = new CPUMask(width, height,canvas);
 		handler = new CPULayerHandler(this,canvas);
-		imagesource = new MemoryImageSource(width, height,ColorModel.getRGBdefault(), pixel, 0, width);
-		imagesource.setAnimated(true);
-		img =Toolkit.getDefaultToolkit().createImage(imagesource);
 	}
 
 	int[] getPixelData(){
@@ -51,20 +49,16 @@ class CPULayer extends DefaultLayer{
 		return buffer;
 	}
 
-	CPUMask getMask(){
+	public CPUMask getMask(){
 		return mask;
 	}
 
-	Image getImage(){
-		return img;
-	}
 
 	@Override
 	public void dispose() {
 		buffer.dispose();
 		mask.dispose();
 		handler.dispose();
-		img.flush();
 		buffer=null;
 		pixel = null;
 		mask = null;
@@ -143,7 +137,6 @@ class CPULayer extends DefaultLayer{
 				buffer.setData(c, X,Y);
 			}
 		}
-		imagesource.newPixels(r.x, r.y, r.width, r.height);
 	}
 
 	@Override
@@ -188,13 +181,14 @@ class CPULayer extends DefaultLayer{
 
 
 	@Override
-	public boolean paint(DrawEvent e) {
+	public boolean paint(PaintEvent e) {
 		//TODO CPUかどうかの判定って必要かな？まぁ、実際にGPU作り始めてからでいっか。
-		Object source = e.source;
+		Object source = e.getSource();
 		if(source!=paintsource)return false;
 		Renderer r = e.getRenderer();
 		Rectangle rect;
-		r.rendering(buffer, e.getMapData(), e.getLocation(),rect= e.getBounds(), e.getOption());
+		r.rendering(buffer, e.getMapData(), e.getLocation(),
+				rect= e.getBounds(), e.getOption());
 		if(paintrect==null){
 			paintrect=rect;
 		}else{
@@ -217,6 +211,10 @@ class CPULayer extends DefaultLayer{
 		paintsource=source;
 		painthistory = new PaintLayerHistory(canvas, handler);
 	}
+	@Override
+	public boolean isPaintable() {
+		return true;
+	}
 
 
 	private static class CPULayerHandler extends InnerLayerHandler{
@@ -227,6 +225,11 @@ class CPULayer extends DefaultLayer{
 		CPULayerHandler(CPULayer c,Canvas ca) {
 			canvas = ca;
 			h = c;
+		}
+
+		@Override
+		public String getHandlerName() {
+			return "layerhandler cpu";
 		}
 
 		@Override
@@ -241,24 +244,19 @@ class CPULayer extends DefaultLayer{
 
 
 		@Override
-		public boolean paint(DrawEvent e) {
-			return h.paint(e);
+		public String getLayerTypeName() {
+			return "Layer";
 		}
 
 		@Override
-		public String getLayerTypeName() {
-			return "Layer";
+		public String getDrawTargetName() {
+			return "cpulayer int argb 8";
 		}
 
 		public Canvas getCanvas() {
 			return canvas;
 		}
 
-
-		@Override
-		Image getImage() {
-			return h.getImage();
-		}
 
 		@Override
 		Layer getLayer() {
@@ -271,10 +269,6 @@ class CPULayer extends DefaultLayer{
 			return h.getDataBuffer();
 		}
 
-		@Override
-		Image getMaskImage() {
-			return h.mask.getImage();
-		}
 
 		@Override
 		PixelDataBuffer getMaskOriginalData() {
@@ -374,7 +368,8 @@ class CPULayer extends DefaultLayer{
 		}
 
 		@Override
-		public void setPixels(int[] colors, int x, int y, int width, int height) {
+		public void setPixels(int[] colors, int x, int y,
+				int width, int height) {
 			h.setPixels(colors, x, y, width, height);
 		}
 
@@ -413,6 +408,28 @@ class CPULayer extends DefaultLayer{
 			return h.isLayer();
 		}
 
-	}
+
+		@Override
+		public void acceptEvent(DrawerEvent e) {
+			if(e instanceof DrawEvent){
+				canvas.dispatchEvent(PaintEvent.convert((DrawEvent)e, this,
+						EventConstant.ID_PAINT_LAYER));
+			}else if (e instanceof DrawStartEvent){
+				canvas.dispatchEvent(new PaintStartEvent( e.getDrawer(), this));
+			}else if(e instanceof DrawLastEvent){
+				canvas.dispatchEvent(new PaintLastEvent(e.getDrawer(), this));
+			}
+		}
+
+		@Override
+		public boolean isPaintable() {
+			return h.isPaintable();
+		}
+
+		@Override
+		public boolean paint(PaintEvent e) {
+			return h.paint(e);
+		}
+	}//レイヤーハンドラー
 
 }

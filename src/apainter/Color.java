@@ -21,7 +21,7 @@ public class Color implements Cloneable{
 	 */
 	public static final int NotColor = 1;
 
-	private float a,r,g,b;
+	private double a,r,g,b;
 
 	GlobalValue gv;
 	String propertyName;
@@ -30,7 +30,7 @@ public class Color implements Cloneable{
 
 		@Override
 		public void setValue(Object value) throws Exception {
-			float[] fs = (float[])value;
+			double[] fs = (double[])value;
 			a = fs[0];
 			r = fs[1];
 			g = fs[2];
@@ -39,21 +39,56 @@ public class Color implements Cloneable{
 
 		@Override
 		public Object get() {
-			return new float[]{a,r,g,b};
+			return new double[]{a,r,g,b};
+		}
+
+		public Object convert(Object o) {
+			if(o instanceof float[]){
+				double[] d = new double[4];
+				float[] f = (float[])o;
+				d[0] = f[0];
+				d[1] = f[1];
+				d[2] = f[2];
+				d[3] = f[3];
+				return d;
+			}
+			if(o instanceof int[]){
+				double[] d = new double[4];
+				int[] i = (int[])o;
+				d[0] = i[0]/255d;
+				d[1] = i[1]/255d;
+				d[2] = i[2]/255d;
+				d[3] = i[3]/255d;
+				return d;
+			}
+			return o;
 		}
 
 		public boolean isSettable(Object obj) {
+			if(obj instanceof double[]){
+				double[] fs = (double[])obj;
+				if(fs.length >= 4){
+					for(int i=0;i<4;i++){
+						if(fs[i]>1d || fs[i] < 0d)return false;
+					}
+					return true;
+				}return false;
+			}
 			if(obj instanceof float[]){
 				float[] fs = (float[])obj;
 				if(fs.length >= 4){
-					if(fs[0] > 1)fs[0] = 1;
-					else if(fs[0] < 0) fs[0] = 0;
-					if(fs[1] > 1)fs[1] = 1;
-					else if(fs[1] < 0) fs[1] = 0;
-					if(fs[2] > 1)fs[2] = 1;
-					else if(fs[2] < 0) fs[2] = 0;
-					if(fs[3] > 1)fs[3] = 1;
-					else if(fs[3] < 0) fs[3] = 0;
+					for(int i=0;i<4;i++){
+						if(fs[i]>1f || fs[i] < 0f)return false;
+					}
+					return true;
+				}return false;
+			}
+			if(obj instanceof int[]){
+				int[] fs = (int[])obj;
+				if(fs.length >= 4){
+					for(int i=0;i<4;i++){
+						if(fs[i]>255 || fs[i] < 0)return false;
+					}
 					return true;
 				}return false;
 			}else return false;
@@ -72,9 +107,9 @@ public class Color implements Cloneable{
 
 	public static int RGB2YCrCb(int argb){
 		int a = argb&0xff000000;
-		int r = argb>>16&0xff;
-		int g = argb>>8 &0xff;
-		int b = argb & 0xff;
+		double r = (argb>>16&0xff);
+		double g = (argb>>8 &0xff);
+		double b = (argb & 0xff);
 		int y,cr,cb;
 		y=(int) (0.299*r+0.587*g+0.114*b);
 		cr=(int) (0.5*r-0.419*g-0.081*b+128);
@@ -98,9 +133,9 @@ public class Color implements Cloneable{
 	}
 	public static int YCrCb2RGB(int aycrcb){
 		int a = aycrcb&0xff000000;
-		int y = aycrcb>>16&0xff;
-		int cr = (aycrcb>>8 &0xff)-128;
-		int cb = (aycrcb & 0xff)-128;
+		double y = (aycrcb>>16&0xff);
+		double cr = (aycrcb>>8 &0xff)-128;
+		double cb = (aycrcb & 0xff)-128;
 		int r,g,b;
 		r=(int) (y+1.402*cr);
 		g=(int) (y-0.714*cr-0.344*cb);
@@ -255,7 +290,7 @@ public class Color implements Cloneable{
 	 }
 
 	 public void setARGB(int a,int r,int g,int b){
-		 float[] f = {a/255f,r/255f,g/255f,b/255f};
+		 double[] f = {a/255f,r/255f,g/255f,b/255f};
 		 bindObject.set(f);
 	 }
 
@@ -269,7 +304,7 @@ public class Color implements Cloneable{
 	 }
 
 	 public void set16bitARGB(int a,int r,int g,int b){
-		 float[] f = {a/65535f,r/65535f,g/65535f,b/65535f};
+		 double[] f = {a/65535f,r/65535f,g/65535f,b/65535f};
 		 bindObject.set(f);
 	 }
 
@@ -310,6 +345,6 @@ public class Color implements Cloneable{
 	 }
 
 	 public java.awt.Color toAwtColor(){
-		 return new java.awt.Color(r, g, b, a);
+		 return new java.awt.Color((float)r, (float)g, (float)b, (float)a);
 	 }
 }

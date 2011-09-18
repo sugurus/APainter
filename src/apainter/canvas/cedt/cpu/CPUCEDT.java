@@ -1,17 +1,17 @@
 package apainter.canvas.cedt.cpu;
 
 import java.awt.Rectangle;
-import java.awt.event.PaintEvent;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import apainter.canvas.Canvas;
 import apainter.canvas.cedt.CanvasEventDispatchThread;
 import apainter.canvas.event.CanvasEvent;
+import apainter.canvas.event.PaintEvent;
+import apainter.canvas.event.PaintEventAccepter;
+import apainter.canvas.event.PaintLastEvent;
+import apainter.canvas.event.PaintStartEvent;
 import apainter.canvas.layerdata.InnerLayerHandler;
-import apainter.drawer.DrawEvent;
-import apainter.drawer.PaintLastEvent;
-import apainter.drawer.PaintStartEvent;
 import apainter.history.HisotryReduceEvent;
 import apainter.history.History;
 import apainter.history.RedoEvent;
@@ -71,6 +71,7 @@ public class CPUCEDT implements CanvasEventDispatchThread{
 		if(!isRunning())return;
 		anyThread.shutdown();
 		drawThread.shutdown();
+		historyReduceThread.shutdown();
 		repaint.stop();
 	}
 
@@ -82,12 +83,12 @@ public class CPUCEDT implements CanvasEventDispatchThread{
 				if (e instanceof PaintStartEvent) {
 					lockDraw();
 					PaintStartEvent pse = (PaintStartEvent) e;
-					InnerLayerHandler h = pse.getTarget();
+					PaintEventAccepter h = pse.getTarget();
 					h.startPaint(e.getSource());
 				}else if (e instanceof PaintLastEvent) {
 					submitDrawEnd((PaintLastEvent)e);
-				}else if (e instanceof DrawEvent) {
-					DrawEvent d = (DrawEvent) e;
+				}else if (e instanceof PaintEvent) {
+					PaintEvent d = (PaintEvent) e;
 					submitDraw(d);
 				}else if(e instanceof HisotryReduceEvent){
 					HisotryReduceEvent h = (HisotryReduceEvent)e;
@@ -127,7 +128,7 @@ public class CPUCEDT implements CanvasEventDispatchThread{
 		});
 	}
 
-	private void submitDraw(final DrawEvent e){
+	private void submitDraw(final PaintEvent e){
 		drawThread.submit(new Runnable() {
 			public void run() {
 				draw(e);
@@ -137,7 +138,7 @@ public class CPUCEDT implements CanvasEventDispatchThread{
 	private void submitDrawEnd(final PaintLastEvent pe){
 		drawThread.submit(new Runnable() {
 			public void run() {
-				InnerLayerHandler h = pe.getTarget();
+				PaintEventAccepter h = pe.getTarget();
 				h.endPaint(pe.getSource());
 				unlockDraw();
 			}
@@ -155,8 +156,8 @@ public class CPUCEDT implements CanvasEventDispatchThread{
 		});
 	}
 
-	private void draw(final DrawEvent de){
-		DrawEvent e = de.canvas.subsetEvent(de);
+	private void draw(final PaintEvent de){
+		PaintEvent e = de.canvas.subsetEvent(de);
 		if(e ==null)return;
 
 		Rectangle r = e.getBounds();
@@ -168,7 +169,7 @@ public class CPUCEDT implements CanvasEventDispatchThread{
 			if(r.width%s==0 || !(r.height%s==0 || r.width < r.height)){
 				for(int i=0;i<s;i++){
 					Rectangle rect = new Rectangle(r.x+(r.width*i/s),r.y,r.width*(i+1)/s-(r.width*i/s),r.height);
-					final DrawEvent e2 = e.subsetEvent(rect);
+					final PaintEvent e2 = e.subsetEvent(rect);
 					runs[i]=new Runnable() {
 						public void run() {
 							canvas.paint(e2);
@@ -178,7 +179,7 @@ public class CPUCEDT implements CanvasEventDispatchThread{
 			}else{
 				for(int i=0;i<s;i++){
 					Rectangle rect = new Rectangle(r.x,r.y+r.height*i/s,r.width,r.height*(i+1)/s-r.height*i/s);
-					final DrawEvent e2 = e.subsetEvent(rect);
+					final PaintEvent e2 = e.subsetEvent(rect);
 					runs[i]=new Runnable() {
 						public void run() {
 							canvas.paint(e2);

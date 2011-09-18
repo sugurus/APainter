@@ -4,11 +4,8 @@ import static java.lang.Math.*;
 
 import java.awt.geom.Point2D;
 
-import nodamushi.pentablet.PenTabletMouseEvent;
 /**
  * 点と点の間を、線、筆圧共に線形補完します。
- * @author ruby
- *
  */
 public class LinerPlot implements Plot{
 	double distance;//元の点と、次の点の距離
@@ -33,10 +30,9 @@ public class LinerPlot implements Plot{
 
 
 	@Override
-	public void begin(PenTabletMouseEvent e) {
-		Point2D.Double d = e.getPointDouble();
-		nextx=nowx = d.x;
-		nexty=nowy = d.y;
+	public void begin(DrawPoint e) {
+		nextx=nowx = e.x;
+		nexty=nowy = e.y;
 		nextp=nowp = e.getPressure();
 		distance = l=sin=0;
 		cos = 1;
@@ -44,16 +40,15 @@ public class LinerPlot implements Plot{
 	}
 
 	@Override
-	public void end(PenTabletMouseEvent e) {
+	public void end(DrawPoint e) {
 		if(plotend)isend = true;
 		setNextPoint(e);
 	}
 
 	@Override
-	public void setNextPoint(PenTabletMouseEvent e) {
+	public void setNextPoint(DrawPoint e) {
 		double exl=l-distance;
-		Point2D.Double d = e.getPointDouble();
-		double nx =d.x,ny =d.y;
+		double nx =e.x,ny =e.y;
 		double distance = hypot(nx-nextx, ny-nexty);
 		if(exl >distance){
 			if(isend){

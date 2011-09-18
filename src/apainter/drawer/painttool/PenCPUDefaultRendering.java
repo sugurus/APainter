@@ -66,7 +66,7 @@ class PenCPUDefaultRendering extends PenCPURendering{
 
 		for(int x,y = clip.y;y<endy;y++){
 			for(x = clip.x;x<endx;x++){
-				int dmaskv = pixel(dmaskp,x,y,basew)&0xff;
+				int dmaskv = pixel(dmaskp,x,y,basew);
 				if(dmaskv==0)continue;
 				int rdmaskv = 255-dmaskv;
 				int c = pixel(basep,x,y,basew);
@@ -94,8 +94,8 @@ class PenCPUDefaultRendering extends PenCPURendering{
 							(ob*dmaskv+b*rdmaskv)*div255shift24>>>24),x,y,basew);
 					continue;
 				}
-			}
-		}
+			}//for x
+		}//for y
 	}
 
 	@Override

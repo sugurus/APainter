@@ -571,10 +571,10 @@ public class APainterDemo extends JFrame {
 
 		@Override
 		public void setValue(Object value) throws Exception {
-			float[] f = (float[])value;
+			double[] f = (double[])value;
 			if(colorselectfront)
-				hsv.setColor(f[0], f[1], f[2], f[3]);
-			Color c = new Color(f[1], f[2], f[3],f[0]);
+				hsv.setColor(f[0], f[1],f[2],f[3]);
+			Color c = new Color((float)f[1], (float)f[2], (float)f[3],(float)f[0]);
 			frontcolorpanel.setBackground(c);
 		}
 
@@ -583,10 +583,10 @@ public class APainterDemo extends JFrame {
 
 		@Override
 		public void setValue(Object value) throws Exception {
-			float[] f = (float[])value;
+			double[] f = (double[])value;
 			if(!colorselectfront)
-				hsv.setColor(f[0], f[1], f[2], f[3]);
-			Color c = new Color(f[1], f[2], f[3],f[0]);
+				hsv.setColor(f[0], f[1],f[2],f[3]);
+			Color c = new Color((float)f[1], (float)f[2], (float)f[3],(float)f[0]);
 			backcolorpanel.setBackground(c);
 		}
 
@@ -742,6 +742,7 @@ class HSVPanel extends JComponent{
 	SVIcon svicon = new SVIcon(svSize);
 	BoxH hicon = new BoxH(svSize, 15);
 	BindObject bindobj;
+	double[] mousevalue;
 	JComponent svp = new JComponent() {
 		protected void paintComponent(Graphics g) {
 			svicon.paintIcon(this, g, 0, 0);
@@ -757,26 +758,32 @@ class HSVPanel extends JComponent{
 		bindobj = o;
 	}
 
-	public void setColor(float a,float r,float g,float b){
+	public void setColor(double a,double r,double g,double b){
+		if(mousevalue!=null&&
+				mousevalue[0] == a&&
+				mousevalue[1] == r&&
+				mousevalue[2] == g&&
+				mousevalue[3] == b){
+			mousevalue=null;
+			return;
+		}
 		float[] fs = Color.RGBtoHSB((int)(r*255), (int)(g*255), (int)(b*255), null);
 		s = fs[1];
 		v = fs[2];
 		if(!(s==0))
 				h = fs[0]*360;
-		svicon.setH(h);
-		svicon.setSV(s, v);
-		hicon.setH(h);
-		hicon.setSV(s, v);
+		svicon.setHSV(h,s, v);
+		hicon.setHSV(h,s, v);
 		svp.repaint();
 		hp.repaint();
+
 	}
 
 	public HSVPanel() {
 		setLayout(new FlowLayout());
 		svp.setPreferredSize(new Dimension(svSize,svSize));
 		hp.setPreferredSize(new Dimension(15,svSize));
-		svicon.setH(0);
-		svicon.setSV(0, 0);
+		svicon.setHSV(0,0,0);
 		MouseAdapter m = new MouseAdapter() {
 			@Override
 			public void mouseDragged(MouseEvent e) {
@@ -785,8 +792,15 @@ class HSVPanel extends JComponent{
 				float S = p.x/130f;
 				if(V<0)V=0;else if(V>1)V=1;
 				if(S<0)S=0;else if(S>1)S=1;
+				v = V;
+				s=S;
+				svicon.setHSV(h,s, v);
+				hicon.setHSV(h,s, v);
+				svp.repaint();
+				hp.repaint();
 				Color c = Color.getHSBColor(h/360, S, V);
-				float[] a = {c.getAlpha()/255f,c.getRed()/255f,c.getGreen()/255f,c.getBlue()/255f};
+				double[] a = {c.getAlpha()/255d,c.getRed()/255d,c.getGreen()/255d,c.getBlue()/255d};
+				mousevalue = a;
 				if(bindobj!=null)bindobj.set(a);
 			}
 			@Override
@@ -804,7 +818,7 @@ class HSVPanel extends JComponent{
 				if(H<0)H=0;else if(H>1)H=1;
 				h = H*360;
 				Color c = Color.getHSBColor(H, s, v);
-				float[] a = {c.getAlpha()/255f,c.getRed()/255f,c.getGreen()/255f,c.getBlue()/255f};
+				double[] a = {c.getAlpha()/255d,c.getRed()/255d,c.getGreen()/255d,c.getBlue()/255d};
 				if(bindobj!=null)bindobj.set(a);
 			}
 

@@ -21,6 +21,7 @@ public class SVIcon implements Icon{
 	private double s=1,v=1;
 	private Color rgb = Color.red;
 
+
 	public SVIcon(int size) {
 		if(size < 1)throw new IllegalArgumentException("size:"+size);
 		this.size = size;
@@ -61,13 +62,29 @@ public class SVIcon implements Icon{
 		v = (double)y/(size-1);
 	}
 
-	public void setSV(double s,double v){
+	/**
+	 * v=0の時sが必ず0になり、マウスの位置とサークルの描画位置が異なることになります。<br>
+	 * それを防ぐためにSの場所を前もって保存しておき、次にsetHSVが呼び出されたときvの値が0ならば、
+	 * ここで設定した値にsを設定します。
+	 * @param s
+	 */
+
+	public void setHSV(double h,double s,double v){
 		if(s < 0)s=0;
 		else if(s>1)s = 1;
 		if(v < 0)v=0;
 		else if(v>1)v=1;
+
 		this.s = s;
 		this.v = v;
+		while(h<=0){
+			h+=360;
+		}
+		h%=360;
+		h/=360;
+		this.h=h;
+		int c = Color.HSBtoRGB((float)h, 1, 1);
+		rgb = new Color(c);
 	}
 
 	public double getS(){
@@ -82,17 +99,6 @@ public class SVIcon implements Icon{
 		return sv;
 	}
 
-	//速度は必要ないから適当
-	public void setH(double h){
-		while(h<=0){
-			h+=360;
-		}
-		h%=360;
-		h/=360;
-		this.h=h;
-		int c = Color.HSBtoRGB((float)h, 1, 1);
-		rgb = new Color(c);
-	}
 
 	public double getH(){
 		return h*360;

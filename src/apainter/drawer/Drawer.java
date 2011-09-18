@@ -10,13 +10,13 @@ import java.util.ArrayList;
 
 import javax.swing.event.EventListenerList;
 
-import nodamushi.pentablet.PenTabletMouseEvent;
 import apainter.Color;
 import apainter.Device;
-import apainter.canvas.event.CanvasEvent;
-import apainter.canvas.event.EventConstant;
-import apainter.canvas.layerdata.InnerLayerHandler;
 import apainter.data.PixelDataBuffer;
+import apainter.drawer.event.DrawEvent;
+import apainter.drawer.event.DrawLastEvent;
+import apainter.drawer.event.DrawStartEvent;
+import apainter.drawer.event.DrawerEvent;
 import apainter.misc.PropertyChangeUtility;
 import apainter.pen.PenShape;
 import apainter.rendering.Renderer;
@@ -46,11 +46,11 @@ abstract public class Drawer {
 		this.id = id;
 	}
 
-	protected synchronized CanvasEvent[] start(PenTabletMouseEvent e,InnerLayerHandler target,Device d){
+	protected synchronized DrawerEvent[] start(DrawPoint e,DrawTarget target,Device d){
 
-		PaintLastEvent le=null;
+		DrawLastEvent le=null;
 		if(nowDrawing){
-			le = new PaintLastEvent(0, this, drawTarget);
+			le = new DrawLastEvent(this, drawTarget);
 		}
 
 		drawTarget=target;
@@ -60,42 +60,42 @@ abstract public class Drawer {
 		plot.begin(e);
 		DrawEvent de = createOneEvent(e, target, d);
 
-		return le!=null?new CanvasEvent[]{le,new PaintStartEvent(0, this, target),de}:
-				new CanvasEvent[]{new PaintStartEvent(0, this, target),de};
+		return le!=null?new DrawerEvent[]{le,new DrawStartEvent(this, target),de}:
+				new DrawerEvent[]{new DrawStartEvent(this, target),de};
 	}
-	protected synchronized CanvasEvent[] drawLine(PenTabletMouseEvent e,InnerLayerHandler target,Device dv){
+	protected synchronized DrawerEvent[] drawLine(DrawPoint e,DrawTarget target,Device dv){
 		if(!nowDrawing||drawTarget!=target){
-			return new CanvasEvent[0];
+			return new DrawerEvent[0];
 		}
 		plot.setNextPoint(e);
 		ArrayList<DrawEvent> es= createEvents(e, target, dv);
-		return es.toArray(new CanvasEvent[es.size()]);
+		return es.toArray(new DrawerEvent[es.size()]);
 	}
-	protected synchronized CanvasEvent[] end(PenTabletMouseEvent e,InnerLayerHandler target,Device dv){
-		if(!nowDrawing||drawTarget!=target)return new CanvasEvent[0];
+	protected synchronized DrawerEvent[] end(DrawPoint e,DrawTarget target,Device dv){
+		if(!nowDrawing||drawTarget!=target)return new DrawerEvent[0];
 		plot.end(e);
 		ArrayList<DrawEvent> des = createEvents(e, target, dv);
-		CanvasEvent[] ret =des.toArray(new CanvasEvent[des.size()+1]);
-		ret[ret.length-1] = new PaintLastEvent(0, this, target);
+		DrawerEvent[] ret =des.toArray(new DrawerEvent[des.size()+1]);
+		ret[ret.length-1] = new DrawLastEvent(this, target);
 		nowDrawing=false;
 		return ret;
 	}
 
 
 
-	protected void postEvent(CanvasEvent e){
+	protected void postEvent(DrawerEvent e){
 		if(e==null)return;
-		e.canvas.dispatchEvent(e);
+		e.target.acceptEvent(e);
 	}
 
-	protected void postEvent(CanvasEvent[] events){
-		for(CanvasEvent e:events){
+	protected void postEvent(DrawerEvent[] events){
+		for(DrawerEvent e:events){
 			if(e==null)continue;
 				postEvent(e);
 		}
 	}
 
-	private DrawEvent createOneEvent(PenTabletMouseEvent e,InnerLayerHandler target,Device d){
+	private DrawEvent createOneEvent(DrawPoint e,DrawTarget target,Device d){
 		Point2D plotpoint;
 		double pressure =plot.getPressure();
 		int pensize = pen.getSize();
@@ -118,20 +118,20 @@ abstract public class Drawer {
 		RenderingOption option = new RenderingOption(front, back, null, dens);
 		setOption(option,e);
 		DrawEvent de =
-			new DrawEvent(EventConstant.ID_PaintStart, this, target, bounds,bounds.getLocation(),
+			new DrawEvent(this, target, bounds,bounds.getLocation(),
 					getRenderer(d), map, option);
 		return de;
 	}
 
 
-	protected ArrayList<DrawEvent> createEvents(PenTabletMouseEvent e,InnerLayerHandler target,Device dv){
+	protected ArrayList<DrawEvent> createEvents(DrawPoint e,DrawTarget target,Device dv){
 		if(!plot.hasNext())return new ArrayList<DrawEvent>();
 		Point2D plotpoint;
 		int pensize = pen.getSize();
 		Renderer renderer = getRenderer(dv);
 
 		ArrayList<DrawEvent> es = new ArrayList<DrawEvent>();
-		Device[] device = getUsableDevices();
+//		Device[] device = getUsableDevices();
 		while(plot.hasNext()){
 			plotpoint = plot.getPlotPoint();
 			double x = plotpoint.getX(),y = plotpoint.getY();
@@ -150,7 +150,7 @@ abstract public class Drawer {
 			RenderingOption option = new RenderingOption(front, back, null, dens);
 			setOption(option,e);
 			DrawEvent de =
-				new DrawEvent(EventConstant.ID_Paint, this, target,
+				new DrawEvent(this, target,
 						bounds, bounds.getLocation(),renderer,  map, option);
 			es.add(de);
 			double d = pen.getMoveDistance(size);
@@ -160,13 +160,12 @@ abstract public class Drawer {
 	}
 
 
-	abstract protected Color getFrontColor(PenTabletMouseEvent e,PenShape pen);
-	abstract protected Color getBackColor(PenTabletMouseEvent e,PenShape pen);
-	abstract protected void setOption(RenderingOption option,PenTabletMouseEvent e);
+	abstract protected Color getFrontColor(DrawPoint e,PenShape pen);
+	abstract protected Color getBackColor(DrawPoint e,PenShape pen);
+	abstract protected void setOption(RenderingOption option,DrawPoint e);
 	abstract protected Renderer getRenderer(Device d);
 	abstract protected Device[] getUsableDevices();
 
-	//TODO 変更通知
 	public void setPen(PenShape p){
 		if(p!=null){
 			PenShape old  =pen;
@@ -256,7 +255,7 @@ abstract public class Drawer {
 	private int density_min=256;// 筆圧最小時の筆の濃度（0~256）
 	private double density = 0.5;// ペン濃度 0～1
 	private boolean nowDrawing=false;
-	private InnerLayerHandler drawTarget=null;
+	private DrawTarget drawTarget=null;
 	private Plot plot=new LinerPlot();
 	{
 		plot.setEndPointPlot(true);

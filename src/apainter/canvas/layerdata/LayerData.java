@@ -14,16 +14,19 @@ import javax.swing.event.EventListenerList;
 import apainter.GlobalValue;
 import apainter.Properties;
 import apainter.canvas.Canvas;
-import apainter.drawer.DrawAccepter;
-import apainter.drawer.DrawEvent;
+import apainter.canvas.event.PaintEvent;
+import apainter.canvas.event.PaintEventAccepter;
+import apainter.drawer.DrawTarget;
+import apainter.drawer.event.DrawEvent;
 
-abstract public class LayerData implements DrawAccepter{
+abstract public class LayerData{
 	protected final Canvas canvas;
 	protected final GlobalValue global;
 	protected LayerList layerlist = new LayerList();
 	protected Mask mask;
 	protected boolean hasSelectedArea = false;
 	protected int layerid=0;
+	protected boolean drawMask=false;
 
 
 	//デフォルト
@@ -40,15 +43,29 @@ abstract public class LayerData implements DrawAccepter{
 		return layerid++;
 	}
 
-	@Override
-	public boolean  paint(DrawEvent e){
-		InnerLayerHandler l = e.getTarget();
-		if(!layerlist.contains(l) || !l.isDrawable())return false;
-		Layer layer = l.getLayer();
-		if(hasSelectedArea){
-			e.getOption().destinationmask=mask.getDataBuffer();
+	public boolean paint(PaintEvent e){
+		PaintEventAccepter l = e.getTarget();
+		if(!l.isPaintable())return false;
+		if (l instanceof InnerLayerHandler) {
+			InnerLayerHandler lh = (InnerLayerHandler) l;
+			if(!layerlist.contains(lh))return false;
+			Layer layer = lh.getLayer();
+			if(hasSelectedArea){
+				e.getOption().destinationmask=mask.getDataBuffer();
+			}
+			return layer.paint(e);
 		}
-		return layer.paint(e);
+
+		//TODO mask
+		if(l instanceof MaskHandler){
+			MaskHandler m =(MaskHandler)l;
+			if(hasSelectedArea){
+				e.getOption().destinationmask=mask.getDataBuffer();
+			}
+			return m.getMask().paint(e);
+		}
+
+		return false;
 	}
 
 	public InnerLayerHandler getSelectedLayerHandler(){
@@ -82,18 +99,39 @@ abstract public class LayerData implements DrawAccepter{
 	}
 
 	public void setSelectLayer(InnerLayerHandler l){
-		if(l==null)return;
-		InnerLayerHandler old = layerlist.getSelectLayerHandler();
-		if(l==old)return;
-		layerlist.setSelectLayer(l);
+		setSelectLayer(l,false);
 	}
 
-	public void setSelectLayer(int layerid2) {
-		layerlist.setSelectLayer(layerid2);
+	public void setSelectLayer(int layerid) {
+		setSelectLayer(layerlist.getLayer(layerid));
+	}
+
+	//メインsetSelectLayer
+	public void setSelectLayer(InnerLayerHandler l,boolean drawMask){
+		if(l==null)return;
+		InnerLayerHandler old = layerlist.getSelectLayerHandler();
+		if(l==old&&drawMask==this.drawMask)return;
+		//TODO マスクを持っているかどうかの判定が必要。
+		this.drawMask = drawMask;
+		layerlist.setSelectLayer(l);
 	}
 
 	public InnerLayerHandler getSelectedLayer(){
 		return layerlist.getSelectLayerHandler();
+	}
+
+	public DrawTarget getDrawTarget(){
+		InnerLayerHandler l = getSelectedLayer();
+		if(!l.isDrawable() && !drawMask){
+			return null;
+		}
+		if(drawMask){
+			Layer layer = l.getLayer();
+			Mask mask = layer.getMask();
+			return mask.getHandler();
+		}
+		return l;
+
 	}
 
 

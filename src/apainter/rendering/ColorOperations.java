@@ -132,13 +132,11 @@ public final class ColorOperations {
 			int oa,int or,int og,int ob){
 		int a = calca(ua, oa);
 		int div = ((1<<24)+a*255-1)/(a*255);
-		int uoalpha = ua*oa;
 		int u_oalpha = ua*(255-oa);
-		int _uoalpha = (255-ua)*oa;
 		return a<<24 |
-		(uoalpha*defaultOp(ur,or)+u_oalpha*ur+_uoalpha*or)*div>>>24 << 16 |
-		(uoalpha*defaultOp(ug,og)+u_oalpha*ug+_uoalpha*og)*div>>>24 <<8 |
-		(uoalpha*defaultOp(ub,ob)+u_oalpha*ub+_uoalpha*ob)*div>>>24;
+		(oa*255*or+u_oalpha*ur)*div>>>24 << 16 |
+		(oa*255*og+u_oalpha*ug)*div>>>24 <<8 |
+		(oa*255*ob+u_oalpha*ub)*div>>>24;
 	}
 
 	public static final int addOp(int ua,int ur,int ug,int ub,

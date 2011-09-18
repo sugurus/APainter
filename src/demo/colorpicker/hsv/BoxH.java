@@ -87,15 +87,11 @@ public class BoxH implements HSelecterIcon{
 	}
 
 	@Override
-	public void setH(double h) {
+	public void setHSV(double h,double s, double v) {
 		h /=360;
 		h %=1;
 		if(h < 0)h+=1;
 		this.h=h;
-	}
-
-	@Override
-	public void setSV(double s, double v) {
 		if(s >1)s=1;
 		else if(s<0)s=0;
 		if(v >1)v=1;

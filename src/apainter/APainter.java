@@ -367,7 +367,7 @@ public class APainter {
 		canvaslist.add(canvas);
 		global.addCanvas(canvas);
 		global.put(GlobalKey.CurrentCanvas, canvas);
-		return canvas.getCanvasHandler();
+		return canvas.getHandler();
 	}
 
 	public static int getMaxCanvasSize(){
@@ -383,7 +383,7 @@ public class APainter {
 		canvaslist.add(canvas);
 		global.addCanvas(canvas);
 		global.put(GlobalKey.CurrentCanvas, canvas);
-		return canvas.getCanvasHandler();
+		return canvas.getHandler();
 	}
 
 

@@ -1,9 +1,11 @@
 package apainter.canvas.layerdata;
 
+import apainter.Handler;
 import apainter.canvas.CanvasHandler;
+import apainter.canvas.CanvasHandlerElement;
 import apainter.rendering.ColorMode;
 
-public interface LayerHandler {
+public interface LayerHandler extends Handler,CanvasHandlerElement{
 
 	/**
 	 * レイヤーもしくはグループのオリジナルのIDを返します。<br>
@@ -12,11 +14,6 @@ public interface LayerHandler {
 	 * @return
 	 */
 	public int getID();
-	/**
-	 * レイヤーの名前を返します。
-	 * @return
-	 */
-	public String getName();
 	/**
 	 * レイヤーの設定をします。<br>
 	 * nullの時""が設定されます。
@@ -77,7 +74,6 @@ public interface LayerHandler {
 	public boolean isGroup();
 	public boolean isLayer();
 
-	public CanvasHandler getCanvas();
 
 	/**
 	 * 現在のレンダリングモードに使っているColorModeを返します

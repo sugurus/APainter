@@ -1,8 +1,8 @@
 package apainter.canvas.layerdata;
 
-import apainter.canvas.Canvas;
+import apainter.canvas.event.PaintEventAccepter;
 
-public interface LayerHandle{
+public interface LayerHandle extends PaintEventAccepter{
 	/**
 	 * レイヤーもしくはグループのオリジナルのIDを返します。<br>
 	 * 他のインスタンスとかぶってはいけません。
@@ -11,16 +11,18 @@ public interface LayerHandle{
 	 */
 	public int getID();
 	/**
-	 * レイヤーの名前を返します。
-	 * @return
-	 */
-	public String getName();
-	/**
 	 * レイヤーの設定をします。<br>
 	 * nullの時""が設定されます。
 	 * @param name
 	 */
 	public void setName(String name);
+
+	/**
+	 * レイヤーの名前を返します。
+	 * @return
+	 */
+	public String getName();
+
 	/**
 	 * レイヤーやグループの透明度を設定します。<br>
 	 * 値は0～256です。
@@ -74,7 +76,6 @@ public interface LayerHandle{
 
 	public boolean isGroup();
 	public boolean isLayer();
-	public Canvas getCanvas();
 
 	/**
 	 * このレイヤーデータを完全に破棄します。

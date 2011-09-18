@@ -25,15 +25,27 @@ public class APainterPen {
 
 	public static int readInt(InputStream in) throws IOException{
 		byte[] b = new byte[4];
-		int r = in.read(b);
-		if(r!=4)throw new IOException();
+		int r = in.read(b,0,4);
+		if(r!=4){
+			if(r==-1)throw new IOException();
+			int left = 4-r;
+			while(left!=0){
+				r = in.read(b,4-left,left);
+				if(r==-1)throw new IOException();
+				left-=r;
+			}
+		}
 		return (b[0]&0xff)<<24 | (b[1]&0xff)<<16 | (b[2]&0xff)<<8 | (b[3]&0xff);
 	}
 
 	public static int readShort(InputStream in) throws IOException{
 		byte[] b = new byte[2];
-		int r = in.read(b);
-		if(r!=2)throw new IOException();
+		int r = in.read(b,0,2);
+		if(r!=2){
+			if(r==-1)throw new IOException();
+			r = in.read(b,1,1);
+			if(r==-1)throw new IOException();
+		}
 		return (b[0]&0xff)<<8 | (b[1]&0xff);
 	}
 
@@ -94,7 +106,14 @@ public class APainterPen {
 			if(read==0x21){//name
 				int ll = in.read();
 				byte[] bb = new byte[ll];
-				in.read(bb);
+				int left=ll;
+				while(left!=0){
+					read = in.read(bb, ll-left, left);
+					if(read==-1){
+						throw new IOException();
+					}
+					left-=read;
+				}
 				nm = new String(bb, "utf-8");
 				in.read();
 				read=in.read();
@@ -121,7 +140,15 @@ public class APainterPen {
 		if(readShort(in)!=0xff31)throw new IOException();
 		int l = readInt(in);
 		byte[] zipdata=new byte[l];
-		if(l!=in.read(zipdata) || 0xffff!=readShort(in))throw new IOException();
+		int left=l;
+		while(left!=0){
+			int read = in.read(zipdata, l-left, left);
+			if(read==-1){
+				throw new IOException();
+			}
+			left-=read;
+		}
+		if( 0xffff!=readShort(in))throw new IOException();
 
 		Inflater inf = new Inflater();
 		inf.setInput(zipdata);

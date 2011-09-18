@@ -47,10 +47,8 @@ public class CercleHSV extends JComponent{
 		H = hsv[0];
 		S = hsv[1];
 		V = hsv[2];
-		h.setH(H);
-		sv.setH(H);
-		sv.setSV(S, V);
-		h.setSV(S, V);
+		h.setHSV(H,S,V);
+		sv.setHSV(H,S, V);
 		fireHSVPropertyChange(old);
 	}
 
@@ -71,10 +69,8 @@ public class CercleHSV extends JComponent{
 		H = h;
 		S = s;
 		V = v;
-		this.h.setH(H);
-		sv.setH(H);
-		sv.setSV(S, V);
-		this.h.setSV(S, V);
+		this.h.setHSV(H,S,V);
+		sv.setHSV(H,S, V);
 		fireHSVPropertyChange(old);
 	}
 
@@ -93,8 +89,8 @@ public class CercleHSV extends JComponent{
 				int y = e.getY();
 				double[] old = {H,S,V};
 				H = h.getH(x-(w-ww>>1), y-(he-hh>>1));
-				h.setH(H);
-				sv.setH(H);
+				h.setHSV(H,S,V);
+				sv.setHSV(H,S,V);
 				repaint();
 				fireHSVPropertyChange(old);
 			}
@@ -109,7 +105,7 @@ public class CercleHSV extends JComponent{
 				sv.setSVformXY(x-(w-ww>>1), y-(he-hh>>1));
 				S = sv.getS();
 				V = sv.getV();
-				h.setSV(S, V);
+				h.setHSV(H,S, V);
 				repaint();
 				fireHSVPropertyChange(old);
 			}

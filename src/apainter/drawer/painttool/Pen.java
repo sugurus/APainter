@@ -1,8 +1,10 @@
 package apainter.drawer.painttool;
 
-import nodamushi.pentablet.PenTabletMouseEvent;
+import static apainter.PropertyChangeNames.*;
 import apainter.Device;
 import apainter.GlobalValue;
+import apainter.drawer.DrawPoint;
+import apainter.drawer.DrawTarget;
 import apainter.rendering.ColorMode;
 import apainter.rendering.Renderer;
 import apainter.rendering.RenderingOption;
@@ -34,6 +36,16 @@ public class Pen extends BasicDrawer{
 //		if(d==Device.GPU){
 //			//GPU
 //		}
+	}
+
+	@Override
+	protected boolean isDrawable(DrawTarget dt) {
+		String[] s = dt.getDrawTargetName().split(" ");
+		boolean ret = true;
+		if(!(s[0].equals("cpulayer")||"cpumask".equals(s[0]))){
+			ret = false;
+		}
+		return ret;
 	}
 
 	private static Renderer getCPURenderer(ColorMode mode){
@@ -101,7 +113,7 @@ public class Pen extends BasicDrawer{
 	}
 
 	@Override
-	protected void setOption(RenderingOption option, PenTabletMouseEvent e) {
+	protected void setOption(RenderingOption option, DrawPoint e) {
 
 	}
 
@@ -113,11 +125,14 @@ public class Pen extends BasicDrawer{
 		if(m==null|| m==ColorMode.AlphaDawn || m==ColorMode.AlphaPlus || m==ColorMode.Del || m==mode)return;
 		ColorMode old = mode;
 		mode = m;
+		firePropertyChange(ColorModeChangeProperty, old, m);
 	}
 
 	public void setColorMode(String colormode){
 		ColorMode m = ColorMode.getColorMode(colormode);
 		setColorMode(m);
 	}
+
+
 
 }

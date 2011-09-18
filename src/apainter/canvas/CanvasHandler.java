@@ -6,6 +6,7 @@ import javax.swing.JComponent;
 
 import apainter.APainter;
 import apainter.BindKey;
+import apainter.Handler;
 import apainter.bind.BindObject;
 import apainter.canvas.event.CanvasEvent;
 import apainter.canvas.layerdata.LayerHandler;
@@ -16,7 +17,7 @@ import apainter.gui.canvas.CanvasView;
  * @author nodamushi
  *
  */
-public class CanvasHandler {
+public class CanvasHandler implements Handler{
 	final Canvas canvas;
 	final APainter ap;
 
@@ -25,6 +26,15 @@ public class CanvasHandler {
 		this.ap=a;
 	}
 
+	@Override
+	public String getHandlerName() {
+		return "canvashandler";
+	}
+
+	@Override
+	public String getName() {
+		return canvas.getCanvasName();
+	}
 
 	public APainter getAPainter(){
 		return ap;

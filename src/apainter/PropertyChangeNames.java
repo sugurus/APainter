@@ -27,6 +27,7 @@ public interface PropertyChangeNames {
 	DrawerDensityChangeProperty="drawerdensity",
 	DrawerMinDensityChangeProperty="drawermindensity",
 	DrawerMinPenSizeChangeProperty="drawerminpensize",
+	ColorModeChangeProperty="colormode",
 
 
 	//履歴系統

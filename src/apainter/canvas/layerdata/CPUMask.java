@@ -1,43 +1,38 @@
 package apainter.canvas.layerdata;
 
-import java.awt.Image;
 import java.awt.Rectangle;
-import java.awt.Toolkit;
-import java.awt.Transparency;
-import java.awt.color.ColorSpace;
-import java.awt.image.ColorModel;
-import java.awt.image.ComponentColorModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.MemoryImageSource;
 import java.util.Arrays;
 
 import apainter.Color;
+import apainter.canvas.Canvas;
+import apainter.canvas.event.EventConstant;
+import apainter.canvas.event.PaintEvent;
+import apainter.canvas.event.PaintEventAccepter;
+import apainter.canvas.event.PaintLastEvent;
+import apainter.canvas.event.PaintStartEvent;
 import apainter.data.PixelDataByteBuffer;
-import apainter.drawer.DrawAccepter;
-import apainter.drawer.DrawEvent;
+import apainter.drawer.event.DrawEvent;
+import apainter.drawer.event.DrawLastEvent;
+import apainter.drawer.event.DrawStartEvent;
+import apainter.drawer.event.DrawerEvent;
+import apainter.rendering.Renderer;
 
-class CPUMask extends Mask implements DrawAccepter{
+class CPUMask extends Mask {
 
 
 	private PixelDataByteBuffer buffer;
 	private byte[] pixel;
-	private MemoryImageSource imagesource;
-	private Image img;
+	private CPUMauseHandler handler = new CPUMauseHandler();
 
-	public CPUMask(int width,int height) {
+	public CPUMask(int width,int height,Canvas canvas) {
+		super(canvas);
 		buffer = PixelDataByteBuffer.create(width, height);
 		pixel = buffer.getData();
-		ColorModel colorModel = new ComponentColorModel(
-				ColorSpace.getInstance(ColorSpace.CS_GRAY),
-				new int[] {8},
-				false, true,
-				Transparency.OPAQUE,
-				DataBuffer.TYPE_BYTE);
-		imagesource=new MemoryImageSource(width, height, colorModel, pixel, 0, width);
-		imagesource.setAnimated(true);
-		img = Toolkit.getDefaultToolkit().createImage(
-				imagesource
-		);
+	}
+
+	@Override
+	public MaskHandler getHandler() {
+		return handler;
 	}
 
 	byte[] getPixel(){
@@ -46,10 +41,6 @@ class CPUMask extends Mask implements DrawAccepter{
 
 	PixelDataByteBuffer getPixelDataBuffer(){
 		return buffer;
-	}
-
-	Image getImage(){
-		return img;
 	}
 
 	@Override
@@ -107,28 +98,118 @@ class CPUMask extends Mask implements DrawAccepter{
 		buffer.setData((byte)0, r);
 	}
 
-	@Override
-	public boolean paint(DrawEvent e) {
-		// TODO mask paint
-		return false;
-	}
-
 	public void dispose(){
 		buffer.dispose();
 		pixel = null;
-		img.flush();
 	}
 
 
 	@Override
-	public void startPaint(Object source) {
-		// TODO 自動生成されたメソッド・スタブ
+	public boolean isPaintable() {
+		//TODO どうしよ？
+		return true;
+	}
 
+
+
+
+	private Object paintsource;
+	private Rectangle paintrect;
+	@Override
+	public void startPaint(Object obj) {
+		if(paintsource==null){
+			paintsource = obj;
+		}
+		//TODO init hisotry
 	}
 	@Override
-	public void endPaint(Object source) {
-		// TODO 自動生成されたメソッド・スタブ
+	public boolean paint(PaintEvent e) {
+		Object source = e.getSource();
+
+		if(source!=paintsource)return false;
+		Renderer r = e.getRenderer();
+		Rectangle rect;
+		r.rendering(buffer, e.getMapData(), e.getLocation(),
+				rect= e.getBounds(), e.getOption());
+		if(paintrect==null){
+			paintrect=rect;
+		}else{
+			paintrect = paintrect.union(rect);
+		}
+		return false;
+	}
+
+	@Override
+	public void endPaint(Object obj) {
+		paintsource = null;
+		//TODO hisotry
+	}
+
+
+
+	public class CPUMauseHandler implements MaskHandler{
+
+
+		CPUMask m = CPUMask.this;
+
+		@Override
+		public Mask getMask() {
+			return m;
+		}
+
+		@Override
+		public Canvas getCanvas() {
+			return m.getCanvas();
+		}
+
+		@Override
+		public String getHandlerName() {
+			return "maskhandler cpu";
+		}
+
+		@Override
+		public String getName() {
+			return "MASK";
+		}
+		@Override
+		public String getDrawTargetName() {
+			return "cpumask byte gray 8";
+		}
+
+		@Override
+		public void acceptEvent(DrawerEvent e) {
+			if(e instanceof DrawEvent){
+				canvas.dispatchEvent(PaintEvent.convert((DrawEvent)e, this,
+						EventConstant.ID_PAINT_LAYERMASK));
+			}else if (e instanceof DrawStartEvent){
+				canvas.dispatchEvent(new PaintStartEvent( e.getDrawer(), this));
+			}else if(e instanceof DrawLastEvent){
+				canvas.dispatchEvent(new PaintLastEvent(e.getDrawer(), this));
+			}
+		}
+
+		@Override
+		public boolean paint(PaintEvent e) {
+			return m.paint(e);
+		}
+
+		@Override
+		public void startPaint(Object obj) {
+			m.startPaint(obj);
+		}
+
+		@Override
+		public void endPaint(Object obj) {
+			m.endPaint(obj);
+		}
+
+		@Override
+		public boolean isPaintable() {
+			return m.isPaintable();
+		}
 
 	}
+
+
 
 }

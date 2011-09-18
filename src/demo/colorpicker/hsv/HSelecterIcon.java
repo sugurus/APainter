@@ -18,16 +18,11 @@ public interface HSelecterIcon extends Icon
 	public double getH(int x,int y);
 
 	/**
-	 * Hを設定します。
-	 */
-	public void setH(double h);
-
-	/**
-	 * SVを設定します。
+	 * HSVを設定します。
 	 * @param s
 	 * @param v
 	 */
-	public void setSV(double s,double v);
+	public void setHSV(double h,double s,double v);
 
 	/**
 	 * SVの状態が見えるようにするかどうか設定します。

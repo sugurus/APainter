@@ -129,6 +129,14 @@ public abstract class BindObject {
 	public boolean isSettable(Object value){
 		return true;
 	}
+	/**
+	 * 実際にセットできる形に変換します。
+	 * @param o
+	 * @return
+	 */
+	public Object convert(Object o){
+		return o;
+	}
 
 	public void setend(Object oldobj,Object newobj){
 

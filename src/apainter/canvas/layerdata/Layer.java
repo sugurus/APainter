@@ -1,7 +1,7 @@
 package apainter.canvas.layerdata;
 
+import apainter.CreateHandler;
 import apainter.data.PixelDataBuffer;
-import apainter.drawer.DrawAccepter;
 import apainter.rendering.RenderingOption;
 
 /**
@@ -9,7 +9,7 @@ import apainter.rendering.RenderingOption;
  * @author nodamushi
  *
  */
-interface Layer extends LayerHandle,Renderable,DrawAccepter{
+interface Layer extends LayerHandle,Renderable,CreateHandler{
 
 	/**
 	 * このレイヤーを操作するためのハンドラーを返します。
@@ -20,4 +20,5 @@ interface Layer extends LayerHandle,Renderable,DrawAccepter{
 	public RenderingOption getRenderingOption();
 	public PixelDataBuffer getDataBuffer();
 
+	public Mask getMask();
 }

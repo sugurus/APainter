@@ -1,6 +1,15 @@
 package apainter.data;
 
+import java.awt.Image;
+import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferInt;
+import java.awt.image.DirectColorModel;
+import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
 import java.util.Arrays;
 
 public class PixelDataIntBuffer extends PixelDataBuffer{
@@ -120,6 +129,40 @@ public class PixelDataIntBuffer extends PixelDataBuffer{
 			i+=r.width;
 		}
 		return distination;
+	}
+
+	private BufferedImage img;
+	/**
+	 * 保持するデータを直接画像データに変換します。
+	 * @return
+	 */
+	public synchronized Image getDirectImage(){
+		if(img == null)
+			img =createImage(pixel, width, height, 0xff000000, 0xff0000, 0xff00, 0xff);
+		return img;
+	}
+
+	/**
+	 * aRGB画像を作成します
+	 * @param data イメージデータ
+	 * @param width 画像幅
+	 * @param height 画像高さ
+	 * @param alphaMask
+	 * 画素データからアルファ値を取り出すためのマスク。
+	 * @param redMask 画素データから赤を取り出すためのマスク
+	 * @param greenMask 画素データから緑を取り出すためのマスク
+	 * @param blueMask 画素データから青を取り出すためのマスク
+	 * @return dataを保持するBufferedImage
+	 */
+	public static BufferedImage createImage(int[] data,int width,int height,
+			int alphaMask,int redMask,int greenMask,int blueMask){
+		int[] mask = {redMask,greenMask,blueMask,alphaMask};
+		DataBuffer buffer = new DataBufferInt(data, width*height);
+		WritableRaster raster = Raster.
+				createPackedRaster(buffer,width,height,width,mask,new Point());
+		ColorModel model =
+				new DirectColorModel(32, redMask, greenMask, blueMask, alphaMask);
+		return new BufferedImage(model, raster, false, null);
 	}
 
 }

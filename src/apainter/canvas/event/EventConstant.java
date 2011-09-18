@@ -5,7 +5,7 @@ package apainter.canvas.event;
  * @author nodamushi
  *
  */
-public class EventConstant {
+public interface EventConstant {
 
 	public static final int
 
@@ -16,18 +16,12 @@ public class EventConstant {
 		,ID_CreateCanvas = 50
 		,ID_CanvasInited=60
 		,ID_DisposeCanvas=70
-		/**
-		 * ユーザーのペイントが始まった（クリックした）ことを示す。
-		 */
-		 ,ID_PaintStart = 100
-		/**
-		 * ユーザーがペイントしていることを示す
-		 */
-		,ID_Paint = 110
-		/**
-		 * ユーザーがペイントを終えた（マウスを放した）
-		 */
-		,ID_PaintEnd = 120
+
+
+		,ID_PAINT_LAYER=100
+		,ID_PAINT_LAYERMASK=101
+		,ID_PAINT_START=120
+		,ID_PAINT_LAST =130
 
 		,ID_CreateLayer=200
 		,ID_DeleteLayer=220
@@ -38,15 +32,4 @@ public class EventConstant {
 
 
 		;
-
-
-
-
-
-
-
-
-
-
-	private EventConstant() {}
 }

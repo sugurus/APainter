@@ -2,8 +2,10 @@ package apainter.canvas.layerdata;
 
 import java.awt.Image;
 
+import apainter.Handler;
 import apainter.canvas.CanvasHandler;
 import apainter.data.PixelDataBuffer;
+import apainter.drawer.DrawTarget;
 import apainter.hierarchy.Element;
 import apainter.rendering.ColorMode;
 
@@ -12,7 +14,7 @@ import apainter.rendering.ColorMode;
  * @author nodamushi
  *
  */
-public abstract class InnerLayerHandler implements LayerHandle,PixelSetable{
+public abstract class InnerLayerHandler implements Handler,LayerHandle,PixelSetable,DrawTarget{
 
 	/**
 	 * 現在のレンダリングモードに使っているColorModeを返します
@@ -47,9 +49,7 @@ public abstract class InnerLayerHandler implements LayerHandle,PixelSetable{
 
 	abstract Layer getLayer();
 	abstract PixelDataBuffer getOriginalData();
-	abstract Image getImage();
 	abstract PixelDataBuffer getMaskOriginalData();
-	abstract Image getMaskImage();
 	abstract PixelSetable getDrawable();
 
 	private Element<InnerLayerHandler> thiselement=null;
@@ -86,6 +86,13 @@ public abstract class InnerLayerHandler implements LayerHandle,PixelSetable{
 
 
 	private static class LH2 implements LayerHandler{
+
+
+
+		@Override
+		public String getHandlerName() {
+			return "layerhandler";
+		}
 
 		private InnerLayerHandler l;
 		public LH2(InnerLayerHandler l) {
@@ -169,7 +176,7 @@ public abstract class InnerLayerHandler implements LayerHandle,PixelSetable{
 
 		@Override
 		public CanvasHandler getCanvas() {
-			return l.getCanvas().getCanvasHandler();
+			return l.getCanvas().getHandler();
 		}
 
 		@Override

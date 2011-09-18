@@ -67,12 +67,13 @@ public class Bind {
 
 	Object set(Object newobj){
 		Object o=null;
-		for(BindObject b:list){
-			if(!b.isSettable(newobj))return rejected;
-		}
 		if(mainObject!=null){
 			if(!mainObject.isSettable(newobj))return rejected;
 			o=get();
+			newobj = mainObject.convert(newobj);
+		}
+		for(BindObject b:list){
+			if(!b.isSettable(newobj))return rejected;
 		}
 
 		for(BindObject b:list){

@@ -1,24 +1,23 @@
 package apainter.drawer;
 
-import nodamushi.pentablet.PenTabletMouseEvent;
 
 public interface Plot extends PlotPointInterpolate,PressureInterpolate{
 
 	/**
 	 * マウスが押された点を追加します。
-	 * @param e
+	 * @param d
 	 */
-	public void begin(PenTabletMouseEvent e);
+	public void begin(DrawPoint h);
 	/**
 	 * マウスがドラッグされた点を追加します。
-	 * @param e
+	 * @param d
 	 */
-	public void setNextPoint(PenTabletMouseEvent e);
+	public void setNextPoint(DrawPoint d);
 	/**
 	 * マウスがリリースされた端点を追加します。
-	 * @param e
+	 * @param d
 	 */
-	public void end(PenTabletMouseEvent e);
+	public void end(DrawPoint d);
 
 	/**
 	 * まだ設置するべきか否か。

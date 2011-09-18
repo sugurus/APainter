@@ -1,6 +1,17 @@
 package apainter.data;
 
+import java.awt.Image;
+import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Transparency;
+import java.awt.color.ColorSpace;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
+import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
 import java.util.Arrays;
 
 /**
@@ -39,7 +50,7 @@ public class PixelDataByteBuffer extends PixelDataBuffer{
 	public static PixelDataByteBuffer copyBuffer(int w,int h,byte[] b){
 		return new PixelDataByteBuffer(w, h, b.clone());
 	}
-	
+
 	@Override
 	public PixelDataBuffer clone() {
 		return new PixelDataByteBuffer(width, height, pixel.clone());
@@ -117,7 +128,7 @@ public class PixelDataByteBuffer extends PixelDataBuffer{
 		}
 		return distination;
 	}
-	
+
 	public byte[] copy(byte[] distination,Rectangle r){
 		if(distination==null ||distination.length < r.width*r.height){
 			distination = new byte[r.width*r.height];
@@ -140,6 +151,32 @@ public class PixelDataByteBuffer extends PixelDataBuffer{
 		for(int y=0;y<rh;y++){
 			System.arraycopy(p.pixel, rh*w, pixel, y*getWidth(), rw);
 		}
+	}
+
+
+	private BufferedImage img;
+	public synchronized Image getDirectImage(){
+		if(img==null)
+			img = createImage(pixel, width, height);
+		return img;
+	}
+
+	/**
+	 * グレー画像を作成します
+	 * @param data イメージデータ
+	 * @param width 画像幅
+	 * @param height 画像高さ
+	 * @return dataを保持するBufferedImage
+	 */
+	public static BufferedImage createImage(byte[] data,int width,int height){
+		DataBuffer buffer = new DataBufferByte(data, width*height);
+		WritableRaster raster = Raster.
+				createInterleavedRaster(buffer, width, height, width,
+						1,new int[1], new Point());
+		ColorModel model = new ComponentColorModel(
+				ColorSpace.getInstance(ColorSpace.CS_GRAY), false, false,
+				Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
+		return new BufferedImage(model, raster, false, null);
 	}
 
 }

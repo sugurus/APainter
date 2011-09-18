@@ -1,20 +1,22 @@
 package apainter.drawer.painttool;
 
+import static apainter.misc.Utility_PixelFunction.*;
+
 import java.awt.Point;
 import java.awt.Rectangle;
 
-import nodamushi.pentablet.PenTabletMouseEvent;
 import apainter.Color;
 import apainter.Device;
 import apainter.GlobalValue;
 import apainter.data.PixelDataBuffer;
 import apainter.data.PixelDataByteBuffer;
 import apainter.data.PixelDataIntBuffer;
+import apainter.drawer.DrawPoint;
+import apainter.drawer.DrawTarget;
 import apainter.rendering.Renderer;
 import apainter.rendering.RenderingOption;
 
-import static apainter.misc.Utility_PixelFunction.*;
-
+//TODO mask対応
 public class Eraser extends BasicDrawer{
 
 	Renderer cpu8bit = new EraserCPURendering();
@@ -35,7 +37,13 @@ public class Eraser extends BasicDrawer{
 	}
 
 	@Override
-	protected void setOption(RenderingOption option, PenTabletMouseEvent e) {}
+	protected void setOption(RenderingOption option, DrawPoint e) {}
+
+	@Override
+	protected boolean isDrawable(DrawTarget dt) {
+		String[] s =dt.getDrawTargetName().split(" ");
+		return s[0].equals("cpulayer");
+	}
 
 }
 
