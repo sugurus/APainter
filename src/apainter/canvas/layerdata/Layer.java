@@ -19,6 +19,4 @@ interface Layer extends LayerHandle,Renderable,CreateHandler{
 
 	public RenderingOption getRenderingOption();
 	public PixelDataBuffer getDataBuffer();
-
-	public Mask getMask();
 }

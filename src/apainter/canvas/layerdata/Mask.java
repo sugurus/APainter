@@ -6,7 +6,7 @@ import apainter.canvas.Canvas;
 import apainter.canvas.event.PaintEventAccepter;
 import apainter.data.PixelDataBuffer;
 
-abstract class Mask implements PixelSetable,PaintEventAccepter,CreateHandler{
+abstract class Mask implements PixelContainer,PaintEventAccepter,CreateHandler{
 
 	protected boolean enable=false;
 	protected Canvas canvas;
@@ -27,4 +27,8 @@ abstract class Mask implements PixelSetable,PaintEventAccepter,CreateHandler{
 
 	abstract PixelDataBuffer getDataBuffer();
 	public abstract MaskHandler getHandler();
+	/**
+	 * 初期化します。
+	 */
+	abstract void init();
 }

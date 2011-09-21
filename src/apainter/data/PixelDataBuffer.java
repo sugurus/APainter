@@ -116,4 +116,5 @@ public abstract class PixelDataBuffer implements Cloneable{
 	public abstract void dispose();
 	abstract Object getData();
 	public abstract PixelDataBuffer clone();
+	public abstract PixelDataBuffer copy(Rectangle r);
 }

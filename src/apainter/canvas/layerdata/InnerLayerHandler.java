@@ -1,7 +1,5 @@
 package apainter.canvas.layerdata;
 
-import java.awt.Image;
-
 import apainter.Handler;
 import apainter.canvas.CanvasHandler;
 import apainter.data.PixelDataBuffer;
@@ -14,7 +12,7 @@ import apainter.rendering.ColorMode;
  * @author nodamushi
  *
  */
-public abstract class InnerLayerHandler implements Handler,LayerHandle,PixelSetable,DrawTarget{
+public abstract class InnerLayerHandler implements MaskContainer,PixelContainer,Handler,LayerHandle,DrawTarget{
 
 	/**
 	 * 現在のレンダリングモードに使っているColorModeを返します
@@ -50,7 +48,6 @@ public abstract class InnerLayerHandler implements Handler,LayerHandle,PixelSeta
 	abstract Layer getLayer();
 	abstract PixelDataBuffer getOriginalData();
 	abstract PixelDataBuffer getMaskOriginalData();
-	abstract PixelSetable getDrawable();
 
 	private Element<InnerLayerHandler> thiselement=null;
 	final synchronized void setElement(Element<InnerLayerHandler> e){
@@ -87,6 +84,11 @@ public abstract class InnerLayerHandler implements Handler,LayerHandle,PixelSeta
 
 	private static class LH2 implements LayerHandler{
 
+
+		@Override
+		public boolean isMaskContainer() {
+			return l.isMaskContainer();
+		}
 
 
 		@Override
@@ -157,11 +159,6 @@ public abstract class InnerLayerHandler implements Handler,LayerHandle,PixelSeta
 		@Override
 		public boolean isPixelContainer() {
 			return l.isPixelContainer();
-		}
-
-		@Override
-		public boolean isPixelSetable() {
-			return l.isPixelSetable();
 		}
 
 		@Override

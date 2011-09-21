@@ -2,6 +2,7 @@ package apainter.rendering;
 
 import static apainter.misc.Utility_PixelFunction.*;
 import static java.lang.Math.*;
+import static apainter.data.PixelData15BitBuffer.*;
 
 /**
  * 色の合算をする関数群です。
@@ -11,7 +12,168 @@ import static java.lang.Math.*;
  * @see http://www.bea.hi-ho.ne.jp/gaku-iwa/color/conjn.html
  */
 public final class ColorOperations {
+	public static final void default15bitOp(int ua,int ur,int ug,int ub,
+			int oa,int or,int og,int ob,int[] integer,int[] decimal,int position){
+		int a = calca15bit(ua, oa);
+		int underalpha =  (ua*(32767-oa)/32767);
+		int r = (oa*or+underalpha*ur)/a;
+		int g = (oa*og+underalpha*ug)/a;
+		int b = (oa*ob+underalpha*ub)/a;
+		integer[position] = argb(integer(a), integer(r), integer(g), integer(b));
+		decimal[position] = argb(decimal(a),decimal(r),decimal(g),decimal(b));
+	}
 
+	public static final int add15bitOp(int under,int over){
+		return under+over>32767?32767:under+over;
+	}
+	public static final void add15bitOp(int ua,int ur,int ug,int ub,
+			int oa,int or,int og,int ob,int[] integer,int[] decimal,int position){
+		int a = calca15bit(ua, oa);
+		int uoalpha = ua*oa/32767;
+		int u_oalpha =  (ua*(32767-oa)/32767);
+		int _uoalpha = (oa*(32767-ua)/32767);
+		int r = (uoalpha*add15bitOp(ur,or)+u_oalpha*ur+_uoalpha*or)/a;
+		int g = (uoalpha*add15bitOp(ug,og)+u_oalpha*ug+_uoalpha*og)/a;
+		int b = (uoalpha*add15bitOp(ub,ob)+u_oalpha*ub+_uoalpha*ob)/a;
+		integer[position] = argb(integer(a), integer(r), integer(g), integer(b));
+		decimal[position] = argb(decimal(a),decimal(r),decimal(g),decimal(b));
+	}
+
+	public static final int subtractive15bitOp(int under,int over){
+		return under-over>=0?under-over:0;
+	}
+	public static final void subtractive15bitOp(int ua,int ur,int ug,int ub,
+			int oa,int or,int og,int ob,int[] integer,int[] decimal,int position){
+		int a = calca15bit(ua, oa);
+		int uoalpha = ua*oa/32767;
+		int u_oalpha =  (ua*(32767-oa)/32767);
+		int _uoalpha = (oa*(32767-ua)/32767);
+		int r = (uoalpha*subtractive15bitOp(ur,or)+u_oalpha*ur+_uoalpha*or)/a;
+		int g = (uoalpha*subtractive15bitOp(ug,og)+u_oalpha*ug+_uoalpha*og)/a;
+		int b = (uoalpha*subtractive15bitOp(ub,ob)+u_oalpha*ub+_uoalpha*ob)/a;
+		integer[position] = argb(integer(a), integer(r), integer(g), integer(b));
+		decimal[position] = argb(decimal(a),decimal(r),decimal(g),decimal(b));
+	}
+
+
+	public static final int screen15bitOp(int under,int over){
+		return ((under+over)*32767-under*over)/32767;
+	}
+	public static final void screen15bitOp(int ua,int ur,int ug,int ub,
+			int oa,int or,int og,int ob,int[] integer,int[] decimal,int position){
+		int a = calca15bit(ua, oa);
+		int uoalpha = ua*oa/32767;
+		int u_oalpha =  (ua*(32767-oa)/32767);
+		int _uoalpha = (oa*(32767-ua)/32767);
+		int r = (uoalpha*screen15bitOp(ur,or)+u_oalpha*ur+_uoalpha*or)/a;
+		int g = (uoalpha*screen15bitOp(ug,og)+u_oalpha*ug+_uoalpha*og)/a;
+		int b = (uoalpha*screen15bitOp(ub,ob)+u_oalpha*ub+_uoalpha*ob)/a;
+		integer[position] = argb(integer(a), integer(r), integer(g), integer(b));
+		decimal[position] = argb(decimal(a),decimal(r),decimal(g),decimal(b));
+	}
+
+	public static final int overlay15bitOp(int under,int over){
+		return under<16384?
+				under*over*2/32767:
+				(under+over-under*over/32767)*2-32767;
+	}
+
+	public static final void overlay15bitOp(int ua,int ur,int ug,int ub,
+			int oa,int or,int og,int ob,int[] integer,int[] decimal,int position){
+		int a = calca15bit(ua, oa);
+		int uoalpha = ua*oa/32767;
+		int u_oalpha =  (ua*(32767-oa)/32767);
+		int _uoalpha = (oa*(32767-ua)/32767);
+		int r = (uoalpha*overlay15bitOp(ur,or)+u_oalpha*ur+_uoalpha*or)/a;
+		int g = (uoalpha*overlay15bitOp(ug,og)+u_oalpha*ug+_uoalpha*og)/a;
+		int b = (uoalpha*overlay15bitOp(ub,ob)+u_oalpha*ub+_uoalpha*ob)/a;
+		integer[position] = argb(integer(a), integer(r), integer(g), integer(b));
+		decimal[position] = argb(decimal(a),decimal(r),decimal(g),decimal(b));
+	}
+
+	public static final int hardlight15bitOp(int under,int over){
+		return over < 16384?
+				under*over*2/32767:
+				(under+over-under*over/32767)*2-32767;
+	}
+
+	public static final void hardlight15bitOp(int ua,int ur,int ug,int ub,
+			int oa,int or,int og,int ob,int[] integer,int[] decimal,int position){
+		int a = calca15bit(ua, oa);
+		int uoalpha = ua*oa/32767;
+		int u_oalpha =  (ua*(32767-oa)/32767);
+		int _uoalpha = (oa*(32767-ua)/32767);
+		int r = (uoalpha*hardlight15bitOp(ur,or)+u_oalpha*ur+_uoalpha*or)/a;
+		int g = (uoalpha*hardlight15bitOp(ug,og)+u_oalpha*ug+_uoalpha*og)/a;
+		int b = (uoalpha*hardlight15bitOp(ub,ob)+u_oalpha*ub+_uoalpha*ob)/a;
+		integer[position] = argb(integer(a), integer(r), integer(g), integer(b));
+		decimal[position] = argb(decimal(a),decimal(r),decimal(g),decimal(b));
+	}
+
+	public static final int darken15bitOp(int under,int over){
+		return under>over?over:under;
+	}
+	public static final void darken15bitOp(int ua,int ur,int ug,int ub,
+			int oa,int or,int og,int ob,int[] integer,int[] decimal,int position){
+		int a = calca15bit(ua, oa);
+		int uoalpha = ua*oa/32767;
+		int u_oalpha =  (ua*(32767-oa)/32767);
+		int _uoalpha = (oa*(32767-ua)/32767);
+		int r = (uoalpha*darken15bitOp(ur,or)+u_oalpha*ur+_uoalpha*or)/a;
+		int g = (uoalpha*darken15bitOp(ug,og)+u_oalpha*ug+_uoalpha*og)/a;
+		int b = (uoalpha*darken15bitOp(ub,ob)+u_oalpha*ub+_uoalpha*ob)/a;
+		integer[position] = argb(integer(a), integer(r), integer(g), integer(b));
+		decimal[position] = argb(decimal(a),decimal(r),decimal(g),decimal(b));
+	}
+
+	public static final int light15bitOp(int under,int over){
+		return under>over?under:over;
+	}
+	public static final void light15bitOp(int ua,int ur,int ug,int ub,
+			int oa,int or,int og,int ob,int[] integer,int[] decimal,int position){
+		int a = calca15bit(ua, oa);
+		int uoalpha = ua*oa/32767;
+		int u_oalpha =  (ua*(32767-oa)/32767);
+		int _uoalpha = (oa*(32767-ua)/32767);
+		int r = (uoalpha*light15bitOp(ur,or)+u_oalpha*ur+_uoalpha*or)/a;
+		int g = (uoalpha*light15bitOp(ug,og)+u_oalpha*ug+_uoalpha*og)/a;
+		int b = (uoalpha*light15bitOp(ub,ob)+u_oalpha*ub+_uoalpha*ob)/a;
+		integer[position] = argb(integer(a), integer(r), integer(g), integer(b));
+		decimal[position] = argb(decimal(a),decimal(r),decimal(g),decimal(b));
+	}
+
+	public static final int difference15bitOp(int under,int over){
+		return under>over?under-over:over-under;
+	}
+	public static final void difference15bitOp(int ua,int ur,int ug,int ub,
+			int oa,int or,int og,int ob,int[] integer,int[] decimal,int position){
+		int a = calca15bit(ua, oa);
+		int uoalpha = ua*oa/32767;
+		int u_oalpha =  (ua*(32767-oa)/32767);
+		int _uoalpha = (oa*(32767-ua)/32767);
+		int r = (uoalpha*difference15bitOp(ur,or)+u_oalpha*ur+_uoalpha*or)/a;
+		int g = (uoalpha*difference15bitOp(ug,og)+u_oalpha*ug+_uoalpha*og)/a;
+		int b = (uoalpha*difference15bitOp(ub,ob)+u_oalpha*ub+_uoalpha*ob)/a;
+		integer[position] = argb(integer(a), integer(r), integer(g), integer(b));
+		decimal[position] = argb(decimal(a),decimal(r),decimal(g),decimal(b));
+	}
+
+
+	public static final int exclusion15bitOp(int under,int over){
+		return under+over-2*under*over/32767;
+	}
+	public static final void exclusion15bitOp(int ua,int ur,int ug,int ub,
+			int oa,int or,int og,int ob,int[] integer,int[] decimal,int position){
+		int a = calca15bit(ua, oa);
+		int uoalpha = ua*oa/32767;
+		int u_oalpha =  (ua*(32767-oa)/32767);
+		int _uoalpha = (oa*(32767-ua)/32767);
+		int r = (uoalpha*exclusion15bitOp(ur,or)+u_oalpha*ur+_uoalpha*or)/a;
+		int g = (uoalpha*exclusion15bitOp(ug,og)+u_oalpha*ug+_uoalpha*og)/a;
+		int b = (uoalpha*exclusion15bitOp(ub,ob)+u_oalpha*ub+_uoalpha*ob)/a;
+		integer[position] = argb(integer(a), integer(r), integer(g), integer(b));
+		decimal[position] = argb(decimal(a),decimal(r),decimal(g),decimal(b));
+	}
 	//---singleOp----------------------------------------
 	public static final int defaultOp(int under,int over){
 		return over;

@@ -186,22 +186,23 @@ public class Color implements Cloneable{
 	}
 
 	/**
-	 * 正規化されたhsvデータから色を設定します。透明度は変わりません。
-	 * @param h
-	 * @param s
-	 * @param v
+	 * hsv値から、rgbを計算します
+	 * @param h 0～1の値の色相
+	 * @param s 0～1の値の彩度　
+	 * @param v 0～1の値の明度
+	 * @return 0～1の範囲の値のrgbが入った配列
 	 */
-	 public void setHSV(double h,double s,double v){
-		 h = h*360;
+	public static double[] HSV2RGB(double h,double s,double v){
+		h = h*360;
 		 double hmod =  Util.mod(h, 6);
 		 int hi = (int)hmod;
 		 double f = hmod-hi;
-		 int p,q,t,V;
-		 p = (int) (v*(1-s)*0xffff);
-		 q = (int) (v*(1-f*s)*0xffff);
-		 t = (int) (v*(1-(1-f)*s)*0xffff);
-		 V = (int) (v*0xffff);
-		 int r,g,b;
+		 double p,q,t,V;
+		 p = v*(1-s);
+		 q = v*(1-f*s);
+		 t = v*(1-(1-f)*s);
+		 V = v;
+		 double r,g,b;
 		 switch(hi){
 		 case 0:
 			 r = V;
@@ -233,41 +234,60 @@ public class Color implements Cloneable{
 			 g = p;
 			 b = q;
 		 }
-		 set16bitARGB(get16bitA(), r, g, b);
+		 return new double[] {r,g,b};
+	}
+
+	/**
+	 * 正規化されたhsvデータから色を設定します。透明度は変わりません。
+	 * @param h
+	 * @param s
+	 * @param v
+	 */
+	 public void setHSV(double h,double s,double v){
+		 double[] rgb = HSV2RGB(h, s, v);
+		 setARGB(a, rgb[0], rgb[1], rgb[2]);
 	 }
 
 	 /**
-	  * 正規化されたhsvデータを返します。hも０～１
+	  * RGBからHSVを計算します
 	  * @see http://ja.wikipedia.org/wiki/HSV色空間
-	  * @return
+	  * @return 順にH,S,Vの値が0～1の範囲で格納されています。
 	  */
-	 public double[] getHSV(){
+	 public static double[] RGB2HSV(double r,double g,double b){
 		 double h,s,v;
-		 int r,g,b;
-		 int max,min,maxpos;
+		 double max,min;
+		 byte maxpos;
 		 {
-			 int[] m = Util.max_min(r=get16bitR(),g=get16bitG(),b=get16bitB());
+			 double[] m = Util.max_min(r,g,b);
 			 max = m[0];min = m[1];
 			 if(max==r)maxpos = 0;
 			 else if(max==g)maxpos=1;
 			 else maxpos = 2;
 		 }
 		 switch(maxpos){
-		 case 0:
-			 h = 60d*((g-b))/(max-min);
+		 case 0://if R
+			 h = ((g-b))/(max-min)/6d;
 			 break;
-		 case 1:
-			 h = 60d*((b-r))/(max-min)+120d;
+		 case 1://if G
+			 h = (((b-r))/(max-min)+2d)/6d;
 			 break;
-		 default:
-			 h = 60d*((r-g))/(max-min)+240d;
+		 default://if B
+			 h = (((r-g))/(max-min)+4d)/6d;
 			 break;
 		 }
-		 h /= 360;
 		 h = Util.mod(h, 1);
-		 s = (double)(max-min)/max;
-		 v = max/(double)0xffff;
+		 s = (max-min)/max;
+		 v = max;
 		 return new double[]{h,s,v};
+	 }
+
+	 /**
+	  * RGBからHSVを計算します
+	  * @see http://ja.wikipedia.org/wiki/HSV色空間
+	  * @return 順にH,S,Vの値が0～1の範囲で格納されています。
+	  */
+	 public double[] getHSV(){
+		 return RGB2HSV(r, g, b);
 	 }
 
 	 @Override
@@ -277,8 +297,8 @@ public class Color implements Cloneable{
 
 
 	 /**
-	  * 色要素の値が255の時のみ、16bitでの値を0xffffとし、それ以外の場合下位8bitは0になります。
-	  * @param argb
+	  * 色を設定します。
+	  * @param argb 各チャネル8bitでargbの順に値が入っている物と見なす。
 	  */
 	 public void setARGB(int argb){
 		 int a,r,g,b;
@@ -288,12 +308,21 @@ public class Color implements Cloneable{
 		 b = Utility_PixelFunction.b(argb);
 		 setARGB(a, r, g, b);
 	 }
-
+	 /**
+	  * 値は0～255の8bitで表現されている物とする。
+	  * @param a
+	  * @param r
+	  * @param g
+	  * @param b
+	  */
 	 public void setARGB(int a,int r,int g,int b){
-		 double[] f = {a/255f,r/255f,g/255f,b/255f};
-		 bindObject.set(f);
+		 setARGB(a/255d,r/255d,g/255d,b/255d);
 	 }
 
+	 /**
+	  * 色を設定します。
+	  * @param argb 各チャネル16bitでargbの順に値が入っている物と見なす。
+	  */
 	 public void set16bitARGB(long argb){
 		 int a,r,g,b;
 		 a = Utility_PixelFunction.a(argb);
@@ -302,10 +331,36 @@ public class Color implements Cloneable{
 		 b = Utility_PixelFunction.b(argb);
 		 set16bitARGB(a, r, g, b);
 	 }
-
+	 /**
+	  * 値は0～65535の16bitで表現されている物とする。
+	  * @param a
+	  * @param r
+	  * @param g
+	  * @param b
+	  */
 	 public void set16bitARGB(int a,int r,int g,int b){
-		 double[] f = {a/65535f,r/65535f,g/65535f,b/65535f};
-		 bindObject.set(f);
+		 setARGB(a/65535d,r/65535d,g/65535d,b/65535d);
+	 }
+
+	 /**
+	  * 各値は0～1の間であるとする。<br>
+	  * 範囲を超える値は、最も範囲に近い値に変更される。
+	  * @param a
+	  * @param r
+	  * @param g
+	  * @param b
+	  */
+	 public void setARGB(double a,double r,double g,double b){
+		 if(a < 0)a = 0;
+		 else if(a > 1)a = 1;
+		 if(r < 0)r = 0;
+		 else if (r>1)r = 1;
+		 if(g < 0)g = 0;
+		 else if(g > 1)g = 1;
+		 if(b < 0)b = 0;
+		 else if (b>1)b = 1;
+		 double[] d = {a,r,g,b};
+		 bindObject.set(d);
 	 }
 
 
@@ -318,12 +373,35 @@ public class Color implements Cloneable{
 		 return  (long)(get16bitA()<<16 | get16bitR())<<32 | (get16bitG() << 16 | get16bitB());
 	 }
 
+	 /**
+	  * 0～255の範囲で値を返します。
+	  * @return
+	  */
 	 public int getA(){
 		 return (int) (a*255);
 	 }
 	 public int get16bitA(){
 		 return (int) (a*65535);
 	 }
+	 /**
+	  * 最大値をmaxValueとして不透明度の値を返します。
+	  * @param maxValue
+	  * @return 0～maxValueの間の値を取る不透明度の値
+	  */
+	 public int getA(int maxValue){
+		 return (int)(a*maxValue);
+	 }
+	 /**
+	  * 不透明度を0~1の範囲で返します。
+	  * @return
+	  */
+	 public double getA_double(){
+		 return a;
+	 }
+	 /**
+	  * 0～255の範囲で値を返します。
+	  * @return
+	  */
 	 public int getR(){
 		 return (int) (r*255);
 	 }
@@ -331,17 +409,73 @@ public class Color implements Cloneable{
 		 return (int) (r*65535);
 	 }
 
+	 /**
+	  * 最大値をmaxValueとして赤の値を返します。
+	  * @param maxValue
+	  * @return 0～maxValueの間の値を取る赤の値
+	  */
+	 public int getR(int maxValue){
+		 return (int)(r*maxValue);
+	 }
+
+	 /**
+	  * 値を0~1の範囲で返します。
+	  * @return
+	  */
+	 public double getR_double(){
+		 return r;
+	 }
+
+	 /**
+	  * 0～255の範囲で値を返します。
+	  * @return
+	  */
 	 public int getG(){
 		 return (int) (g*255);
+	 }
+	 /**
+	  * 最大値をmaxValueとして緑の値を返します。
+	  * @param maxValue
+	  * @return 0～maxValueの間の値を取る緑の値
+	  */
+	 public int getG(int maxValue){
+		 return (int)(g*maxValue);
+	 }
+	 /**
+	  * 値を0~1の範囲で返します。
+	  * @return
+	  */
+	 public double getG_double(){
+		 return g;
 	 }
 	 public int get16bitG(){
 		 return (int) (g*65535);
 	 }
+	 /**
+	  * 0～255の範囲で値を返します。
+	  * @return
+	  */
 	 public int getB(){
 		 return (int) (b*255);
 	 }
+	 /**
+	  * 最大値をmaxValueとして青の値を返します。
+	  * @param maxValue
+	  * @return 0～maxValueの間の値を取る青の値
+	  */
+	 public int getB(int maxValue){
+		 return (int)(b*maxValue);
+	 }
+
 	 public int get16bitB(){
 		 return (int) (b*65535);
+	 }
+	 /**
+	  * 値を0~1の範囲で返します。
+	  * @return
+	  */
+	 public double getB_double(){
+		 return b;
 	 }
 
 	 public java.awt.Color toAwtColor(){

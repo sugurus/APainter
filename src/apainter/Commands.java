@@ -27,8 +27,8 @@ import apainter.command.CommandDecoder;
 import apainter.drawer.Drawer;
 import apainter.drawer.painttool.Eraser;
 import apainter.drawer.painttool.Pen;
-import apainter.gui.canvas.CanvasMouseListener;
-import apainter.gui.canvas.CanvasView;
+import apainter.gui.CanvasMouseListener;
+import apainter.gui.CanvasView;
 import apainter.misc.Utility_PixelFunction;
 import apainter.pen.PenFactoryCenter;
 import apainter.pen.PenShape;
@@ -87,99 +87,6 @@ class _GetDrawer implements CommandDecoder {
 	}
 }
 
-
-class _Debag_FillLayer implements CommandDecoder {
-	private static final String name = "debag{filllayer}";
-	private static final String help = "debag{filllayer} a r g b [x y w h]:::fill the selected layer with a color(a,r,g,b)";
-
-	private static class Com extends Command {
-		int a,r,g,b;
-		int x,y,w,h;
-
-		Com(int a,int r,int g, int b,int x,int y,int w,int h) {
-			this.a = a;
-			this.r = r;
-			this.g = g;
-			this.b = b;
-			this.x=x;
-			this.y=y;
-			this.w=w;
-			this.h=h;
-		}
-
-		@Override
-		public Void execution(GlobalValue global) {
-			Canvas c = getCurrentCanvas(global);
-			InnerLayerHandler lh =c.getSelectedLayer();
-			int cw = c.getWidth(),ch=c.getHeight();
-			int xx,yy,ww,hh;
-			if(x<0){
-				xx=0;
-				yy=0;
-				ww = cw;
-				hh=ch;
-			}else if(x>=cw || y<0 || y >= ch){
-				return null;
-			}else{
-				ww = w;
-				xx=x;
-				if(x+w>cw)ww = cw-x;
-				hh = h;
-				yy=y;
-				if(y+h>ch)hh = ch-y;
-			}
-
-			int[] color = new int[ww*hh];
-			int argb = Utility_PixelFunction.argb(a, r, g, b);
-			Arrays.fill(color, argb);
-			lh.setPixels(color, xx, yy, ww, hh);
-			c.rendering(new Rectangle(xx,yy,ww,hh));
-
-			return null;
-		}
-	}
-
-	@Override
-	public String getCommandName() {
-		return name;
-	}
-
-	@Override
-	public String help() {
-		return help;
-	}
-
-	@Override
-	public Command decode(String[] param) {
-
-		if (param.length == 4) {
-			try{
-				int a = Integer.parseInt(param[0]);
-				int r = Integer.parseInt(param[1]);
-				int g = Integer.parseInt(param[2]);
-				int b = Integer.parseInt(param[3]);
-				return new Com(a,r, g, b,-1,0,0,0);
-			}catch (NumberFormatException e) {
-				e.printStackTrace();
-			}
-		}else if(param.length==8){
-			try{
-				int a = Integer.parseInt(param[0]);
-				int r = Integer.parseInt(param[1]);
-				int g = Integer.parseInt(param[2]);
-				int b = Integer.parseInt(param[3]);
-				int x = Integer.parseInt(param[4]);
-				int y= Integer.parseInt(param[5]);
-				int w = Integer.parseInt(param[6]);
-				int h = Integer.parseInt(param[7]);
-				return new Com(a,r, g, b,x,y,w,h);
-			}catch (NumberFormatException e) {
-				e.printStackTrace();
-			}
-		}
-		return null;
-	}
-}
 
 class _Debag_MinPenDensity implements CommandDecoder {
 	private static final String name = "minpendens";

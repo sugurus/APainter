@@ -18,6 +18,19 @@ public interface LayerHandle extends PaintEventAccepter{
 	public void setName(String name);
 
 	/**
+	 * マスクを持つことができるかどうか。
+	 * @return
+	 */
+	public boolean isMaskContainer();
+
+	/**
+	 * isMaskContainerがtrueをかえすとき、MaskContainerを返します。<br>
+	 * それ以外の時はnull
+	 * @return
+	 */
+	public MaskContainer getMaskContainer();
+
+	/**
 	 * レイヤーの名前を返します。
 	 * @return
 	 */
@@ -52,27 +65,8 @@ public interface LayerHandle extends PaintEventAccepter{
 	 * @return
 	 */
 	public boolean isDrawable();
-	/**
-	 * マスクが有効になっているかどうか
-	 * @return
-	 */
-	public boolean isEnableMask();
-	/**
-	 * マスクの有効性を設定します。<br>
-	 * falseを指定してもデータが消えるわけではありません。
-	 * @param b
-	 */
-	public void setEnableMask(boolean b);
-	/**
-	 * 新たなマスクを作成します。<br>
-	 * 前提条件として、isEnableMaskの返す値がfalseである必要があります。<br>
-	 * そうでないとき例外が発生します。
-	 * @see LayerHandle#isEnableMask() isEnableMask
-	 */
-	public void createMask();
 
 	public boolean isPixelContainer();
-	public boolean isPixelSetable();
 
 	public boolean isGroup();
 	public boolean isLayer();

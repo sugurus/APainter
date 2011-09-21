@@ -39,7 +39,7 @@ import apainter.command.NotFoundCommandException;
 import apainter.debug.DebugMain;
 import apainter.drawer.painttool.Eraser;
 import apainter.drawer.painttool.Pen;
-import apainter.gui.canvas.CanvasMouseListener;
+import apainter.gui.CanvasMouseListener;
 import apainter.misc.PropertyChangeHolder;
 import apainter.pen.PenFactoryCenter;
 import apainter.pen.PenShape;
@@ -253,7 +253,6 @@ public class APainter {
 			addCommand(new _BackColor());
 			addCommand(new _CreateCanvas());
 			addCommand(new _CreateLayer());
-			addCommand(new _Debag_FillLayer());
 			addCommand(new _Exit());
 			addCommand(new _FrontColor());
 			addCommand(new _LayerColorMode());

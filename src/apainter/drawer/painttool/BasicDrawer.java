@@ -10,7 +10,7 @@ import apainter.drawer.DrawPoint;
 import apainter.drawer.DrawTarget;
 import apainter.drawer.Drawer;
 import apainter.drawer.event.DrawerEvent;
-import apainter.gui.canvas.CanvasMouseListener;
+import apainter.gui.CanvasMouseListener;
 import apainter.pen.PenShape;
 
 public abstract class BasicDrawer extends Drawer implements CanvasMouseListener{

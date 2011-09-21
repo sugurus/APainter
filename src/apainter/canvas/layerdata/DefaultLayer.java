@@ -1,11 +1,9 @@
 package apainter.canvas.layerdata;
 
 import static apainter.misc.Util.*;
-import apainter.bind.Bind;
-import apainter.bind.BindObject;
 import apainter.canvas.Canvas;
 import apainter.rendering.ColorMode;
-abstract class DefaultLayer implements Layer,PixelSetable,MaskContainer{
+abstract class DefaultLayer implements Layer,PixelContainer,MaskContainer{
 
 
 	public DefaultLayer(int id,String name,Canvas canvas,LayerData layerdata) {
@@ -59,10 +57,6 @@ abstract class DefaultLayer implements Layer,PixelSetable,MaskContainer{
 		return true;
 	}
 
-	@Override
-	public boolean isPixelSetable() {
-		return true;
-	}
 
 	@Override
 	final public boolean isVisible() {

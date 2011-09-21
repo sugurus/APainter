@@ -58,6 +58,11 @@ public class PixelDataIntBuffer extends PixelDataBuffer{
 	}
 
 	@Override
+	public PixelDataIntBuffer copy(Rectangle r){
+		return new PixelDataIntBuffer(r.width, r.height, copy(null, r));
+	}
+
+	@Override
 	public void dispose() {
 		pixel = null;
 	}
@@ -96,8 +101,13 @@ public class PixelDataIntBuffer extends PixelDataBuffer{
 		if(!contains(x,y))return;
 		pixel[x+y*width]=b;
 	}
-	public int getData(int x,int y){
+	public int getData(int x,int y)throws OutBoundsException{
 		if(!contains(x,y))throw new OutBoundsException(getBounds(), x, y);
+		return pixel[x+y*width];
+	}
+
+	public int getData(int x,int y,int defaultvalue){
+		if(!contains(x,y))return defaultvalue;
 		return pixel[x+y*width];
 	}
 

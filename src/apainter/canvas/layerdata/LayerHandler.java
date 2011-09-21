@@ -49,6 +49,17 @@ public interface LayerHandler extends Handler,CanvasHandlerElement{
 	 * @return
 	 */
 	public boolean isDrawable();
+
+	/**
+	 * マスクを持つことができるか否か。<br>
+	 * この関数がfalseを返すとき、マスク関連のメソッドを呼び出しても意味がありません。
+	 * @see LayerHandler#isEnableMask()
+	 * @see LayerHandler#setEnableMask(boolean)
+	 * @see LayerHandler#createMask()
+	 * @return
+	 */
+	public boolean isMaskContainer();
+
 	/**
 	 * マスクが有効になっているかどうか
 	 * @return
@@ -69,7 +80,6 @@ public interface LayerHandler extends Handler,CanvasHandlerElement{
 	public void createMask();
 
 	public boolean isPixelContainer();
-	public boolean isPixelSetable();
 
 	public boolean isGroup();
 	public boolean isLayer();

@@ -126,9 +126,10 @@ abstract public class LayerData{
 			return null;
 		}
 		if(drawMask){
-			Layer layer = l.getLayer();
-			Mask mask = layer.getMask();
-			return mask.getHandler();
+			if(l.isMaskContainer()){
+				return l.getMask();
+			}
+			return null;
 		}
 		return l;
 

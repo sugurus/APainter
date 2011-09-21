@@ -1,4 +1,4 @@
-package apainter.gui.canvas;
+package apainter.gui;
 
 import java.awt.Rectangle;
 

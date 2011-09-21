@@ -15,6 +15,8 @@ public abstract class CompressedPixelData {
 		}
 		else if(p instanceof PixelDataByteBuffer){
 			return new CompressedBytePixelData((PixelDataByteBuffer)p);
+		}else if(p instanceof PixelData15BitBuffer){
+			return new Compressed15BitPixelData((PixelData15BitBuffer) p);
 		}
 
 		throw new RuntimeException(String.format("この形式に対応していません:class %d",p.getClass().getName()));
@@ -53,7 +55,7 @@ public abstract class CompressedPixelData {
 	public int height(){
 		return height;
 	}
-	
+
 	public int dataSize(){
 		return binarySize;
 	}

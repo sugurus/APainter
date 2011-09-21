@@ -1,4 +1,4 @@
-package apainter.gui.canvas;
+package apainter.gui;
 
 import static apainter.misc.Util.*;
 import static java.lang.Math.*;

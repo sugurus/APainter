@@ -1,4 +1,4 @@
-package apainter.gui.canvas;
+package apainter.gui;
 
 
 import static apainter.misc.Util.*;
@@ -41,7 +41,7 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 
 
 	private BufferedImage renderingImage=null;
-	private SmallImage smallimage = null;
+	private AreaAvarageReducedImage smallimage = null;
 	private VolatileImage zoomImage;
 	private boolean fastRendering=true;
 	private VolatileImage rotImage;
@@ -53,7 +53,7 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 
 	public CPUCanvasPanel(BufferedImage img) {
 		renderingImage = img;
-		smallimage =new SmallImage(img);
+		smallimage =new AreaAvarageReducedImage(img);
 		addComponentListener(new ComponentListener() {
 			public void componentResized(ComponentEvent e) {
 				init();

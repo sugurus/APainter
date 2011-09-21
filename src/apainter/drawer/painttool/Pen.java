@@ -14,24 +14,25 @@ public class Pen extends BasicDrawer{
 	private ColorMode mode = ColorMode.Default;
 	private static Renderer[] cpuren = new Renderer[]{
 			new PenCPUDefaultRendering(),
-			new PenCPUAddRendering(),
-			new PenCPUSubtractiveRendering(),
-			new PenCPUMultiplicationRendering(),
-			new PenCPUScreenRendering(),
-			new PenCPUOverlayRendering(),
-			new PenCPUSoftlightRendering(),
-			new PenCPUHardlightRendering(),
-			new PenCPUDodgeRendering(),
-			new PenCPUBurnRendering(),
-			new PenCPUDarkenRendering(),
-			new PenCPULightRendering(),
-			new PenCPUDifferenceRendering(),
-			new PenCPUExclusionRendering()
+//			new PenCPUAddRendering(),
+//			new PenCPUSubtractiveRendering(),
+//			new PenCPUMultiplicationRendering(),
+//			new PenCPUScreenRendering(),
+//			new PenCPUOverlayRendering(),
+//			new PenCPUSoftlightRendering(),
+//			new PenCPUHardlightRendering(),
+//			new PenCPUDodgeRendering(),
+//			new PenCPUBurnRendering(),
+//			new PenCPUDarkenRendering(),
+//			new PenCPULightRendering(),
+//			new PenCPUDifferenceRendering(),
+//			new PenCPUExclusionRendering()
 	};
 
 
 	public Pen(GlobalValue global,int id) {
 		super(global,id);
+		setDensity(0.4);
 //		Device d = getDevice();
 //		if(d==Device.GPU){
 //			//GPU
@@ -49,52 +50,52 @@ public class Pen extends BasicDrawer{
 	}
 
 	private static Renderer getCPURenderer(ColorMode mode){
-		Renderer r = null;
-		switch(mode){
-		case Default:
-			r=cpuren[0];
-			break;
-		case Add:
-			r=cpuren[1];
-			break;
-		case Subtractive:
-			r=cpuren[2];
-			break;
-		case Multiplication:
-			r=cpuren[3];
-			break;
-		case Screen:
-			r=cpuren[4];
-			break;
-		case Overlay:
-			r=cpuren[5];
-			break;
-		case Softlight:
-			r=cpuren[6];
-			break;
-		case Hardlight:
-			r=cpuren[7];
-			break;
-		case Dodge:
-			r=cpuren[8];
-			break;
-		case Burn:
-			r=cpuren[9];
-			break;
-		case Darken:
-			r=cpuren[10];
-			break;
-		case Light:
-			r=cpuren[11];
-			break;
-		case Difference:
-			r=cpuren[12];
-			break;
-		case Exclusion:
-			r=cpuren[13];
-			break;
-
-		}
+		Renderer r = cpuren[0];
+//		switch(mode){
+//		case Default:
+//			r=cpuren[0];
+//			break;
+//		case Add:
+//			r=cpuren[1];
+//			break;
+//		case Subtractive:
+//			r=cpuren[2];
+//			break;
+//		case Multiplication:
+//			r=cpuren[3];
+//			break;
+//		case Screen:
+//			r=cpuren[4];
+//			break;
+//		case Overlay:
+//			r=cpuren[5];
+//			break;
+//		case Softlight:
+//			r=cpuren[6];
+//			break;
+//		case Hardlight:
+//			r=cpuren[7];
+//			break;
+//		case Dodge:
+//			r=cpuren[8];
+//			break;
+//		case Burn:
+//			r=cpuren[9];
+//			break;
+//		case Darken:
+//			r=cpuren[10];
+//			break;
+//		case Light:
+//			r=cpuren[11];
+//			break;
+//		case Difference:
+//			r=cpuren[12];
+//			break;
+//		case Exclusion:
+//			r=cpuren[13];
+//			break;
+//
+//		}
 		return r;
 	}
 

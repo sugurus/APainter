@@ -56,6 +56,10 @@ public class PixelDataByteBuffer extends PixelDataBuffer{
 		return new PixelDataByteBuffer(width, height, pixel.clone());
 	}
 
+	public PixelDataByteBuffer copy(Rectangle r){
+		return new PixelDataByteBuffer(r.width, r.height,copy((byte[])null, r));
+	}
+
 	private byte[] pixel;
 
 	public PixelDataByteBuffer(int w,int h,byte[] pixel) {

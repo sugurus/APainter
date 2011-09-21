@@ -10,7 +10,7 @@ import apainter.Handler;
 import apainter.bind.BindObject;
 import apainter.canvas.event.CanvasEvent;
 import apainter.canvas.layerdata.LayerHandler;
-import apainter.gui.canvas.CanvasView;
+import apainter.gui.CanvasView;
 
 /**
  * Canvasのアダプタークラス

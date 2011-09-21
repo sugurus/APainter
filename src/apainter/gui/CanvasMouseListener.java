@@ -1,4 +1,4 @@
-package apainter.gui.canvas;
+package apainter.gui;
 
 import apainter.canvas.Canvas;
 import nodamushi.pentablet.PenTabletMouseEvent;

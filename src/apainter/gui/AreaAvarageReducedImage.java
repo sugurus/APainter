@@ -1,4 +1,4 @@
-package apainter.gui.canvas;
+package apainter.gui;
 
 import static apainter.misc.Utility_PixelFunction.*;
 import static java.lang.Math.*;
@@ -11,14 +11,22 @@ import java.awt.image.DataBufferInt;
 
 import apainter.canvas.cedt.cpu.CPUParallelWorkThread;
 
-public class SmallImage {
+/**
+ * 面積平均法により画像を縮小します。<br>
+ * このクラスが扱える画像は、TYPE_INT_RGBのBufferedImageのみです。<br>
+ * このインスタンスは一度生成すると、画像の縮小率を変更しても新たなメモリーを取得する必要がありません。<br>
+ * また、部分的なレンダリングが可能です。
+ * @author nodamushi
+ *
+ */
+public class AreaAvarageReducedImage {
 	private static final int SHIFT = 12;
 	private static final int length = 1<<SHIFT;
 
 
 	private final BufferedImage sourceimage,smallimage;
 	private final int[] source;
-	private final int[] obj;
+	private final int[] xreduce;
 	private final int[] dst;
 	private final int sw,sh;
 	private final Rectangle rect;
@@ -27,16 +35,24 @@ public class SmallImage {
 	private float zoom;
 	private int pixelSize;
 
-	public SmallImage(BufferedImage img) {
+	/**
+	 * 与えられた画像の縮小画像を生成します。<br>
+	 * 画像のタイプはTYPE_INT_RGBでなくてはなりません。
+	 * @param img TYPE_INT_RGBのBufferedImage画像
+	 * @throws IllegalArgumentException imgのタイプがTYPE_INT_RGBでない。
+	 * @see {@link BufferedImage}
+	 * @see {@link BufferedImage#TYPE_INT_RGB}
+	 */
+	public AreaAvarageReducedImage(BufferedImage img) throws IllegalArgumentException{
 		if(img.getType()!= BufferedImage.TYPE_INT_RGB){
-			throw new RuntimeException("image type is not TYPE INT RGB");
+			throw new IllegalArgumentException("image type is not TYPE INT RGB");
 		}
 		zoom =1f;
 		pixelSize =1024;
 		sourceimage = img;
 		sw = dw = img.getWidth();
 		sh = dh = img.getHeight();
-		obj = new int[sw*sh];
+		xreduce = new int[sw*sh];
 		smallimage = new BufferedImage(sw, sh, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = smallimage.createGraphics();
 		g.drawImage(sourceimage,0,0,null);
@@ -47,11 +63,24 @@ public class SmallImage {
 	}
 
 
+	/**
+	 * 座標(x,y)に縮小画像を書きます。<br>
+	 * getImageメソッドから縮小画像を取得し、書き込むよりも効率的に書き込みます。
+	 * @param g 書き込み先のGraphicsオブジェクト
+	 * @param x 座標x
+	 * @param y 座標y
+	 */
 	public void drawImage(Graphics g,int x,int y){
 		g.drawImage(smallimage,x,y,x+dw,y+dh,0,0,dw,dh,null);
 	}
 
-	public BufferedImage getSmallImage(){
+	/**
+	 * 縮小結果を得ます。<br>
+	 * その際、結果のコピーが渡されます。<br>
+	 * 単純にGraphicsに書き込むならばdrawImageメソッドを利用して下さい。
+	 * @return
+	 */
+	public BufferedImage getImage(){
 		BufferedImage b = new BufferedImage(dw, dh, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = b.createGraphics();
 		g.drawImage(smallimage,0,0,dw,dh,0,0,dw,dh,null);
@@ -59,18 +88,45 @@ public class SmallImage {
 		return b;
 	}
 
+	/**
+	 * 縮小元画像を返します。
+	 * @return
+	 */
+	public BufferedImage getOriginalImage(){
+		return sourceimage;
+	}
+
+	/**
+	 * 拡大率が同じかどうかを返します
+	 * @param zoom 調べたい縮小率
+	 * @return 値が一致しているか否か。
+	 */
 	public boolean isEqual(double zoom){
 		return (float)zoom == this.zoom;
 	}
-
+	/**
+	 * 拡大率が同じかどうかを返します
+	 * @param zoom 調べたい縮小率
+	 * @return 値が一致しているか否か。
+	 */
 	public boolean isEqual(float zoom){
 		return zoom == this.zoom;
 	}
 
+	/**
+	 * 拡大率を返します
+	 * @return
+	 */
 	public float getZoom(){
 		return zoom;
 	}
 
+	/**
+	 * 拡大率を設定します。<br>
+	 * 値が1以上の場合は1に設定されます。<br>
+	 * 値が0.05以下の場合は0.05に設定されます。
+	 * @param zoom
+	 */
 	public void setZoom(float zoom){
 		if(this.zoom!=zoom){
 			if(zoom>1f)zoom = 1f;
@@ -83,10 +139,18 @@ public class SmallImage {
 		}
 	}
 
+	/**
+	 * 全体を縮小し直します。
+	 */
 	public void update(){
 		update(null);
 	}
 
+	/**
+	 * 指定された領域を縮小し直します。
+	 * @param clip 縮小し直す領域。座標系は縮小される「前」の元画像での座標系です。
+	 * @return 縮小したかどうか。falseが返ったときはclipの範囲がすべて範囲外の時です。
+	 */
 	public boolean update(Rectangle clip){
 		if(clip!=null){
 			clip = rect.intersection(clip);
@@ -120,12 +184,13 @@ public class SmallImage {
 		Runnable[] runs = new Runnable[tsize];
 		final int ll = (int) ((1f- (sxfloat -sx))*pixelSize);
 
+		//x軸方向に縮小
 		for(int i=0;i<tsize;i++){
 			final int ssy = sy+(ey-sy)*i/tsize;
 			final int eey = sy+(ey-sy)*(i+1)/tsize;
 			runs[i] = new Runnable() {
 				public void run() {
-					for(int y=ssy;y<eey;y++){
+					LOOP:for(int y=ssy;y<eey;y++) {
 						int xpos = dstStartx;
 						int rgb = pixel(source, sx, y, sw);
 						int r=r(rgb)*ll,g=g(rgb)*ll,b=b(rgb)*ll,l=length-ll;
@@ -133,8 +198,11 @@ public class SmallImage {
 						for(;x<ex;x++){
 							rgb = pixel(source, x, y, sw);
 							if(l<=pixelSize){
-								set(obj, argb(255, (r+r(rgb)*l)>>SHIFT,
-										(g+g(rgb)*l)>>SHIFT, (b+b(rgb)*l)>>SHIFT), xpos++, y, sw);
+								set(xreduce, argb(255,
+										(r+r(rgb)*l)>>SHIFT,
+										(g+g(rgb)*l)>>SHIFT,
+										(b+b(rgb)*l)>>SHIFT),
+									xpos++, y, sw);
 								r=r(rgb)*(pixelSize-l);
 								g=g(rgb)*(pixelSize-l);
 								b=b(rgb)*(pixelSize-l);
@@ -146,14 +214,16 @@ public class SmallImage {
 								l-=pixelSize;
 							}
 						}
-						Label:if(xpos<dstEndx){
+						if(xpos<dstEndx){
 							while(x<sw){
 								rgb = pixel(source, x, y, sw);
 								if(l<=pixelSize){
-									set(obj,
-											argb(255, (r+r(rgb)*l)>>SHIFT,
-											(g+g(rgb)*l)>>SHIFT, (b+b(rgb)*l)>>SHIFT), xpos, y, sw);
-									break Label;
+									set(xreduce,argb(255,
+											(r+r(rgb)*l)>>SHIFT,
+											(g+g(rgb)*l)>>SHIFT,
+											(b+b(rgb)*l)>>SHIFT),
+										xpos, y, sw);
+									continue LOOP;
 								}else{
 									r+=r(rgb)*pixelSize;
 									g+=g(rgb)*pixelSize;
@@ -162,14 +232,21 @@ public class SmallImage {
 								}
 								x++;
 							}
-							set(obj,argb(l*255>>SHIFT,r/(length-l),g/(length-l),b/(length-l)),xpos,y,sw);
+							set(xreduce,argb(
+									l*255>>SHIFT,
+									r/(length-l),
+									g/(length-l),
+									b/(length-l)),
+								xpos,y,sw);
 						}
-					}
-				}
-			};
-		}
+					}//end for y
+				}//end run method
+			};//end runnable
+		}//end for i
 
 		CPUParallelWorkThread.exec(runs);
+
+		//y軸方向に縮小
 		final int ll2 = (int) ((1f-(syfloat-sy))*pixelSize);
 
 		for(int i=0;i<tsize;i++){
@@ -177,16 +254,19 @@ public class SmallImage {
 			final int eex = dstStartx+(dstEndx-dstStartx)*(i+1)/tsize;
 			runs[i] = new Runnable() {
 				public void run() {
-					for(int x=ssx;x<eex;x++){
+					LOOP:for(int x=ssx;x<eex;x++){
 						int ypos=dstStarty;
-						int rgb = pixel(obj, x, sy, sw);
+						int rgb = pixel(xreduce, x, sy, sw);
 						int r=r(rgb)*ll2,g=g(rgb)*ll2,b=b(rgb)*ll2,l=length-ll2;
 						int y = sy+1;
 						for(;y<ey;y++){
-							rgb = pixel(obj, x, y, sw);
+							rgb = pixel(xreduce, x, y, sw);
 							if(l<=pixelSize){
-								set(dst, argb(255, (r+r(rgb)*l)>>SHIFT,
-										(g+g(rgb)*l)>>SHIFT, (b+b(rgb)*l)>>SHIFT), x, ypos++, sw);
+								set(dst, argb(255,
+										(r+r(rgb)*l)>>SHIFT,
+										(g+g(rgb)*l)>>SHIFT,
+										(b+b(rgb)*l)>>SHIFT),
+									x, ypos++, sw);
 								r=r(rgb)*(pixelSize-l);
 								g=g(rgb)*(pixelSize-l);
 								b=b(rgb)*(pixelSize-l);
@@ -198,13 +278,16 @@ public class SmallImage {
 								l-=pixelSize;
 							}
 						}
-						Label:if(ypos<dstEndy){
+						if(ypos<dstEndy){
 							while(y<sh){
-								rgb = pixel(obj, x, y, sw);
+								rgb = pixel(xreduce, x, y, sw);
 								if(l<=pixelSize){
-									set(dst, argb(255, (r+r(rgb)*l)>>SHIFT,
-											(g+g(rgb)*l)>>SHIFT, (b+b(rgb)*l)>>SHIFT), x, ypos, sw);
-									break Label;
+									set(dst, argb(255,
+											(r+r(rgb)*l)>>SHIFT,
+											(g+g(rgb)*l)>>SHIFT,
+											(b+b(rgb)*l)>>SHIFT),
+										x, ypos, sw);
+									continue LOOP;
 								}else{
 									r+=r(rgb)*pixelSize;
 									g+=g(rgb)*pixelSize;
@@ -213,12 +296,17 @@ public class SmallImage {
 								}
 								y++;
 							}
-							set(dst,argb(l*255>>>SHIFT,r/(length-l),g/(length-l),b/(length-l)),x,ypos,sw);
+							set(dst,argb(
+									l*255>>>SHIFT,
+									r/(length-l),
+									g/(length-l),
+									b/(length-l)),
+								x,ypos,sw);
 						}
-					}
-				}
-			};
-		}
+					}//end for x
+				}//end run method
+			};//end runnable
+		}//end for i
 
 		CPUParallelWorkThread.exec(runs);
 

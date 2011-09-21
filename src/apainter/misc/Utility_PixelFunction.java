@@ -12,6 +12,10 @@ public final class Utility_PixelFunction {
 		return a+oa-((a*oa)*div255shift24>>>24);
 	}
 
+	public static final int calca15bit(int a,int oa){
+		return a+oa-(a*oa/32767);
+	}
+
 	public static final int layeralph(int a,int layer){
 		return a*layer>>8;
 	}

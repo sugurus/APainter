@@ -153,6 +153,20 @@ public class Util {
 		return new int[]{ma,mi};
 	}
 
+	public static double[] max_min(double... arr){
+		if(arr.length==0)return null;
+		double mi = arr[0],ma = arr[0];
+		for(int i=1;i<arr.length;i++){
+			double a = arr[i];
+			if(a > ma){
+				ma = a;
+			}else if(a < mi){
+				mi = a;
+			}
+		}
+		return new double[]{ma,mi};
+	}
+
 
 
 	/**
