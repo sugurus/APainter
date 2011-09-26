@@ -20,5 +20,9 @@ public interface CanvasViewRendering {
 
 	public void init();
 
+	/**
+	 * 使用されなくなったので、使用しているメモリを解放します。
+	 */
+	public void dispose();
 
 }

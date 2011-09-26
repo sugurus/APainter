@@ -2,15 +2,17 @@ package apainter.data;
 
 public class Compressed15BitPixelData extends CompressedPixelData{
 	private CompressedIntPixelData integer,decimal;
-	
+
 	public Compressed15BitPixelData(PixelData15BitBuffer buffer) {
 		PixelDataIntBuffer i1,i2;
 		i1 = buffer.getIntegerBuffer();
 		i2 = buffer.getDecimalBuffer();
 		integer = new CompressedIntPixelData(i1);
 		decimal = new CompressedIntPixelData(i2);
+		width = buffer.getWidth();
+		height = buffer.getHeight();
 	}
-	
+
 
 	@Override
 	public PixelData15BitBuffer inflate() {
@@ -19,5 +21,12 @@ public class Compressed15BitPixelData extends CompressedPixelData{
 		i2 = decimal.inflate();
 		return new PixelData15BitBuffer(i1.getWidth(), i1.getHeight(), i1,i2);
 	}
+
+	@Override
+	public int dataSize() {
+		return integer.dataSize()+decimal.dataSize();
+	}
+
+
 
 }

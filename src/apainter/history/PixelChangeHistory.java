@@ -16,7 +16,7 @@ import apainter.resorce.Resource;
 public abstract class PixelChangeHistory extends HistoryObject{
 
 	//準備用
-	protected Canvas canvas;
+	protected final Canvas canvas;
 	private Resource<? extends PixelDataBuffer> resource,
 	resource2;//15bit用
 	private PixelDataBuffer copy;
@@ -55,9 +55,9 @@ public abstract class PixelChangeHistory extends HistoryObject{
 		width =before.getWidth();
 		height=before.getHeight();
 		dataclass = before.getClass();
-		if(canvas!=null)LABEL:{
+		LABEL:if(canvas!=null){
 			int w = canvas.getWidth(),h=canvas.getHeight();
-			if(w>=width&&h>=height){
+			if(w>width&&h>height){
 				break LABEL;
 			}
 			if(before instanceof PixelDataIntBuffer){
@@ -102,8 +102,11 @@ public abstract class PixelChangeHistory extends HistoryObject{
 				copy = new PixelData15BitBuffer(width, height, i1, i2);
 				resource = res1;
 				resource2 = res2;
+				return;
 			}
 		}
+		//FIXME DEBUG
+		System.out.println("Pixel Change History make clone");
 		copy = before.clone();
 	}
 
@@ -230,7 +233,9 @@ public abstract class PixelChangeHistory extends HistoryObject{
 			long m = compressafter.dataSize()+compressbefore.dataSize();
 			return m;
 		}
-		if(dataclass.equals(PixelDataIntBuffer.class))
+		if(dataclass.equals(PixelData15BitBuffer.class)){
+			return  bounds.width*bounds.height*8*2;
+		}else if(dataclass.equals(PixelDataIntBuffer.class))
 			return bounds.width*bounds.height*4*2;
 		else
 			return bounds.width*bounds.height*2;

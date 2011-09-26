@@ -7,10 +7,12 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.LayoutManager;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
@@ -32,7 +34,7 @@ import apainter.misc.Angle;
 public final class CanvasView extends JPanel{
 
 
-	private final Dimension canvasDafaultSize;
+	private  Dimension canvasDafaultSize;
 
 
 	//座標などの情報
@@ -49,15 +51,15 @@ public final class CanvasView extends JPanel{
 	//T:平行移動　S:n倍変換  R:画面中央で回転 Rev:水平方向逆転　cx = centerR*cos(centerAngle),cy=centerR*sin(centerAngle)
 	//左上を原点とする通常のCanvasViewのコンポーネント座標からCanvas上の座標へ変換する行列
 	//T(Lw/2,Lh/2)S(1/zoom)T(-cx,-cy)R(-angle)(Rev)
-	private final AffineTransform toCanvas  = new AffineTransform();
+	private AffineTransform toCanvas  = new AffineTransform();
 	//Canvas上の座標からCanvasViewのコンポーネント座標へ変換
 	//toCanvasの逆行列
 	//(Rev)R(angle)T(cx,cy)S(zoom)T(-Lw/2,-Lh/2)
 	private AffineTransform toComponent= new AffineTransform();
 
 
-	@SuppressWarnings("unused")
 	private PenTabletRecognizer tabletlistener;
+	private KeyListener keylistener;
 	private JComponent canvasComponent;//画像を表示するパネル
 	private CanvasViewRendering canvasRendering;
 	private JComponent background=new JPanel();//背景
@@ -133,27 +135,41 @@ public final class CanvasView extends JPanel{
 			@Override public void addLayoutComponent(String name, Component comp) {}
 		});
 		installMouseListener();
-
 	}
 
+
+	public void removeKeyListener(){
+		removeKeyListener(keylistener);
+	}
+
+	public void addKeyListener(){
+		for(KeyListener k:getKeyListeners())if(k==keylistener)return;
+		addKeyListener(keylistener);
+	}
 
 	private void installMouseListener(){
 		tabletlistener = new PenTabletRecognizer(this) {
 
 			@Override
-			public void operatorChanged(PenTabletMouseEvent e) {
-				// TODO operatorChange
-
+			public void mouseOperatorChanged(PenTabletMouseEvent e) {
+				Double k = convertToCanvas(e.getPointDouble());
+				e.setPoint(k.x, k.y);
+				canvas.dispatchEvent(e);
 			}
 
 			@Override
-			public void onScroll(MouseWheelEvent e) {
-				// TODO onScroll
-
+			public void mouseWheelMoved(MouseWheelEvent e) {
+				Double k = convertToCanvas(e.getPoint());
+				MouseWheelEvent e2 = new MouseWheelEvent((Component)e.getSource(), e.getID(), e.getWhen(),
+						e.getModifiers()|e.getModifiersEx(),
+						(int)k.x, (int)k.y, e.getClickCount(),
+						e.isPopupTrigger(), e.getScrollType(),
+						e.getScrollAmount(), e.getWheelRotation());
+				canvas.dispatchEvent(e2);
 			}
 
 			@Override
-			public void onPressed(PenTabletMouseEvent e) {
+			public void mousePressed(PenTabletMouseEvent e) {
 				if(!hasFocus())	requestFocus();
 				Double k = convertToCanvas(e.getPointDouble());
 				e.setPoint(k.x, k.y);
@@ -161,42 +177,43 @@ public final class CanvasView extends JPanel{
 			}
 
 			@Override
-			public void onReleased(PenTabletMouseEvent e) {
+			public void mouseReleased(PenTabletMouseEvent e) {
+				if(e.isPopupTrigger()){
+					//位置変換なし
+					canvas.dispatchEvent(e);
+					return;
+				}
 				Double k = convertToCanvas(e.getPointDouble());
 				e.setPoint(k.x, k.y);
 				canvas.dispatchEvent(e);
 			}
 			@Override
-			public void onDragged(PenTabletMouseEvent e) {
-				Double k = convertToCanvas(e.getPointDouble());
-				e.setPoint(k.x, k.y);
-				canvas.dispatchEvent(e);
-			}
-
-			@Override
-			public void onMove(PenTabletMouseEvent e) {
+			public void mouseDragged(PenTabletMouseEvent e) {
 				Double k = convertToCanvas(e.getPointDouble());
 				e.setPoint(k.x, k.y);
 				canvas.dispatchEvent(e);
 			}
 
 			@Override
-			public void onExit(PenTabletMouseEvent e) {
+			public void mouseMoved(PenTabletMouseEvent e) {
 				Double k = convertToCanvas(e.getPointDouble());
 				e.setPoint(k.x, k.y);
 				canvas.dispatchEvent(e);
 			}
 
 			@Override
-			public void onEnter(PenTabletMouseEvent e) {
+			public void mouseExited(PenTabletMouseEvent e) {
 				Double k = convertToCanvas(e.getPointDouble());
 				e.setPoint(k.x, k.y);
 				canvas.dispatchEvent(e);
 			}
 
-			public void pressKey(PenTabletMouseEvent e) {}
-			public void releaseKey(PenTabletMouseEvent e) {}
-
+			@Override
+			public void mouseEntered(PenTabletMouseEvent e) {
+				Double k = convertToCanvas(e.getPointDouble());
+				e.setPoint(k.x, k.y);
+				canvas.dispatchEvent(e);
+			}
 		};
 	}
 
@@ -387,6 +404,11 @@ public final class CanvasView extends JPanel{
 		toCanvas.transform(p, d);
 		return d;
 	}
+	public Double convertToCanvas(Point p){
+		Double d = new Double();
+		toCanvas.transform(p, d);
+		return d;
+	}
 	/**
 	 * コンポーネント座標系の座標をキャンバス座標系に変換する
 	 * @param x コンポーネント座標系の座標
@@ -439,6 +461,24 @@ public final class CanvasView extends JPanel{
 
 
 
+	public void clear(){
+		removeAllBinds();
+		removeAll();
+		canvasRendering.dispose();
+		canvas = null;
+		global = null;
+		angle = null;
+		background = null;
+		canvasRendering = null;
+		canvasComponent = null;
+		toCanvas = null;
+		toComponent = null;
+		canvasDafaultSize = null;
+		centerAngle = null;
+		overlayer = null;
+		tabletlistener.dispose();
+		tabletlistener = null;
+	}
 
 
 	//----bind-------------------

@@ -1,10 +1,7 @@
 package apainter.gui;
 
-
 import static apainter.misc.Util.*;
-import static apainter.misc.Utility_PixelFunction.*;
 import static java.awt.RenderingHints.*;
-import static java.awt.image.BufferedImage.*;
 import static java.lang.Math.*;
 
 import java.awt.AlphaComposite;
@@ -14,38 +11,34 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
-import java.awt.Image;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
+import java.awt.Transparency;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
 import java.awt.image.VolatileImage;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 
-import apainter.canvas.cedt.cpu.CPUParallelWorkThread;
 import apainter.misc.Angle;
 import apainter.misc.Util;
 
 
 public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
-	private static Map<RenderingHints.Key, Object> smallmap = new HashMap<RenderingHints.Key, Object>();
 
-
+	//この画像はJavaで管理できない。
 	private BufferedImage renderingImage=null;
 	private AreaAvarageReducedImage smallimage = null;
-	private VolatileImage zoomImage;
+//	private VolatileImage zoomImage;
+	//ビデオメモリにrenderingImageを全部送るよりも、
+	//Javaが管理するBufferedImageに書き込んで、ビデオメモリに送ってもらったほうが
+	//速い気がする。
+	private BufferedImage zoomImage;
 	private boolean fastRendering=true;
 	private VolatileImage rotImage;
-	private boolean reconstructflag = true;
 
 	private CanvasView parent;
 	private boolean initedVolatile=false;
@@ -64,6 +57,18 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 			public void componentMoved(ComponentEvent e) {}
 			public void componentHidden(ComponentEvent e) {}
 		});
+	}
+
+	@Override
+	public void dispose() {
+		zoomImage.flush();
+		zoomImage = null;
+		renderingImage.flush();
+		renderingImage = null;
+		rotImage.flush();
+		rotImage = null;
+		smallimage.flush();
+		smallimage =null;
 	}
 
 	@Override
@@ -135,9 +140,9 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 			initVolatile();
 			if(!initedVolatile)return;
 		}
-		if(checkVImage(zoomImage)!=0){
-			renderingZoomImage(null);
-		}
+//		if(checkVImage(zoomImage)!=0){
+//			renderingZoomImage(null);
+//		}
 		else if(checkVImage(rotImage)!=0)renderingRotImage();
 		g.drawImage(rotImage,0,0,null);
 	}
@@ -165,7 +170,12 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 		if(zoomImage!=null)zoomImage.flush();
 		if(getWidth()==0||getHeight()==0)return;
 		rotImage = createVImage(width,height,true);
-		zoomImage = createVImage(l, l, true);
+//		zoomImage = createVImage(l, l, true);
+		GraphicsConfiguration gc = getGraphicsConfiguration();
+		if(gc!=null)
+			zoomImage = gc.createCompatibleImage(l, l, Transparency.TRANSLUCENT);
+		else
+			zoomImage = null;
 		if(zoomImage!=null){
 			renderingZoomImage(null);
 			initedVolatile = true;
@@ -240,20 +250,25 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 		af.translate((int)(-s.width/2d), (int)(-s.height/2d));
 		Point2D.Double pd = new Point2D.Double();
 		af.transform(pd, pd);
-		do{
+//		do{
 			//サイズチェック
-			switch(checkVImage(zoomImage)){
-			case 2://※breakがないのは意図的。
-				if(zoomImage!=null)
-					zoomImage.flush();
-				zoomImage = createVImage(l, l, true);
-			case 1:
-				rect = null;
-			}
+//			switch(checkVImage(zoomImage)){
+//			case 2://※breakがないのは意図的。
+//				if(zoomImage!=null)
+//					zoomImage.flush();
+//				zoomImage = createVImage(l, l, true);
+//			case 1:
+//				rect = null;
+//			}
 			Dimension d = getImageSize(zoomImage);
 			if(d.width!=l && d.height!=l){
 				zoomImage.flush();
-				zoomImage = createVImage(l, l, true);
+//				zoomImage = createVImage(l, l, true);
+				GraphicsConfiguration gc = getGraphicsConfiguration();
+				if(gc!=null)
+					zoomImage = gc.createCompatibleImage(l, l, Transparency.TRANSLUCENT);
+				else
+					zoomImage = new BufferedImage(l, l, BufferedImage.TYPE_INT_ARGB);
 				rect = null;
 			}
 
@@ -264,7 +279,12 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 				rect = null;
 				while(g==null){
 					zoomImage.flush();
-					zoomImage = createVImage(l, l, true);
+//					zoomImage = createVImage(l, l, true);
+					GraphicsConfiguration gc = getGraphicsConfiguration();
+					if(gc!=null)
+						zoomImage = gc.createCompatibleImage(l, l, Transparency.TRANSLUCENT);
+					else
+						zoomImage = new BufferedImage(l, l, BufferedImage.TYPE_INT_ARGB);
 					g = zoomImage.createGraphics();
 				}
 			}
@@ -282,7 +302,7 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 			smallimage.drawImage(g, (int) pd.x, (int) pd.y);
 			g.dispose();
 
-		}while(zoomImage.contentsLost());
+//		}while(zoomImage.contentsLost());
 
 	}
 
@@ -293,20 +313,25 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 		int l = (int) floor(hypot(width,height));
 		Dimension s = getImageSize(renderingImage);
 
-		do{
+//		do{
 			//サイズチェック
-			switch(checkVImage(zoomImage)){
-			case 2://※breakがないのは意図的。
-				if(zoomImage!=null)
-					zoomImage.flush();
-				zoomImage = createVImage(l, l, true);
-			case 1:
-				rect = null;
-			}
+//			switch(checkVImage(zoomImage)){
+//			case 2://※breakがないのは意図的。
+//				if(zoomImage!=null)
+//					zoomImage.flush();
+//				zoomImage = createVImage(l, l, true);
+//			case 1:
+//				rect = null;
+//			}
 			Dimension d = getImageSize(zoomImage);
 			if(d.width!=l && d.height!=l){
 				zoomImage.flush();
-				zoomImage = createVImage(l, l, true);
+//				zoomImage = createVImage(l, l, true);
+				GraphicsConfiguration gc = getGraphicsConfiguration();
+				if(gc!=null)
+					zoomImage = gc.createCompatibleImage(l, l, Transparency.TRANSLUCENT);
+				else
+					zoomImage = new BufferedImage(l, l, BufferedImage.TYPE_INT_ARGB);
 				rect = null;
 			}
 
@@ -317,7 +342,12 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 				rect = null;
 				while(g==null){
 					zoomImage.flush();
-					zoomImage = createVImage(l, l, true);
+//					zoomImage = createVImage(l, l, true);
+					GraphicsConfiguration gc = getGraphicsConfiguration();
+					if(gc!=null)
+						zoomImage = gc.createCompatibleImage(l, l, Transparency.TRANSLUCENT);
+					else
+						zoomImage = new BufferedImage(l, l, BufferedImage.TYPE_INT_ARGB);
 					g = zoomImage.createGraphics();
 				}
 			}
@@ -363,7 +393,7 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 
 			g.dispose();
 
-		}while(zoomImage.contentsLost());
+//		}while(zoomImage.contentsLost());
 	}
 
 
@@ -373,12 +403,12 @@ public class CPUCanvasPanel extends JComponent implements CanvasViewRendering{
 		int l = (int)(floor(hypot(width,height)));
 
 		//zoomImageが内容を失っていないかとサイズチェック。
-		{
-			Dimension d = getImageSize(zoomImage);
-			if((checkVImage(zoomImage) !=0) || d.width!=l || d.height!=l){
-				renderingZoomImage(null);
-			}
-		}
+//		{
+//			Dimension d = getImageSize(zoomImage);
+//			if((checkVImage(zoomImage) !=0) || d.width!=l || d.height!=l){
+//				renderingZoomImage(null);
+//			}
+//		}
 
 		if(checkVImage(rotImage) == 2)//画像が使えない
 		{

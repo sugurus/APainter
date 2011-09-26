@@ -22,7 +22,7 @@ public class CUI implements Runnable{
 
 	public synchronized void start(){
 		if(thread!=null&&thread.isAlive())return;
-		thread = new Thread(this);
+		thread = new Thread(this, "APainter CUI");
 		thread.start();
 	}
 

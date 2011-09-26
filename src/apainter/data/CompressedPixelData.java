@@ -52,7 +52,7 @@ public abstract class CompressedPixelData {
 	public int getWidth(){
 		return width;
 	}
-	public int height(){
+	public int getHeight(){
 		return height;
 	}
 

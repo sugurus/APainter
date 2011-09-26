@@ -2,6 +2,7 @@ package apainter.canvas.cedt.cpu;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -10,27 +11,58 @@ import apainter.misc.UnionRectangle;
 
 public class RepaintThread{
 
-	private Timer timer = new Timer();
+	private Timer timer;
 	private TimerTask t;
 
 
-	private ArrayList<Rectangle> bounds
-		= new ArrayList<Rectangle>(30);
-	private Canvas canvas;
+	private HashMap<Canvas, ArrayList<Rectangle>> map = new HashMap<Canvas, ArrayList<Rectangle>>();
 
-	public RepaintThread(int delay,Canvas c) {
-		canvas = c;
+	private static RepaintThread thread;
+
+	private static synchronized RepaintThread getRepaintThread(){
+		if(thread == null){
+			thread = new RepaintThread();
+		}
+		return thread;
 	}
 
-	public void addJob(Rectangle r){
+	public static synchronized void addCanvas(Canvas canvas){
+		RepaintThread rt  = getRepaintThread();
+		if(rt.map.get(canvas)!=null){
+			return;
+		}else{
+			rt.map.put(canvas, new ArrayList<Rectangle>());
+			if(!rt.isRunning())rt.start();
+		}
+	}
+
+	public static synchronized void removeCanvas(Canvas canvas){
+		RepaintThread rt  = getRepaintThread();
+		rt.map.remove(canvas);
+		if(rt.map.isEmpty()){
+			rt.stop();
+		}
+	}
+
+	public static void addRepaintJob(Rectangle r,Canvas canvas){
+		getRepaintThread().addJob(r, canvas);
+	}
+
+	private void addJob(Rectangle r,Canvas canvas){
 		if(r==null||r.isEmpty())return;
+		ArrayList<Rectangle> bounds=map.get(canvas);
+		if(bounds==null){
+			return;
+		}
+
 		synchronized (bounds) {
 			bounds.add(r);
 		}
 	}
 
 	public synchronized void start(){
-		if(t!=null)return;
+		if(timer!=null)return;
+		timer = new Timer();
 		t = new TimerTask() {
 
 			@Override
@@ -43,22 +75,36 @@ public class RepaintThread{
 		timer.scheduleAtFixedRate(t, 0, 1000/60);
 	}
 
-	public synchronized void stop(){
+	private synchronized void stop(){
 		if(t==null)return;
 		t.cancel();
 		t=null;
+		timer.cancel();
+		timer = null;
 	}
 
-	public boolean isRunning(){
-		return t!=null;
+	private boolean isRunning(){
+		return timer!=null;
 	}
 
 
 	private boolean haveJob(){
-		return !bounds.isEmpty();
+		if(map.isEmpty())return false;
+		for(Canvas canvas:map.keySet()){
+			ArrayList<Rectangle> bounds = map.get(canvas);
+			if(!bounds.isEmpty())return true;
+		}
+		return false;
 	}
 
 	private void exec(){
+		for(Canvas canvas:map.keySet()){
+			ArrayList<Rectangle> bounds = map.get(canvas);
+			exec(bounds,canvas);
+		}
+	}
+
+	private void exec(ArrayList<Rectangle> bounds,Canvas canvas){
 		Rectangle[] k;
 		synchronized (bounds) {
 			if(bounds.isEmpty())return;

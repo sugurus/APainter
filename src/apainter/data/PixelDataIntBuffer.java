@@ -19,6 +19,7 @@ public class PixelDataIntBuffer extends PixelDataBuffer{
 		return new PixelDataIntBuffer(w, h, new int[w*h]);
 	}
 
+
 	/**
 	 * 渡されたピクセルデータの一部をコピーし保持します。
 	 * @param w
@@ -119,7 +120,7 @@ public class PixelDataIntBuffer extends PixelDataBuffer{
 		if(getHeight()<h)rh=getHeight();
 		else rh=h;
 		for(int y=0;y<rh;y++){
-			System.arraycopy(p.pixel, rh*w, pixel, y*getWidth(), rw);
+			System.arraycopy(p.pixel, y*w, pixel, y*getWidth(), rw);
 		}
 	}
 

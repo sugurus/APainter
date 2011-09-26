@@ -1,15 +1,8 @@
 package apainter.canvas.layerdata;
 
-import java.awt.Image;
 import java.awt.Rectangle;
-import java.awt.Toolkit;
-import java.awt.Transparency;
-import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
 import java.awt.image.DataBufferInt;
-import java.awt.image.DirectColorModel;
-import java.awt.image.MemoryImageSource;
 import java.util.ArrayList;
 
 import apainter.GlobalValue;
@@ -31,6 +24,12 @@ public class CPULayerData extends LayerData{
 	public CPULayerData(Canvas canvas,GlobalValue globalvalue) {
 		super(canvas,globalvalue);
 		init();
+	}
+
+	@Override
+	protected void _dispose() {
+		renderingimage.flush();
+		renderingbuffer=null;
 	}
 
 	private void init(){

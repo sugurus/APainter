@@ -11,7 +11,6 @@ import apainter.canvas.event.PaintEvent;
 import apainter.canvas.event.PaintEventAccepter;
 import apainter.canvas.event.PaintLastEvent;
 import apainter.canvas.event.PaintStartEvent;
-import apainter.canvas.layerdata.InnerLayerHandler;
 import apainter.history.HisotryReduceEvent;
 import apainter.history.History;
 import apainter.history.RedoEvent;
@@ -20,7 +19,6 @@ import apainter.history.UndoEvent;
 public class CPUCEDT implements CanvasEventDispatchThread{
 
 	private ExecutorService anyThread,drawThread,historyReduceThread;
-	RepaintThread repaint;
 	private Canvas canvas;
 	private boolean lockdraw=false;
 
@@ -53,17 +51,14 @@ public class CPUCEDT implements CanvasEventDispatchThread{
 		if(historyReduceThread==null || historyReduceThread.isShutdown()){
 			historyReduceThread =Executors.newSingleThreadExecutor();
 		}
-		if(repaint==null || !repaint.isRunning())
-			repaint = new RepaintThread(1000/60, canvas);
-		repaint.start();
+		RepaintThread.addCanvas(canvas);
 	}
 
 	@Override
 	public boolean isRunning() {
 		return anyThread!=null && !anyThread.isShutdown()&&
 		drawThread!=null && !drawThread.isShutdown()&&
-		historyReduceThread!=null && !historyReduceThread.isShutdown()&&
-		repaint!=null && repaint.isRunning();
+		historyReduceThread!=null && !historyReduceThread.isShutdown();
 	}
 
 	@Override
@@ -72,7 +67,7 @@ public class CPUCEDT implements CanvasEventDispatchThread{
 		anyThread.shutdown();
 		drawThread.shutdown();
 		historyReduceThread.shutdown();
-		repaint.stop();
+		RepaintThread.removeCanvas(canvas);
 	}
 
 	@Override
@@ -189,7 +184,7 @@ public class CPUCEDT implements CanvasEventDispatchThread{
 			}
 			CPUParallelWorkThread.exec(runs);
 		}
-		repaint.addJob(r);
+		RepaintThread.addRepaintJob(r, canvas);
 	}
 
 }

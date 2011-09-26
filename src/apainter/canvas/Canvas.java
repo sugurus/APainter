@@ -1,10 +1,14 @@
 package apainter.canvas;
 
+import static apainter.GlobalKey.*;
 import static apainter.PropertyChangeNames.*;
 import static apainter.misc.Util.*;
 
+import java.awt.Component;
 import java.awt.Rectangle;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeListener;
 
@@ -17,7 +21,6 @@ import apainter.CreateHandler;
 import apainter.Device;
 import apainter.GlobalKey;
 import apainter.GlobalValue;
-import apainter.Handler;
 import apainter.canvas.cedt.CanvasEventAccepter;
 import apainter.canvas.cedt.cpu.CPUCEA_0;
 import apainter.canvas.event.CanvasEvent;
@@ -31,7 +34,9 @@ import apainter.data.PixelDataIntBuffer;
 import apainter.drawer.DrawTarget;
 import apainter.gui.CPUCanvasPanel;
 import apainter.gui.CanvasMouseListener;
+import apainter.gui.CanvasScrollListener;
 import apainter.gui.CanvasView;
+import apainter.gui.RightReleaseListener;
 import apainter.history.History;
 import apainter.history.HistoryObject;
 import apainter.misc.PropertyChangeUtility;
@@ -257,12 +262,16 @@ public class Canvas implements CreateHandler{
 	public void dispose(){
 		//TODO
 		layerdata.dispose();
+		history.clear();
 		shutDownCEDT();
 		global.removeCanvas(this);
-		getCanvasView().removeAllBinds();
+		getCanvasView().clear();
+
+		intbuffer.dispose();
+		bytebuffer.dispose();
+
 
 	}
-
 
 
 
@@ -326,7 +335,16 @@ public class Canvas implements CreateHandler{
 
 
 	//MouseListener-------------------------------
-	public synchronized void dispatchEvent(final PenTabletMouseEvent e){
+	public void dispatchEvent(final MouseWheelEvent e){
+		if(e==null)return;
+		ceaccepter.runInAnyThread(new Runnable() {
+			public void run() {
+				onScroll(e);
+			}
+		});
+	}
+	public void dispatchEvent(final PenTabletMouseEvent e){
+		if(e==null)return;
 		ceaccepter.runInAnyThread(new Runnable() {
 			public void run() {
 				int id=e.getID();
@@ -355,10 +373,37 @@ public class Canvas implements CreateHandler{
 					String newvalue;
 					if(dev==CursorDevice.MOUSE){
 						newvalue="mouse";
+						CanvasMouseListener head =
+								global.get(CanvasHeadAction, CanvasMouseListener.class);
+						CanvasMouseListener tail =
+								global.get(CanvasTailAction, CanvasMouseListener.class);
+						if(head!=null&&!head.isSelected()){
+							head.selected();
+							if(head!=tail)
+								tail.unselected();
+						}
 					}else if(e.isPen()){
 						newvalue="head";
+						CanvasMouseListener head =
+								global.get(CanvasHeadAction, CanvasMouseListener.class);
+						CanvasMouseListener tail =
+								global.get(CanvasTailAction, CanvasMouseListener.class);
+						if(head!=null&&!head.isSelected()){
+							head.selected();
+							if(head!=tail)
+								tail.unselected();
+						}
 					}else{
 						newvalue="tail";
+						CanvasMouseListener tail =
+								global.get(CanvasTailAction, CanvasMouseListener.class);
+						CanvasMouseListener head =
+								global.get(CanvasHeadAction, CanvasMouseListener.class);
+						if(tail!=null&&!tail.isSelected()){
+							tail.selected();
+							if(tail!=head)
+								head.unselected();
+						}
 					}
 					global.firePropertyChange(CursorTypeChangeProperty, null, newvalue, source);
 					break;
@@ -367,79 +412,71 @@ public class Canvas implements CreateHandler{
 			}
 		});
 	}
-	private CanvasMouseListener t,h;
+	private CanvasMouseListener tailacton,headaction;
+	private void onScroll(MouseWheelEvent e){
+		CanvasScrollListener scroll = global.get(CanvasWheelAction,CanvasScrollListener.class);
+		if(scroll!=null){
+			scroll.scroll(e, this);
+		}
+	}
 	private void onPressed(PenTabletMouseEvent e) {
-		h=t=null;
-		switch(e.getButtonType()){
-		case HEAD:
-		case BUTTON1:
+		headaction=tailacton=null;
+		if(e.isPen()){
 			Object head = global.get(GlobalKey.CanvasHeadAction);
-			if(head!=null && head instanceof CanvasMouseListener)(h=(CanvasMouseListener)head).press(e,this);
-			break;
-		case TAIL:
+			if(head!=null && head instanceof CanvasMouseListener)(headaction=(CanvasMouseListener)head).press(e,this);
+		}else if(e.isTail()){
 			Object tail = global.get(GlobalKey.CanvasTailAction);
-			if(tail!=null && tail instanceof CanvasMouseListener)(t=(CanvasMouseListener)tail).press(e,this);
-			break;
-		case BUTTON3:
-			break;
-		case BUTTON2:
-			break;
-		case SIDE1:
-			break;
-		case SIDE2:
-			break;
+			if(tail!=null && tail instanceof CanvasMouseListener)(tailacton=(CanvasMouseListener)tail).press(e,this);
 		}
 	}
 
 	private void onReleased(PenTabletMouseEvent e) {
-		switch(e.getButtonType()){
-		case HEAD:
-		case BUTTON1:
-			if(h!=null)h.release(e,this);
-			break;
-		case TAIL:
-			if(t!=null)t.release(e,this);
-			break;
-		case BUTTON3:
-			break;
-		case BUTTON2:
-			break;
-		case SIDE1:
-			break;
-		case SIDE2:
-			break;
+		if(e.isPen()){
+			if(headaction!=null)headaction.release(e,this);
+		}else if(e.isTail()){
+			if(tailacton!=null)tailacton.release(e,this);
+		}else if(e.isPopupTrigger()){
+			Component c = e.getComponent();
+			if(c.contains(e.getPoint())){
+				RightReleaseListener l = global.get(
+						RightMouseReleaseAction, RightReleaseListener.class);
+				if(l!=null){
+					l.mouseRightReleased(e, this);
+				}
+			}
 		}
-		h=t=null;
+		headaction=tailacton=null;
 	}
+
 	private void onDragged(PenTabletMouseEvent e) {
-		switch(e.getButtonType()){
-		case HEAD:
-		case BUTTON1:
-			if(h!=null)h.drag(e,this);
-			break;
-		case TAIL:
-			if(t!=null)t.drag(e,this);
-			break;
-		case BUTTON3:
-			break;
-		case BUTTON2:
-			break;
-		case SIDE1:
-			break;
-		case SIDE2:
-			break;
+		if(e.isPen()){
+			if(headaction!=null)headaction.drag(e,this);
+		}else if(e.isTail()){
+			if(tailacton!=null)tailacton.drag(e,this);
 		}
 	}
 	private void onMove(PenTabletMouseEvent e) {
-		//TODO move
+		if(e.isPen()){
+			if(headaction!=null)headaction.move(e,this);
+		}else if(e.isTail()){
+			if(tailacton!=null)tailacton.move(e,this);
+		}
 	}
 
 	private void onExit(PenTabletMouseEvent e) {
-		// TODO exit
+		if(e.isPen()){
+			if(headaction!=null)headaction.exit(e,this);
+		}else if(e.isTail()){
+			if(tailacton!=null)tailacton.exit(e,this);
+		}
 	}
 
 	private void onEnter(PenTabletMouseEvent e) {
-		// TODO enter
+		if(e.isPen()){
+			if(headaction!=null)headaction.enter(e,this);
+		}else if(e.isTail()){
+			if(tailacton!=null)tailacton.enter(e,this);
+		}
 	}
 
 

@@ -63,6 +63,13 @@ public class GlobalValue extends HashMap<Object, Object>{
 	public void removeCanvas(Canvas canvas){
 		CanvasList l = (CanvasList)get(CanvasList);
 		l.remove(canvas);
+		if(get(CurrentCanvas)==canvas){
+			if(l.isEmpty()){
+				put(CurrentCanvas,null);
+			}else{
+				put(CurrentCanvas,l.get(0));
+			}
+		}
 	}
 
 	@SuppressWarnings("unchecked")

@@ -19,6 +19,10 @@ public class DrawPoint {
 	rotation;//回転角度;
 
 
+	@Override
+	public String toString() {
+		return String.format("Location(%.3f,%.3f),Pressrue %.3f,Alititude(%.3f,%.3f),Rotation %.3f", x,y,pressure,alititudex,alititudey,rotation);
+	}
 	/**
 	 * 位置情報からDrawPointを生成します。筆圧は1、傾き回転は0で設定されます。
 	 * @param x x座標

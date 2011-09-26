@@ -7,11 +7,11 @@ public class LimitedResource <E>{
 	public static interface ResourceFactory<E>{
 		public E create();
 	}
-	
+
 	final LockObject[] locked;
 	private Semaphore sema;
 	private ResourceFactory<E> fact;
-	
+
 	public LimitedResource(int size,ResourceFactory<E> factory) {
 		locked = new LockObject[size];
 		fact = factory;
@@ -20,7 +20,16 @@ public class LimitedResource <E>{
 			locked[i]=new LockObject(factory.create(),sema);
 		}
 	}
-	
+
+	public void dispose(){
+		for(int i=0;i<locked.length;i++){
+			locked[i] = null;
+		}
+		synchronized (sema) {
+			sema.notifyAll();
+		}
+	}
+
 	/**
 	 * リソースを新たに作り直してしまいます。
 	 */
@@ -30,7 +39,7 @@ public class LimitedResource <E>{
 			locked[i]=new LockObject(fact.create(),sema);
 		}
 	}
-	
+
 	/**
 	 * リソースを取得するまで待機します。スレッドが割り込まれたなどの場合にはnullが返ります
 	 * @return Resouceオブジェクト。使い終わったら必ずrelease関数を呼び出してください。
@@ -52,7 +61,7 @@ public class LimitedResource <E>{
 		}
 		return r;
 	}
-	
+
 	/**
 	 * リソースを取得するまで最大でtimeoutミリ秒待機します。得られなかった場合はnullが返ります
 	 * @param timeout 待機する時間（ミリ秒）
@@ -77,7 +86,7 @@ public class LimitedResource <E>{
 		}
 		return r;
 	}
-	
+
 	/**
 	 * リソースを取得するまで待機しません。取得試みに失敗した場合は直ちにnullを返します。
 	 * @return Resouceオブジェクト。使い終わったら必ずrelease関数を呼び出してください。
@@ -95,8 +104,8 @@ public class LimitedResource <E>{
 		}
 		return r;
 	}
-	
-	
+
+
 }
 
 class LockObject{
@@ -108,18 +117,18 @@ class LockObject{
 		resource =e;
 		sm = s;
 	}
-	
+
 	boolean isLocked(){
 		return locked;
 	}
-	
+
 	synchronized boolean lock(Object key){
 		if(locked)return false;
 		locked=true;
 		this.key = key;
 		return true;
 	}
-	
+
 	synchronized void release(Object key){
 		if(key==this.key){
 			locked=false;
@@ -128,11 +137,11 @@ class LockObject{
 		}
 	}
 
-	
+
 	synchronized Object getResource(Object key){
 		if(key==this.key)
 			return resource;
 		return null;
 	}
-	
+
 }

@@ -11,14 +11,12 @@ import java.awt.event.MouseWheelEvent;
  */
 public abstract class PenTabletAdapter extends PenTabletRecognizer{
 	public PenTabletAdapter(Component c) {super(c);}
-	@Override public void onDragged(PenTabletMouseEvent e) {}
-	@Override public void onMove(PenTabletMouseEvent e) {}
-	@Override public void onPressed(PenTabletMouseEvent e) {}
-	@Override public void onReleased(PenTabletMouseEvent e) {}
-	@Override public void onScroll(MouseWheelEvent e) {}
-	@Override public void operatorChanged(PenTabletMouseEvent e) {}
-	@Override public void onEnter(PenTabletMouseEvent e) {}
-	@Override public void onExit(PenTabletMouseEvent e) {}
-	@Override public void pressKey(PenTabletMouseEvent e) {}
-	@Override public void releaseKey(PenTabletMouseEvent e) {}
+	@Override public void mouseDragged(PenTabletMouseEvent e) {}
+	@Override public void mouseMoved(PenTabletMouseEvent e) {}
+	@Override public void mousePressed(PenTabletMouseEvent e) {}
+	@Override public void mouseReleased(PenTabletMouseEvent e) {}
+	@Override public void mouseWheelMoved(MouseWheelEvent e) {}
+	@Override public void mouseOperatorChanged(PenTabletMouseEvent e) {}
+	@Override public void mouseEntered(PenTabletMouseEvent e) {}
+	@Override public void mouseExited(PenTabletMouseEvent e) {}
 }

@@ -355,13 +355,11 @@ public class APainter {
 
 
 	private int canvasid=0;
-	private Random random = new Random(System.currentTimeMillis());
 
 	public synchronized CanvasHandler createNewCanvas(int width,int height){
 		if(width>maxSize || height > maxSize)throw new RuntimeException("size over");
 
-		int id=(random.nextInt()&0xffff)<<16;
-		id|=canvasid++;
+		int id=canvasid++;
 		Canvas canvas= new Canvas(width, height, device, global,id,this);
 		canvaslist.add(canvas);
 		global.addCanvas(canvas);
@@ -375,8 +373,7 @@ public class APainter {
 
 	public synchronized CanvasHandler createNewCanvas(int width,int height,
 			String author,String canvasname,long makeDay,long workTime,long actionCount){
-		int id=random.nextInt()&0xffff0000;
-		id|=canvasid++;
+		int id=canvasid++;
 		Canvas canvas= new Canvas(width, height, device, global,
 				author, canvasname, makeDay, workTime, actionCount,id,this);
 		canvaslist.add(canvas);

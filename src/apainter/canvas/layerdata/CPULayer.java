@@ -67,6 +67,7 @@ class CPULayer extends DefaultLayer{
 		handler.dispose();
 		integerbuffer=null;
 		mask = null;
+
 	}
 
 	@Override
@@ -185,12 +186,15 @@ class CPULayer extends DefaultLayer{
 
 	private static class CPULayerHandler extends InnerLayerHandler{
 
-		private final CPULayer h;
-		private final Canvas canvas;
+		private CPULayer h;
+		private Canvas canvas;
 
 		CPULayerHandler(CPULayer c,Canvas ca) {
 			canvas = ca;
 			h = c;
+		}
+		private void clear(){
+			h =null; canvas = null;
 		}
 
 		@Override

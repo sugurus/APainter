@@ -46,9 +46,9 @@ public class CPUParallelWorkThread {
             SecurityManager s = System.getSecurityManager();
             group = (s != null)? s.getThreadGroup() :
                                  Thread.currentThread().getThreadGroup();
-            namePrefix = "workpool-" +
+            namePrefix = "CPU Parallel Work (id:" +
                           poolNumber.getAndIncrement() +
-                         "-thread-";
+                         ") -";
         }
 
         public Thread newThread(Runnable r) {
@@ -75,7 +75,9 @@ public class CPUParallelWorkThread {
 	}
 
 	public static synchronized void shutDown(){
-		if(isRunning())thread.shutdown();
+		if(isRunning()){
+			thread.shutdown();
+		}
 	}
 
 	public static int getThreadSize(){

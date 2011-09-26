@@ -32,6 +32,17 @@ public abstract class BasicDrawer extends Drawer implements CanvasMouseListener{
 		if(d==null)return null;
 		return isDrawable(d)?d:null;
 	}
+
+	@Override
+	public void enter(PenTabletMouseEvent e, Canvas canvas) {
+		// TODO 自動生成されたメソッド・スタブ
+
+	}
+	@Override
+	public void exit(PenTabletMouseEvent e, Canvas canvas) {
+		// TODO 自動生成されたメソッド・スタブ
+
+	}
 	protected abstract boolean isDrawable(DrawTarget dt);
 
 	@Override
@@ -97,5 +108,23 @@ public abstract class BasicDrawer extends Drawer implements CanvasMouseListener{
 		return new Device[]{Device.CPU,Device.GPU};
 	}
 
+	private boolean isselected = false;
+	@Override
+	public final void selected() {
+		isselected = true;
+		_selected();
+	}
+	protected void _selected(){}
+
+	@Override
+	public final void unselected() {
+		isselected = false;
+		_unselected();
+	}
+	protected void _unselected(){}
+	@Override
+	public boolean isSelected() {
+		return isselected;
+	}
 
 }

@@ -24,10 +24,10 @@ public class AreaAvarageReducedImage {
 	private static final int length = 1<<SHIFT;
 
 
-	private final BufferedImage sourceimage,smallimage;
-	private final int[] source;
-	private final int[] xreduce;
-	private final int[] dst;
+	private BufferedImage sourceimage,smallimage;
+	private int[] source;
+	private int[] xreduce;
+	private int[] dst;
 	private final int sw,sh;
 	private final Rectangle rect;
 
@@ -60,6 +60,12 @@ public class AreaAvarageReducedImage {
 		rect = new Rectangle(0,0,sw,sh);
 		source = ((DataBufferInt)img. getRaster().getDataBuffer()).getData();
 		dst = ((DataBufferInt)smallimage. getRaster().getDataBuffer()).getData();
+	}
+
+	public void flush(){
+		smallimage.flush();
+		source = xreduce =  dst = null;
+		sourceimage = null;
 	}
 
 

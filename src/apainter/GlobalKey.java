@@ -8,7 +8,7 @@ public enum GlobalKey{
 	 * ArrayListです
 	 */
 	CanvasActionList(false),
-	CanvasHeadAction,CanvasTailAction,
+	CanvasHeadAction,CanvasTailAction,CanvasWheelAction,RightMouseReleaseAction,
 	PenFactoryCenter(false),OnDevice(false),
 
 	CommandCenter(false),

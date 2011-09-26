@@ -700,10 +700,11 @@ public class APainterDemo extends JFrame {
 
 	}
 	private void initCanvas(){
-		CanvasHandler c = apainter.createNewCanvas(canvaswidth, canvasheight);
 		if(canvash!=null){
 			canvash.dispose();
 		}
+		CanvasHandler c = apainter.createNewCanvas(canvaswidth, canvasheight);
+		System.out.println("create "+ c.getID());
 		canvash = c;
 
 		canvash.bind(posbind, BindKey.CanvasPositionBIND);
@@ -714,7 +715,6 @@ public class APainterDemo extends JFrame {
 		view.removeAll();
 		view.add(apainterview,BorderLayout.CENTER);
 		view.validate();
-
 	}
 
 

@@ -2,11 +2,8 @@ package nodamushi.pentablet;
 
 import java.awt.Component;
 import java.awt.Point;
-import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
-
-import javax.swing.SwingUtilities;
 
 public final class PenTabletMouseEvent extends MouseEvent{
 
@@ -15,7 +12,6 @@ public final class PenTabletMouseEvent extends MouseEvent{
 	private static final long serialVersionUID = 5560345349890009137L;
 	private int x,y;
 	private double dx,dy;
-	private ButtonType buttontype;
 	private CursorDevice cursorDevice;
 	private State state;
 	private double
@@ -26,25 +22,23 @@ public final class PenTabletMouseEvent extends MouseEvent{
 	//Mouse用
 	private PenTabletMouseEvent(Component source,int id,long when,int modifiers,
             int x,int y,int clickCount,boolean popupTrigger,int button,
-            ButtonType btype,CursorDevice ctype,State state)
+            CursorDevice ctype,State state)
 	{
 		super(source,id,when,modifiers,x,y,clickCount,popupTrigger,button);
 		dx = x+0.5f;dy=y+0.5f;
 		this.x=x;this.y=y;
-		buttontype = btype;
 		cursorDevice=ctype;
 		this.state = state;
 	}
 
 
 	private PenTabletMouseEvent(Component source,int id,long when,int modifiers,
-            double x,double y,int clickCount,boolean popupTrigger,ButtonType
-            btype,CursorDevice ctype,State state,
+            double x,double y,int clickCount,boolean popupTrigger,
+            CursorDevice ctype,State state,
             double pres,double rot,double tx,double ty)
 	{
 		super(source,id,when,modifiers,(int)x,(int)y,clickCount,popupTrigger);
 		setPoint(x,y);
-		buttontype = btype;
 		cursorDevice=ctype;
 		this.state = state;
 		if(ctype == CursorDevice.TABLET)
@@ -57,22 +51,6 @@ public final class PenTabletMouseEvent extends MouseEvent{
 	}
 
 
-	public boolean isTypedKeyBord(){
-		return buttontype==ButtonType.CONTROL||
-				buttontype==ButtonType.SHIFT||
-				buttontype==ButtonType.ALT;
-	}
-
-
-	/**
-	 * 筆圧がクリック最低圧を超えているかどうかを返します。<br>
-	 * 筆圧があっても最低筆圧以下ではfalseになります。
-	 * @see #setClickMinPressure(double)
-	 * @see #setClickMinPressure(int)
-	 * @see #getClickMinPressure()
-	 *
-	 */
-	public boolean isPressed(){	return pressure >= clickedMinPressure;}
 
 	/**
 	 * このイベントの発生元がマウスによる物かどうかを返します
@@ -183,12 +161,6 @@ public final class PenTabletMouseEvent extends MouseEvent{
 	 */
 	public double getRotation(){return rotation;}
 
-
-	/**
-	 * 変化したボタンを返します。
-	 * @see ButtonType
-	 */
-	public ButtonType getButtonType(){return buttontype;}
 	/**
 	 * このイベントを発生させたデバイスを返します。
 	 * @see CursorDevice
@@ -203,19 +175,10 @@ public final class PenTabletMouseEvent extends MouseEvent{
 
 
 
-	/**
-	 * 渡された時間からダブルクリックを満たす時間経過かどうかを返します。
-	 * @param when 対象の時間
-	 * @return whenからダブルクリックを満たす時間経過かどうか
-	 */
-	public boolean isDoubleClick(long when){
-		long t = getWhen()-when;
-		return t >= doubleclickedMinTime && t <= doubleclickedMaxTime;
-	}
 
 	@Override
 	public String toString() {
-		return String.format("(x:%f,y:%f),pressure %f,tit(x %f,y %f),rotation %f,ButtonType %s,CursorType %s,State %s",dx,dy,pressure,titx,tity,rotation,buttontype.toString(),cursorDevice.toString(),state.toString());
+		return String.format("(x:%f,y:%f),pressure %f,tit(x %f,y %f),rotation %f,CursorType %s,State %s",dx,dy,pressure,titx,tity,rotation,cursorDevice.toString(),state.toString());
 	}
 
 	public void setState(State s){ state = s; }
@@ -226,7 +189,16 @@ public final class PenTabletMouseEvent extends MouseEvent{
 	 * @return ペンでクリックされた場合true。マウスでもtrueが返ります。
 	 */
 	public boolean isPen(){
-		return buttontype == ButtonType.HEAD||buttontype == ButtonType.BUTTON1;
+		int m = getModifiers()|getModifiersEx();
+		return b(m,HEAD_MASK)||
+				((b(m,BUTTON1_DOWN_MASK)||b(m,BUTTON1_MASK)) &&!b(m,TAIL_MASK));
+	}
+	public boolean isTail(){
+		int m = getModifiersEx();
+		return b(m,TAIL_MASK);
+	}
+	private static boolean b(int m,int mask){
+		return (m&mask) == mask;
 	}
 
 
@@ -241,53 +213,10 @@ public final class PenTabletMouseEvent extends MouseEvent{
 	 * CURSORTYPECHANGEのイベントid番号
 	 */
 	static public final int MOUSE_CURSORTYPECHANGE=510;
-
-	static private ButtonType[] popuptrigger = {ButtonType.BUTTON3,ButtonType.SIDE2};
-	static private double clickedMinPressure=0.1f;
-	static private int doubleclickedMinTime = 60;
-	static private int doubleclickedMaxTime = 200;
-	/**
-	 * クリックされたかどうかの境目の筆圧の割合を設定します
-	 * @param pressure 百分率
-	 */
-	static public void setClickMinPressure(int pressure){
-		clickedMinPressure = pressure/100f;
-		if(clickedMinPressure > 1)clickedMinPressure = 1;
-		else if(clickedMinPressure< 0)clickedMinPressure = 0;
-	}
-	/**
-	 * クリックされたかどうかの境目の筆圧の割合を設定します
-	 * @param pressur0～1
-	 */
-	static public void setClickMinPressure(double pressure){
-		clickedMinPressure = pressure;
-		if(clickedMinPressure > 1)clickedMinPressure = 1;
-		else if(clickedMinPressure< 0)clickedMinPressure = 0;
-	}
-	/**
-	 * クリックされたかどうかの境目の筆圧の割合を返します。
-	 * @return 0～1
-	 */
-	static public double getClickMinPressure(){return clickedMinPressure;}
-
-	static public void setDoubleClickMinTime(int milisec)
-	{
-		if(milisec < 0)milisec = 0;
-		else if(milisec >= doubleclickedMaxTime)milisec = doubleclickedMaxTime-1;
-		doubleclickedMinTime = milisec;
-	}
-
-	static public int getDoubleClickMinTime(){return doubleclickedMinTime;}
-
-	static public void setDoubleClickMaxTime(int milisec)
-	{
-		if(milisec < doubleclickedMinTime)milisec = doubleclickedMinTime+1;
-		else if(milisec > 1000)milisec = 1000;
-		doubleclickedMaxTime = milisec;
-	}
-
-	static public int getDoubleClickMaxTime(){ return doubleclickedMaxTime;}
-
+	static public final int HEAD_MASK=32768,
+			HEAD_DOWN_MASK = HEAD_MASK|BUTTON1_DOWN_MASK,
+			TAIL_MASK=65536,
+			TAIL_DOWN_MASK = TAIL_MASK|BUTTON1_DOWN_MASK;
 
 	/**
 	 * 前後関係を指定し、マウスイベントをラッピングします
@@ -301,20 +230,17 @@ public final class PenTabletMouseEvent extends MouseEvent{
 		State state;
 		int id = e.getID();
 		state = State.getState(id);
-		ButtonType bt=ButtonType.NULL;
-		if(SwingUtilities.isLeftMouseButton(e))bt = ButtonType.BUTTON1;
-		else if(SwingUtilities.isMiddleMouseButton(e))bt = ButtonType.BUTTON2;
-		else if(SwingUtilities.isRightMouseButton(e))bt = ButtonType.BUTTON3;
-		return new PenTabletMouseEvent((Component)e.getSource(), id, e.getWhen(), e.getModifiers(), e.getX(), e.getY(),
-				e.getClickCount(), e.isPopupTrigger(), e.getButton(), bt, CursorDevice.MOUSE, state);
+		return new PenTabletMouseEvent((Component)e.getSource(), id, e.getWhen(),
+				e.getModifiers(), e.getX(), e.getY(),
+				e.getClickCount(), e.isPopupTrigger(), e.getButton(),  CursorDevice.MOUSE, state);
 	}
 
 	static public PenTabletMouseEvent createEvent(Component source,long when,int modifiers,double x,double y,
-			int clickCount,ButtonType btype,
+			int clickCount,
 			CursorDevice ctype,State state,double pres,double rot,double tx,double ty)
 	{
 		return createEvent(source, when, modifiers, x, y, clickCount,
-				btype, ctype, state, pres, rot, tx, ty, null, null);
+				 ctype, state, pres, rot, tx, ty, null, null);
 	}
 
 
@@ -338,66 +264,25 @@ public final class PenTabletMouseEvent extends MouseEvent{
 	 * @return
 	 */
 	static PenTabletMouseEvent createEvent(Component source,long when,int modifiers,double x,double y,
-			int clickCount,ButtonType btype,CursorDevice ctype,State state,
+			int clickCount,CursorDevice ctype,State state,
 			double pres,double rot,double tx,double ty,PenTabletMouseEvent befo,PenTabletMouseEvent nex)
 	{
-		boolean popupTrigger=false;
-		for(ButtonType b :popuptrigger)
-			if(b==btype){
-				popupTrigger=true;
-				break;
-			}
-
-		switch(btype)
-		{
-		case BUTTON1:
-		case HEAD:
-		case SIDE1:
-			modifiers|=InputEvent.BUTTON1_DOWN_MASK;
-			break;
-		case BUTTON2:
-			modifiers|=InputEvent.BUTTON2_DOWN_MASK;
-			break;
-		case BUTTON3:
-		case TAIL:
-		case SIDE2:
-		case CUSTOM:
-			modifiers|=InputEvent.BUTTON3_DOWN_MASK;
-			break;
-		case NULL:
-			break;
-		}
+		boolean popupTrigger=b(modifiers,BUTTON3_DOWN_MASK)||b(modifiers,BUTTON3_MASK);
 		if(pres <0)pres = 0;
 		else if(pres >1)pres = 1;
 		int id=state.getID();
 		return new PenTabletMouseEvent(source, id, when, modifiers, x, y,
-				clickCount, popupTrigger, btype, ctype, state, pres, rot, tx, ty);
+				clickCount, popupTrigger, ctype, state, pres, rot, tx, ty);
 	}
 
 	static public PenTabletMouseEvent createEvent(Component source,long when,int modifiers,double x,double y,
-			int clickCount,ButtonType btype,CursorDevice ctype,State state)
+			int clickCount,CursorDevice ctype,State state)
 	{
-		return createEvent(source, when, modifiers, x, y, clickCount, btype, ctype, state, 1, 0, 0, 0);
+		return createEvent(source, when, modifiers, x, y, clickCount, ctype, state, 1, 0, 0, 0);
 	}
-	/**
-	 * 現在タブレットの先端（もしくはマウス）で操作されているかのおおよそを返します。
-	 * @return
-	 */
-	static public boolean isTabletCursorPen(){return PenTabletRecognizer.getFinalTabletType() == ButtonType.HEAD;}
 
 
 	//enums/////////////////////////////////////////////////////////////////////
-	/**
-	 * どのボタンかを表す。
-	 */
-	static public enum ButtonType{
-		/**ペン先*/HEAD,/**ペンの後ろ（消しゴム）*/TAIL,
-		/**ペンのサイドボタン*/SIDE1,/**ペンのサイドボタン*/SIDE2,
-		/**マウスの左（であることが多い）*/BUTTON1,/**マウスの右（であることが多い）*/BUTTON3,/**マウスの中（であることが多い）*/BUTTON2,
-		/**カスタムボタン*/CUSTOM,
-		/**ALTボタンが押されました**/ALT,/**SHIFTが押されました**/SHIFT,/**CONTROLが押されました。**/CONTROL,
-		/**判別不能の時（nullの代用）*/NULL,
-	}
 	/**
 	 * カーソルを動かしているデバイス
 	 */

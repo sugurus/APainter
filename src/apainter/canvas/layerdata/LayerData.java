@@ -8,7 +8,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 
-import javax.swing.JComponent;
 import javax.swing.event.EventListenerList;
 
 import apainter.GlobalValue;
@@ -17,7 +16,6 @@ import apainter.canvas.Canvas;
 import apainter.canvas.event.PaintEvent;
 import apainter.canvas.event.PaintEventAccepter;
 import apainter.drawer.DrawTarget;
-import apainter.drawer.event.DrawEvent;
 
 abstract public class LayerData{
 	protected final Canvas canvas;
@@ -291,11 +289,13 @@ abstract public class LayerData{
 	}
 
 	public void dispose(){
+		_dispose();
 		for(InnerLayerHandler l:getAllInnerLayerHandlers()){
 			l.getLayer().dispose();
 		}
+		layerlist.removeAll(layerlist.getAllElements());
 	}
 
-
+	protected abstract void _dispose();
 
 }

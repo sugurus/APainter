@@ -18,8 +18,8 @@ import apainter.gui.CanvasView;
  *
  */
 public class CanvasHandler implements Handler{
-	final Canvas canvas;
-	final APainter ap;
+	Canvas canvas;
+	APainter ap;
 
 	CanvasHandler(Canvas c,APainter a) {
 		canvas = c;
@@ -174,6 +174,16 @@ public class CanvasHandler implements Handler{
 
 	public void dispose() {
 		canvas.dispose();
+		canvas = null;
+		ap = null;
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e) {}
+				System.gc();
+			}
+		}).start();
 	}
 
 }
