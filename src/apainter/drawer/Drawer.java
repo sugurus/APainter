@@ -1,6 +1,6 @@
 package apainter.drawer;
-import static java.lang.Math.*;
 import static apainter.PropertyChangeNames.*;
+import static java.lang.Math.*;
 
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -12,7 +12,6 @@ import javax.swing.event.EventListenerList;
 
 import apainter.Color;
 import apainter.Device;
-import apainter.data.PixelData;
 import apainter.data.PixelDataContainer;
 import apainter.drawer.event.DrawEvent;
 import apainter.drawer.event.DrawLastEvent;
@@ -20,6 +19,7 @@ import apainter.drawer.event.DrawStartEvent;
 import apainter.drawer.event.DrawerEvent;
 import apainter.misc.PropertyChangeUtility;
 import apainter.pen.PenShape;
+import apainter.pen.PenShapeFactory2;
 import apainter.rendering.Renderer;
 import apainter.rendering.RenderingOption;
 
@@ -99,17 +99,17 @@ abstract public class Drawer {
 	private DrawEvent createOneEvent(DrawPoint e,DrawTarget target,Device d){
 		Point2D plotpoint;
 		double pressure =plot.getPressure();
-		int pensize = pen.getSize();
-		pensize = getPenSize(pensize, pressure);
-		if(pensize==0){
+		int size = getPenSize(pensize, pressure);
+		if(size==0){
 			return null;
 		}
-		double length = pen.getMoveDistance(pensize);
+		PenShape pen = penfactory.getPenShape(size, d);
+		double length = pen.getMoveDistance();
 		plotpoint = plot.getPlotPoint();
 		plot.move(length);
 		double x = plotpoint.getX(),y=plotpoint.getY();
-		PixelDataContainer map = pen.getFootPrint(x, y, pensize);
-		Point center = pen.getCenterPoint(pensize);
+		PixelDataContainer map = pen.getFootPrint(x, y);
+		Point center = pen.getCenterPoint();
 
 
 
@@ -129,7 +129,6 @@ abstract public class Drawer {
 	protected ArrayList<DrawEvent> createEvents(DrawPoint e,DrawTarget target,Device dv){
 		if(!plot.hasNext())return new ArrayList<DrawEvent>();
 		Point2D plotpoint;
-		int pensize = pen.getSize();
 		Renderer renderer = getRenderer(dv);
 
 		ArrayList<DrawEvent> es = new ArrayList<DrawEvent>();
@@ -143,8 +142,9 @@ abstract public class Drawer {
 				plot.move(1/16d);
 				continue;
 			}
-			PixelDataContainer map = pen.getFootPrint(x, y, size);
-			Point center = pen.getCenterPoint(size);
+			PenShape pen = penfactory.getPenShape(size, dv);
+			PixelDataContainer map = pen.getFootPrint(x, y);
+			Point center = pen.getCenterPoint();
 			Rectangle bounds = new Rectangle((int)x-center.x, (int)y-center.y,
 					map.getWidth(), map.getHeight());
 			Color front =getFrontColor(e, pen),back = getBackColor(e, pen);
@@ -155,7 +155,7 @@ abstract public class Drawer {
 				new DrawEvent(this, target,
 						bounds, bounds.getLocation(),renderer,  map, option);
 			es.add(de);
-			double d = pen.getMoveDistance(size);
+			double d = pen.getMoveDistance();
 			plot.move(d);
 		}
 		return es;
@@ -168,10 +168,10 @@ abstract public class Drawer {
 	abstract protected Renderer getRenderer(Device d);
 	abstract protected Device[] getUsableDevices();
 
-	public void setPen(PenShape p){
+	public void setPenFactory(PenShapeFactory2 p){
 		if(p!=null){
-			PenShape old  =pen;
-			pen = p;
+			PenShapeFactory2 old  =penfactory;
+			penfactory = p;
 			firePropertyChange(PenShapeChangeProperty, old, p);
 		}
 	}
@@ -252,6 +252,11 @@ abstract public class Drawer {
 		return smin;
 	}
 
+	public void setPenSize(int size){
+		if(size <=0)return;
+		pensize = size;
+	}
+
 	private final int id;
 	private double smin=0;// 筆圧最小時の筆の大きさの割合
 	private int density_min=256;// 筆圧最小時の筆の濃度（0~256）
@@ -264,7 +269,8 @@ abstract public class Drawer {
 	}
 	private PressureAdjuster padj=NormalPressureAdjuster.obj;
 
-	protected PenShape pen;
+	protected PenShapeFactory2 penfactory;
+	protected int pensize=10;
 
 
 	private EventListenerList elist = new EventListenerList();

@@ -14,19 +14,11 @@ import apainter.data.PixelDataContainer;
  *
  */
 public interface PenShape {
-	/**
-	 * CPUの場合はPixelDataIntBuffer
-	 * @param x
-	 * @param y
-	 * @param w
-	 * @param h
-	 * @return
-	 */
-	public PixelDataContainer getFootPrint(double x,double y,int size);
-	public Point getCenterPoint(int size);
+	public PixelDataContainer getFootPrint(double x,double y);
+	public Point getCenterPoint();
 	public Dimension getMapSize();
 	public int getSize();
-	public double getMoveDistance(int size);
+	public double getMoveDistance();
 	public void setIntervalLengthPercent(double percent);
 	public String getName();
 	public long getID();

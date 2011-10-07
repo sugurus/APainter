@@ -9,7 +9,11 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.DataFormatException;
+
+import javax.swing.JComponent;
+import javax.swing.plaf.ComponentUI;
 
 import apainter.Device;
 import apainter.data.PixelData;
@@ -21,6 +25,7 @@ import apainter.pen.PenData;
 import apainter.pen.PenPackage;
 import apainter.pen.PenShape;
 import apainter.pen.PenShapeFactory;
+import apainter.pen.PenShapeFactory2;
 
 /**
  * ファイルから読み込み、ペン生成をする基底クラス。
@@ -47,10 +52,12 @@ public class URLPenFactory implements PenShapeFactory{
 		return name;
 	}
 
+	private static AtomicInteger factory2ID=new AtomicInteger();
 	@Override
-	public PenShape createPenShape(int size,Device d) {
-		Group g = findGroup(size);
-		return new URLPenShape(g);
+	public PenShapeFactory2 createFactory2() {
+		int i = factory2ID.getAndIncrement();
+		long id = this.id+i*1000000000;
+		return new URLFactory2(id);
 	}
 
 	@Override
@@ -123,6 +130,68 @@ public class URLPenFactory implements PenShapeFactory{
 		else return w;
 	}
 
+	protected class URLFactory2 implements PenShapeFactory2{
+
+		String name=URLPenFactory.this.name;
+		long id;
+		double p=1;
+
+		public URLFactory2(long id) {
+			this.id=id;
+		}
+
+		@Override
+		public String getPenName() {
+			return name;
+		}
+		@Override
+		public void setName(String name) {
+			if(name!=null)this.name=name;
+		}
+
+		@Override
+		public long getID() {
+			return id;
+		}
+
+		@Override
+		public void load() throws IOException {
+			URLPenFactory.this.load();
+		}
+
+		@Override
+		public void release() {
+			URLPenFactory.this.release();
+		}
+
+		@Override
+		public boolean isLoaded() {
+			return URLPenFactory.this.isLoaded();
+		}
+
+		@Override
+		public PenShapeFactory2 createFactory2() {
+			return URLPenFactory.this.createFactory2();
+		}
+
+		@Override
+		public PenShape getPenShape(int size,Device d) {
+			Group g = findGroup(size);
+			PenShape p= new URLPenShape(g);
+			p.setIntervalLengthPercent(this.p);
+			return p;
+		}
+		@Override
+		public double getMoveDistancePercent() {
+			return p;
+		}
+		@Override
+		public void setMoveDistancePercent(double n) {
+			if(n<=0)return;
+			p = n;
+		}
+
+	}
 
 	protected class URLPenShape implements PenShape{
 
@@ -136,23 +205,17 @@ public class URLPenFactory implements PenShapeFactory{
 		}
 
 		@Override
-		public Point getCenterPoint(int size) {
-			Group gg ;
-			if(g.getSize()==size)gg=g;
-			else gg= findGroup(size);
-			return new Point(gg.getCenterX(),gg.getCenterY());
+		public Point getCenterPoint() {
+			return new Point(g.getCenterX(),g.getCenterY());
 		}
 
 		@Override
-		public PixelDataContainer getFootPrint(double x, double y, int size) {
-			Group gg ;
-			if(g.getSize()==size)gg=g;
-			else gg= findGroup(size);
+		public PixelDataContainer getFootPrint(double x, double y) {
 			x = x-(int)floor(x);
 			y = y-(int)floor(y);
-			int px = (int) (x*gg.getXBlocks());
-			int py = (int) (y*gg.getYBlocks());
-			final PenData p = gg. getPen(px,py);
+			int px = (int) (x*g.getXBlocks());
+			int py = (int) (y*g.getYBlocks());
+			final PenData p = g. getPen(px,py);
 			PixelDataContainer pdc = new PixelDataContainer() {
 
 				@Override
@@ -184,8 +247,8 @@ public class URLPenFactory implements PenShapeFactory{
 		}
 
 		@Override
-		public double getMoveDistance(int size) {
-			return URLPenFactory.this.getIntervalLength(size, intervalpercent);
+		public double getMoveDistance() {
+			return URLPenFactory.this.getIntervalLength(g.getSize(), intervalpercent);
 		}
 
 		@Override

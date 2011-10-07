@@ -248,64 +248,6 @@ class _GetPenFactory implements CommandDecoder {
 	}
 }
 
-class _Debag_SetPenSize implements CommandDecoder {
-	private static final String name = "pensize";
-	private static final String help = "pensize drawerid size:::set pen size.this is a debug command.";
-
-	private static class Com extends Command {
-		int size;
-		int id;
-
-		Com(int s,int i) {
-			size = s;
-			id = i;
-		}
-
-		@Override
-		public Object execution(GlobalValue global) {
-			@SuppressWarnings("unchecked")
-			ArrayList<CanvasMouseListener> l = (ArrayList<CanvasMouseListener>) global.get(CanvasActionList);
-
-			for(CanvasMouseListener c:l){
-				if(c instanceof Drawer && ((Drawer) c).getID()==id){
-					PenShape p=global.get(PenFactoryCenter,PenFactoryCenter.class).getPenShapeFactory(0).createPenShape(size, Device.CPU);
-					((Drawer) c).setPen(p);
-				}
-			}
-
-
-			return null;
-		}
-	}
-
-	@Override
-	public String getCommandName() {
-		return name;
-	}
-
-	@Override
-	public String help() {
-		return help;
-	}
-
-	@Override
-	public Command decode(String[] param) {
-
-		if (param.length != 2) {
-			return null;
-		} else {
-			try{
-				int i = Integer.parseInt(param[0]);
-				int s = Integer.parseInt(param[1]);
-				return new Com(s*10,i);
-			}catch (NumberFormatException e) {
-				return null;
-			}
-
-		}
-
-	}
-}
 
 class _Debag_SaveCanvasImage implements CommandDecoder {
 	private static final String name = "saveci";

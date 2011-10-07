@@ -138,8 +138,8 @@ public class APainter {
 				e.printStackTrace();
 			}
 			//FIXME
-			pen.setPen(f.createPenShape(10,Device.CPU));
-			era.setPen(f.createPenShape(10,Device.CPU));
+			pen.setPenFactory(f.createFactory2());
+			era.setPenFactory(f.createFactory2());
 			global.put(CanvasHeadAction, pen);
 			global.put(CanvasTailAction,era);
 			ArrayList<CanvasMouseListener> list = new  ArrayList<CanvasMouseListener>();

@@ -406,12 +406,10 @@ public class APainterDemo extends JFrame {
 		pensize.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				int size = pensize.getValue()*10;
-				PenShapeFactory penf = (PenShapeFactory) apainter.exec("getpenf 0");
-				PenShape p = penf.createPenShape(size, Device.CPU);
 				if(selectpen.isSelected()){
-					pen.setPen(p);
+					pen.setPenSize(size);
 				}else if(eraselect.isSelected()){
-					era.setPen(p);
+					era.setPenSize(size);
 				}
 				sizelabel.setText("筆サイズ "+pensize.getValue());
 			}

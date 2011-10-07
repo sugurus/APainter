@@ -4,16 +4,15 @@ import java.io.IOException;
 
 import apainter.Device;
 
+/**
+ * ペン形状のデータ生成、保持部分に相当します。<br>
+ * データの取得はPenShapeFactory2から行います。
+ * @author nodamushi
+ *
+ */
 public interface PenShapeFactory {
 
 	public String getPenName();
-	/**
-	 * サイズは10倍された値です。1サイズは10です。
-	 * @param size
-	 * @param device
-	 * @return
-	 */
-	public PenShape createPenShape(int size,Device device);
 	public long getID();
 
 	/**
@@ -32,5 +31,10 @@ public interface PenShapeFactory {
 	 * @return
 	 */
 	public boolean isLoaded();
+
+	/**
+	 * @return
+	 */
+	public PenShapeFactory2 createFactory2();
 
 }
