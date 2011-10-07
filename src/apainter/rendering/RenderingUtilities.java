@@ -3,7 +3,7 @@ package apainter.rendering;
 import java.awt.Point;
 import java.awt.Rectangle;
 
-import apainter.data.PixelDataBuffer;
+import apainter.data.PixelData;
 
 public class RenderingUtilities {
 	/**
@@ -15,7 +15,7 @@ public class RenderingUtilities {
 	 * @return
 	 */
 	public static Rectangle getEnableClipBounds
-		(PixelDataBuffer base,PixelDataBuffer over,Point p,Rectangle clip){
+		(PixelData base,PixelData over,Point p,Rectangle clip){
 		Rectangle ret;
 		if(clip!=null)
 			ret = base.intersection(clip);

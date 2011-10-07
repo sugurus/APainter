@@ -15,7 +15,7 @@ public class CompressedIntPixelDataTest {
 
 	public static int w = 100,h = 100;
 	public static int[] i=new int[w*h];
-	public static PixelDataIntBuffer buffer;
+	public static PixelDataInt buffer;
 	public static CompressedIntPixelData compress;
 
 	@BeforeClass
@@ -24,7 +24,7 @@ public class CompressedIntPixelDataTest {
 		for(int t=0;t<i.length;t++){
 			i[t] = r.nextInt();
 		}
-		buffer = new PixelDataIntBuffer(w, h, i);
+		buffer = new PixelDataInt(w, h, i);
 		compress = new CompressedIntPixelData(buffer);
 	}
 
@@ -43,7 +43,7 @@ public class CompressedIntPixelDataTest {
 	@Test
 	public void testInflate() {
 		long time= System.currentTimeMillis();
-		PixelDataIntBuffer p = compress.inflate();
+		PixelDataInt p = compress.inflate();
 		System.out.println((System.currentTimeMillis()-time));
 		int[] ii = p.getData();
 		assertTrue(Arrays.equals(i, ii));

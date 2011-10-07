@@ -22,8 +22,8 @@ import java.awt.geom.Point2D.Double;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import nodamushi.pentablet.PenTabletMouseEvent;
-import nodamushi.pentablet.PenTabletRecognizer;
+import nodamushi.pentablet.TabletMouseEvent;
+import nodamushi.pentablet.TabletRecognizer;
 import apainter.GlobalValue;
 import apainter.bind.Bind;
 import apainter.bind.BindObject;
@@ -58,7 +58,7 @@ public final class CanvasView extends JPanel{
 	private AffineTransform toComponent= new AffineTransform();
 
 
-	private PenTabletRecognizer tabletlistener;
+	private TabletRecognizer tabletlistener;
 	private KeyListener keylistener;
 	private JComponent canvasComponent;//画像を表示するパネル
 	private CanvasViewRendering canvasRendering;
@@ -137,7 +137,6 @@ public final class CanvasView extends JPanel{
 		installMouseListener();
 	}
 
-
 	public void removeKeyListener(){
 		removeKeyListener(keylistener);
 	}
@@ -148,11 +147,11 @@ public final class CanvasView extends JPanel{
 	}
 
 	private void installMouseListener(){
-		tabletlistener = new PenTabletRecognizer(this) {
+		tabletlistener = new TabletRecognizer(this) {
 
 			@Override
-			public void mouseOperatorChanged(PenTabletMouseEvent e) {
-				Double k = convertToCanvas(e.getPointDouble());
+			public void mouseOperatorChanged(TabletMouseEvent e) {
+				Double k = convertToCanvas(e.getPoint2D());
 				e.setPoint(k.x, k.y);
 				canvas.dispatchEvent(e);
 			}
@@ -169,48 +168,48 @@ public final class CanvasView extends JPanel{
 			}
 
 			@Override
-			public void mousePressed(PenTabletMouseEvent e) {
+			public void mousePressed(TabletMouseEvent e) {
 				if(!hasFocus())	requestFocus();
-				Double k = convertToCanvas(e.getPointDouble());
+				Double k = convertToCanvas(e.getPoint2D());
 				e.setPoint(k.x, k.y);
 				canvas.dispatchEvent(e);
 			}
 
 			@Override
-			public void mouseReleased(PenTabletMouseEvent e) {
+			public void mouseReleased(TabletMouseEvent e) {
 				if(e.isPopupTrigger()){
 					//位置変換なし
 					canvas.dispatchEvent(e);
 					return;
 				}
-				Double k = convertToCanvas(e.getPointDouble());
+				Double k = convertToCanvas(e.getPoint2D());
 				e.setPoint(k.x, k.y);
 				canvas.dispatchEvent(e);
 			}
 			@Override
-			public void mouseDragged(PenTabletMouseEvent e) {
-				Double k = convertToCanvas(e.getPointDouble());
-				e.setPoint(k.x, k.y);
-				canvas.dispatchEvent(e);
-			}
-
-			@Override
-			public void mouseMoved(PenTabletMouseEvent e) {
-				Double k = convertToCanvas(e.getPointDouble());
+			public void mouseDragged(TabletMouseEvent e) {
+				Double k = convertToCanvas(e.getPoint2D());
 				e.setPoint(k.x, k.y);
 				canvas.dispatchEvent(e);
 			}
 
 			@Override
-			public void mouseExited(PenTabletMouseEvent e) {
-				Double k = convertToCanvas(e.getPointDouble());
+			public void mouseMoved(TabletMouseEvent e) {
+				Double k = convertToCanvas(e.getPoint2D());
 				e.setPoint(k.x, k.y);
 				canvas.dispatchEvent(e);
 			}
 
 			@Override
-			public void mouseEntered(PenTabletMouseEvent e) {
-				Double k = convertToCanvas(e.getPointDouble());
+			public void mouseExited(TabletMouseEvent e) {
+				Double k = convertToCanvas(e.getPoint2D());
+				e.setPoint(k.x, k.y);
+				canvas.dispatchEvent(e);
+			}
+
+			@Override
+			public void mouseEntered(TabletMouseEvent e) {
+				Double k = convertToCanvas(e.getPoint2D());
 				e.setPoint(k.x, k.y);
 				canvas.dispatchEvent(e);
 			}

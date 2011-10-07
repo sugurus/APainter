@@ -5,7 +5,8 @@ import static apainter.misc.Util.*;
 import java.awt.Point;
 import java.awt.Rectangle;
 
-import apainter.data.PixelDataBuffer;
+import apainter.data.PixelData;
+import apainter.data.PixelDataContainer;
 import apainter.drawer.DrawTarget;
 import apainter.drawer.Drawer;
 import apainter.rendering.Renderer;
@@ -18,13 +19,13 @@ public class DrawEvent extends DrawerEvent{
 
 	private Rectangle rect;
 	private Point footpoint;
-	private PixelDataBuffer footprint;
+	private PixelDataContainer footprint;
 	private RenderingOption option;
 	private Renderer renderer;
 
 	public DrawEvent(Drawer source,
 			DrawTarget target,Rectangle bounds,Point footpoint,
-			Renderer renderer,PixelDataBuffer footprint,RenderingOption option) {
+			Renderer renderer,PixelDataContainer footprint,RenderingOption option) {
 		super(source,target);
 		this.renderer = nullCheack(renderer,"renderer");
 		this.rect = nullCheack(bounds,"bounds");
@@ -81,7 +82,7 @@ public class DrawEvent extends DrawerEvent{
 	/**
 	 * フットプリントを返します
 	 */
-	public PixelDataBuffer getFootprint(){
+	public PixelDataContainer getFootprint(){
 		return footprint;
 	}
 	@Override

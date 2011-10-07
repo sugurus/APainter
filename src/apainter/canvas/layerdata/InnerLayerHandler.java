@@ -2,7 +2,7 @@ package apainter.canvas.layerdata;
 
 import apainter.Handler;
 import apainter.canvas.CanvasHandler;
-import apainter.data.PixelDataBuffer;
+import apainter.data.PixelData;
 import apainter.drawer.DrawTarget;
 import apainter.hierarchy.Element;
 import apainter.rendering.ColorMode;
@@ -46,8 +46,8 @@ public abstract class InnerLayerHandler implements MaskContainer,PixelContainer,
 
 
 	abstract Layer getLayer();
-	abstract PixelDataBuffer getOriginalData();
-	abstract PixelDataBuffer getMaskOriginalData();
+	abstract PixelData getOriginalData();
+	abstract PixelData getMaskOriginalData();
 
 	private Element<InnerLayerHandler> thiselement=null;
 	final synchronized void setElement(Element<InnerLayerHandler> e){

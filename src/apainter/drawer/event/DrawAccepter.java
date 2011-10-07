@@ -1,4 +1,4 @@
-package apainter.drawer;
+package apainter.drawer.event;
 
 
 public interface DrawAccepter {

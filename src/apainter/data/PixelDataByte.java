@@ -19,14 +19,14 @@ import java.util.Arrays;
  * @author nodamushi
  *
  */
-public class PixelDataByteBuffer extends PixelDataBuffer{
+public class PixelDataByte extends PixelData{
 
-	public static PixelDataByteBuffer create(int w,int h){
+	public static PixelDataByte create(int w,int h){
 		if(w<=0||h<=0)throw new IllegalArgumentException(String.format("w:%d,h:%d",w,h));
-		return new PixelDataByteBuffer(w, h, new byte[w*h]);
+		return new PixelDataByte(w, h, new byte[w*h]);
 	}
 
-	public static PixelDataByteBuffer create(int w,int h,byte[] data,
+	public static PixelDataByte create(int w,int h,byte[] data,
 			int x,int y,int subw,int subh){
 		if(w<=0||h<=0 || data.length != w*h || x<0||y<0||subw<=0||subh<=0||
 				x+subw>w|y+subh>h)
@@ -37,7 +37,7 @@ public class PixelDataByteBuffer extends PixelDataBuffer{
 		for(int yy=y,e=y+subh;yy<e;yy++){
 			System.arraycopy(data, yy*w+x, t, (yy-y)*subw, subw);
 		}
-		return new PixelDataByteBuffer(subw, subh, t);
+		return new PixelDataByte(subw, subh, t);
 	}
 
 	/**
@@ -47,22 +47,27 @@ public class PixelDataByteBuffer extends PixelDataBuffer{
 	 * @param b
 	 * @return
 	 */
-	public static PixelDataByteBuffer copyBuffer(int w,int h,byte[] b){
-		return new PixelDataByteBuffer(w, h, b.clone());
+	public static PixelDataByte copyBuffer(int w,int h,byte[] b){
+		return new PixelDataByte(w, h, b.clone());
 	}
 
 	@Override
-	public PixelDataBuffer clone() {
-		return new PixelDataByteBuffer(width, height, pixel.clone());
+	public PixelData clone() {
+		return new PixelDataByte(width, height, pixel.clone());
 	}
 
-	public PixelDataByteBuffer copy(Rectangle r){
-		return new PixelDataByteBuffer(r.width, r.height,copy((byte[])null, r));
+	public PixelDataByte copy(Rectangle r){
+		return new PixelDataByte(r.width, r.height,copy((byte[])null, r));
+	}
+
+	@Override
+	public ColorType getColorType() {
+		return ColorType.GRAY;
 	}
 
 	private byte[] pixel;
 
-	public PixelDataByteBuffer(int w,int h,byte[] pixel) {
+	public PixelDataByte(int w,int h,byte[] pixel) {
 		super(w,h);
 		if(pixel.length!=w*h)throw new RuntimeException(String.format("pixel length(%d) != w(%d)*h(%d)",pixel.length,w,h));
 		this.pixel = pixel;
@@ -145,7 +150,7 @@ public class PixelDataByteBuffer extends PixelDataBuffer{
 		return distination;
 	}
 
-	public void draw(PixelDataByteBuffer p) {
+	public void draw(PixelDataByte p) {
 		int w = p.getWidth(),h=p.getHeight();
 		int rw,rh;
 		if(getWidth()<w)rw=getWidth();

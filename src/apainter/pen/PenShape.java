@@ -3,7 +3,8 @@ package apainter.pen;
 import java.awt.Dimension;
 import java.awt.Point;
 
-import apainter.data.PixelDataBuffer;
+import apainter.data.PixelData;
+import apainter.data.PixelDataContainer;
 
 /**
  * sizeとは、１０倍された値になっています。
@@ -21,7 +22,7 @@ public interface PenShape {
 	 * @param h
 	 * @return
 	 */
-	public PixelDataBuffer getFootPrint(double x,double y,int size);
+	public PixelDataContainer getFootPrint(double x,double y,int size);
 	public Point getCenterPoint(int size);
 	public Dimension getMapSize();
 	public int getSize();

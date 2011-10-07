@@ -5,7 +5,8 @@ import static apainter.misc.Util.*;
 import java.awt.Point;
 import java.awt.Rectangle;
 
-import apainter.data.PixelDataBuffer;
+import apainter.data.PixelData;
+import apainter.data.PixelDataContainer;
 import apainter.drawer.Drawer;
 import apainter.drawer.event.DrawEvent;
 import apainter.rendering.Renderer;
@@ -21,13 +22,13 @@ public class PaintEvent extends CanvasEvent{
 	private PaintEventAccepter target;
 	private Rectangle rect;
 	private Point setPoint;
-	private PixelDataBuffer mapdata;
+	private PixelDataContainer mapdata;
 	private RenderingOption option;
 	private Renderer renderer;
 
 	public PaintEvent(int id, Drawer source,
 	PaintEventAccepter target,Rectangle bounds,Point setpoint,
-	Renderer renderer,PixelDataBuffer mapdata,RenderingOption option) {
+	Renderer renderer,PixelDataContainer mapdata,RenderingOption option) {
 	super(id, source,target.getCanvas());
 	if(mapdata==null)throw new NullPointerException("mapdata");
 	if(bounds==null)throw new NullPointerException("bounds");
@@ -74,7 +75,7 @@ public class PaintEvent extends CanvasEvent{
 	return target;
 	}
 
-	public PixelDataBuffer getMapData(){
+	public PixelDataContainer getMapData(){
 	return mapdata;
 	}
 

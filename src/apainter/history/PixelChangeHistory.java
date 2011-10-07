@@ -5,10 +5,10 @@ import java.awt.Rectangle;
 import apainter.canvas.Canvas;
 import apainter.canvas.cedt.cpu.CPUParallelWorkThread;
 import apainter.data.CompressedPixelData;
-import apainter.data.PixelData15BitBuffer;
-import apainter.data.PixelDataBuffer;
-import apainter.data.PixelDataByteBuffer;
-import apainter.data.PixelDataIntBuffer;
+import apainter.data.PixelData15BitColor;
+import apainter.data.PixelData;
+import apainter.data.PixelDataByte;
+import apainter.data.PixelDataInt;
 import apainter.misc.Util;
 import apainter.resorce.LimitedResource;
 import apainter.resorce.Resource;
@@ -17,9 +17,9 @@ public abstract class PixelChangeHistory extends HistoryObject{
 
 	//準備用
 	protected final Canvas canvas;
-	private Resource<? extends PixelDataBuffer> resource,
+	private Resource<? extends PixelData> resource,
 	resource2;//15bit用
-	private PixelDataBuffer copy;
+	private PixelData copy;
 	private int width,height;
 	private boolean inited1=false;
 
@@ -29,7 +29,7 @@ public abstract class PixelChangeHistory extends HistoryObject{
 	protected boolean compressed=false;
 
 	protected Rectangle bounds;
-	protected PixelDataBuffer beforebuffer,afterbuffer;
+	protected PixelData beforebuffer,afterbuffer;
 	protected CompressedPixelData compressbefore,compressafter;
 	protected Class<?> dataclass;
 
@@ -44,11 +44,11 @@ public abstract class PixelChangeHistory extends HistoryObject{
 	 * 渡されたとき、例外を投げます。
 	 * @param before 更新前の画素の状態
 	 */
-	public synchronized void copyBeforePixel(PixelDataBuffer before){
+	public synchronized void copyBeforePixel(PixelData before){
 		if(inited1)return;
-		if(!(before instanceof PixelDataByteBuffer ||
-				before instanceof PixelDataIntBuffer||
-				before instanceof PixelData15BitBuffer)){
+		if(!(before instanceof PixelDataByte ||
+				before instanceof PixelDataInt||
+				before instanceof PixelData15BitColor)){
 			throw new RuntimeException("before class is not PixelDataByteBuffer or PixelDataIntBuffer: "+before.getClass());
 		}
 		inited1=true;
@@ -60,46 +60,46 @@ public abstract class PixelChangeHistory extends HistoryObject{
 			if(w>width&&h>height){
 				break LABEL;
 			}
-			if(before instanceof PixelDataIntBuffer){
-				LimitedResource<PixelDataIntBuffer> r = canvas.getPixelDataIntBufferResource();
-				Resource<PixelDataIntBuffer> res = r.tryGetResource();
+			if(before instanceof PixelDataInt){
+				LimitedResource<PixelDataInt> r = canvas.getPixelDataIntBufferResource();
+				Resource<PixelDataInt> res = r.tryGetResource();
 				if(res==null){
 					break LABEL;
 				}
-				PixelDataIntBuffer bf = res.getResource();
-				bf.draw((PixelDataIntBuffer)before);
+				PixelDataInt bf = res.getResource();
+				bf.draw((PixelDataInt)before);
 				copy=bf;
 				resource = res;
 				return;
-			}else if(before instanceof PixelDataByteBuffer){
-				LimitedResource<PixelDataByteBuffer> r = canvas.getPixelDataByteBuffereResource();
-				Resource<PixelDataByteBuffer> res = r.tryGetResource();
+			}else if(before instanceof PixelDataByte){
+				LimitedResource<PixelDataByte> r = canvas.getPixelDataByteBuffereResource();
+				Resource<PixelDataByte> res = r.tryGetResource();
 				if(res==null){
 					break LABEL;
 				}
-				PixelDataByteBuffer bf = res.getResource();
-				bf.draw((PixelDataByteBuffer)before);
+				PixelDataByte bf = res.getResource();
+				bf.draw((PixelDataByte)before);
 				copy=bf;
 				resource = res;
 				return;
-			}else if(before instanceof PixelData15BitBuffer){
-				LimitedResource<PixelDataIntBuffer> r = canvas.getPixelDataIntBufferResource();
-				Resource<PixelDataIntBuffer> res1 = r.tryGetResource();
+			}else if(before instanceof PixelData15BitColor){
+				LimitedResource<PixelDataInt> r = canvas.getPixelDataIntBufferResource();
+				Resource<PixelDataInt> res1 = r.tryGetResource();
 				if(res1==null){
 					break LABEL;
 				}
 				r = canvas.getPixelDataIntBufferResource();
-				Resource<PixelDataIntBuffer> res2 = r.tryGetResource();
+				Resource<PixelDataInt> res2 = r.tryGetResource();
 				if(res2==null){
 					res1.unlock();
 					break LABEL;
 				}
-				PixelData15BitBuffer b = (PixelData15BitBuffer) before;
-				PixelDataIntBuffer i1 = res1.getResource(),i2=res2.getResource(),
+				PixelData15BitColor b = (PixelData15BitColor) before;
+				PixelDataInt i1 = res1.getResource(),i2=res2.getResource(),
 						b1 = b.getIntegerBuffer(),b2 = b.getDecimalBuffer();
 				i1.draw(b1);
 				i2.draw(b2);
-				copy = new PixelData15BitBuffer(width, height, i1, i2);
+				copy = new PixelData15BitColor(width, height, i1, i2);
 				resource = res1;
 				resource2 = res2;
 				return;
@@ -118,7 +118,7 @@ public abstract class PixelChangeHistory extends HistoryObject{
 	 * @param r 変化した領域
 	 * @throws RuntimeException
 	 */
-	public synchronized void setAfterPixel(PixelDataBuffer after,Rectangle r)throws RuntimeException{
+	public synchronized void setAfterPixel(PixelData after,Rectangle r)throws RuntimeException{
 		if(!inited1){
 			throw new RuntimeException("copyBeforePixel method does not finish!");
 		}
@@ -176,48 +176,48 @@ public abstract class PixelChangeHistory extends HistoryObject{
 	 * 渡されたpとafterbufferのクラスが一致する場合、書き込みます。
 	 * @param p
 	 */
-	protected void drawAfterData(PixelDataBuffer p){
+	protected void drawAfterData(PixelData p){
 		if(!isCorrect()||!dataclass.equals(p.getClass()))return;
 		if(compressed){
-			PixelDataBuffer k = compressafter.inflate();
-			if(k instanceof PixelDataIntBuffer){
-				((PixelDataIntBuffer)p).setData(((PixelDataIntBuffer)k).getData(), bounds);
-			}else if(k instanceof PixelDataByteBuffer){
-				((PixelDataByteBuffer)p).setData(((PixelDataByteBuffer)k).getData(), bounds);
-			}else if(k instanceof PixelData15BitBuffer){
-				((PixelData15BitBuffer)p).setData((PixelData15BitBuffer)k, bounds);
+			PixelData k = compressafter.inflate();
+			if(k instanceof PixelDataInt){
+				((PixelDataInt)p).setData(((PixelDataInt)k).getData(), bounds);
+			}else if(k instanceof PixelDataByte){
+				((PixelDataByte)p).setData(((PixelDataByte)k).getData(), bounds);
+			}else if(k instanceof PixelData15BitColor){
+				((PixelData15BitColor)p).setData((PixelData15BitColor)k, bounds);
 			}
 		}else{
-			if(p instanceof PixelDataIntBuffer){
-				((PixelDataIntBuffer)p).
-				setData(((PixelDataIntBuffer)afterbuffer).getData(),
+			if(p instanceof PixelDataInt){
+				((PixelDataInt)p).
+				setData(((PixelDataInt)afterbuffer).getData(),
 						bounds);
-			}else if(p instanceof PixelDataByteBuffer){
-				((PixelDataByteBuffer)p).setData(((PixelDataByteBuffer)afterbuffer).getData(), bounds);
-			}else if(p instanceof PixelData15BitBuffer){
-				((PixelData15BitBuffer)p).setData((PixelData15BitBuffer)afterbuffer, bounds);
+			}else if(p instanceof PixelDataByte){
+				((PixelDataByte)p).setData(((PixelDataByte)afterbuffer).getData(), bounds);
+			}else if(p instanceof PixelData15BitColor){
+				((PixelData15BitColor)p).setData((PixelData15BitColor)afterbuffer, bounds);
 			}
 		}
 	}
 
-	protected void drawBeforeData(PixelDataBuffer p){
+	protected void drawBeforeData(PixelData p){
 		if(!isCorrect()||!dataclass.equals(p.getClass()))return;
 		if(compressed){
-			PixelDataBuffer k = compressbefore.inflate();
-			if(k instanceof PixelDataIntBuffer){
-				((PixelDataIntBuffer)p).setData(((PixelDataIntBuffer)k).getData(), bounds);
-			}else if(k instanceof PixelDataByteBuffer){
-				((PixelDataByteBuffer)p).setData(((PixelDataByteBuffer)k).getData(), bounds);
-			}else if(k instanceof PixelData15BitBuffer){
-				((PixelData15BitBuffer)p).setData((PixelData15BitBuffer)k, bounds);
+			PixelData k = compressbefore.inflate();
+			if(k instanceof PixelDataInt){
+				((PixelDataInt)p).setData(((PixelDataInt)k).getData(), bounds);
+			}else if(k instanceof PixelDataByte){
+				((PixelDataByte)p).setData(((PixelDataByte)k).getData(), bounds);
+			}else if(k instanceof PixelData15BitColor){
+				((PixelData15BitColor)p).setData((PixelData15BitColor)k, bounds);
 			}
 		}else{
-			if(p instanceof PixelDataIntBuffer){
-				((PixelDataIntBuffer)p).setData(((PixelDataIntBuffer)beforebuffer).getData(), bounds);
-			}else if(p instanceof PixelDataByteBuffer){
-				((PixelDataByteBuffer)p).setData(((PixelDataByteBuffer)beforebuffer).getData(), bounds);
-			}else if(p instanceof PixelData15BitBuffer){
-				((PixelData15BitBuffer)p).setData((PixelData15BitBuffer)beforebuffer, bounds);
+			if(p instanceof PixelDataInt){
+				((PixelDataInt)p).setData(((PixelDataInt)beforebuffer).getData(), bounds);
+			}else if(p instanceof PixelDataByte){
+				((PixelDataByte)p).setData(((PixelDataByte)beforebuffer).getData(), bounds);
+			}else if(p instanceof PixelData15BitColor){
+				((PixelData15BitColor)p).setData((PixelData15BitColor)beforebuffer, bounds);
 			}
 		}
 	}
@@ -233,9 +233,9 @@ public abstract class PixelChangeHistory extends HistoryObject{
 			long m = compressafter.dataSize()+compressbefore.dataSize();
 			return m;
 		}
-		if(dataclass.equals(PixelData15BitBuffer.class)){
+		if(dataclass.equals(PixelData15BitColor.class)){
 			return  bounds.width*bounds.height*8*2;
-		}else if(dataclass.equals(PixelDataIntBuffer.class))
+		}else if(dataclass.equals(PixelDataInt.class))
 			return bounds.width*bounds.height*4*2;
 		else
 			return bounds.width*bounds.height*2;

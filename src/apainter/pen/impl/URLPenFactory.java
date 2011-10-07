@@ -12,8 +12,9 @@ import java.util.HashMap;
 import java.util.zip.DataFormatException;
 
 import apainter.Device;
-import apainter.data.PixelDataBuffer;
-import apainter.data.PixelDataByteBuffer;
+import apainter.data.PixelData;
+import apainter.data.PixelDataByte;
+import apainter.data.PixelDataContainer;
 import apainter.pen.APainterPen;
 import apainter.pen.Group;
 import apainter.pen.PenData;
@@ -143,7 +144,7 @@ public class URLPenFactory implements PenShapeFactory{
 		}
 
 		@Override
-		public PixelDataBuffer getFootPrint(double x, double y, int size) {
+		public PixelDataContainer getFootPrint(double x, double y, int size) {
 			Group gg ;
 			if(g.getSize()==size)gg=g;
 			else gg= findGroup(size);
@@ -151,8 +152,25 @@ public class URLPenFactory implements PenShapeFactory{
 			y = y-(int)floor(y);
 			int px = (int) (x*gg.getXBlocks());
 			int py = (int) (y*gg.getYBlocks());
-			PenData p = gg. getPen(px,py);
-			return p.getDataBuffer();
+			final PenData p = gg. getPen(px,py);
+			PixelDataContainer pdc = new PixelDataContainer() {
+
+				@Override
+				public int getWidth() {
+					return p.getWidth();
+				}
+
+				@Override
+				public PixelData getPixelData() {
+					return p.getDataBuffer();
+				}
+
+				@Override
+				public int getHeight() {
+					return p.getHeight();
+				}
+			};
+			return pdc;
 		}
 
 		@Override

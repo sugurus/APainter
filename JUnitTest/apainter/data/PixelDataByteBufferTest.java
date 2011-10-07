@@ -10,7 +10,7 @@ public class PixelDataByteBufferTest {
 
 	@Test
 	public void testIntersection() {
-		PixelDataByteBuffer b = PixelDataByteBuffer.create(100, 100);
+		PixelDataByte b = PixelDataByte.create(100, 100);
 		Rectangle r = new Rectangle(-10,20,100,230);
 		Rectangle t = new Rectangle(0,20,90,80);
 		assertEquals(b.intersection(r), t);

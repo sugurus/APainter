@@ -10,9 +10,10 @@ import apainter.canvas.event.PaintEvent;
 import apainter.canvas.event.PaintLastEvent;
 import apainter.canvas.event.PaintStartEvent;
 import apainter.data.OutBoundsException;
-import apainter.data.PixelData15BitBuffer;
-import apainter.data.PixelDataBuffer;
-import apainter.data.PixelDataIntBuffer;
+import apainter.data.PixelData15BitColor;
+import apainter.data.PixelData;
+import apainter.data.PixelDataContainer;
+import apainter.data.PixelDataInt;
 import apainter.drawer.event.DrawEvent;
 import apainter.drawer.event.DrawLastEvent;
 import apainter.drawer.event.DrawStartEvent;
@@ -24,8 +25,25 @@ import apainter.rendering.RenderingUtilities;
 
 class CPULayer extends DefaultLayer{
 
-	private PixelDataIntBuffer integerbuffer;
-	private PixelData15BitBuffer buffer;
+	private PixelDataInt integerbuffer;
+	private PixelDataContainer integercontainer = new PixelDataContainer() {
+
+		@Override
+		public int getWidth() {
+			return integerbuffer.width;
+		}
+
+		@Override
+		public PixelData getPixelData() {
+			return integerbuffer;
+		}
+
+		@Override
+		public int getHeight() {
+			return integerbuffer.height;
+		}
+	};
+	private PixelData15BitColor buffer;
 	private CPUMask mask;
 	private CPULayerHandler handler;
 
@@ -35,14 +53,14 @@ class CPULayer extends DefaultLayer{
 
 	public CPULayer(int id, String name,int width,int height,Canvas canvas,CPULayerData layerData) {
 		super(id, name,canvas,layerData);
-		buffer = new PixelData15BitBuffer(width, height);
+		buffer = new PixelData15BitColor(width, height);
 		integerbuffer = buffer.getIntegerBuffer();
 		mask = new CPUMask(width, height,canvas);
 		handler = new CPULayerHandler(this,canvas);
 	}
 
 	@Override
-	public PixelDataBuffer getDataBuffer() {
+	public PixelData getDataBuffer() {
 		return buffer;
 	}
 
@@ -100,12 +118,12 @@ class CPULayer extends DefaultLayer{
 	}
 
 	@Override
-	public void render(PixelDataBuffer destination, Rectangle r) {
+	public void render(PixelData destination, Rectangle r) {
 		Point p = new Point();
 		r =RenderingUtilities.getEnableClipBounds(destination, integerbuffer, p, r);
 		Renderer render = mode.getCPURenderer();
 		RenderingOption option = getRenderingOption();
-		render.rendering(destination, integerbuffer, p, r, option);
+		render.rendering(destination, integercontainer, p, r, option);
 	}
 
 	@Override
@@ -254,13 +272,13 @@ class CPULayer extends DefaultLayer{
 
 
 		@Override
-		PixelDataBuffer getOriginalData() {
+		PixelData getOriginalData() {
 			return h.getDataBuffer();
 		}
 
 
 		@Override
-		PixelDataBuffer getMaskOriginalData() {
+		PixelData getMaskOriginalData() {
 			return h.mask.getPixelDataBuffer();
 		}
 

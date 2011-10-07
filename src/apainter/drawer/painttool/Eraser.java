@@ -8,15 +8,16 @@ import java.awt.Rectangle;
 import apainter.Color;
 import apainter.Device;
 import apainter.GlobalValue;
-import apainter.data.PixelData15BitBuffer;
-import apainter.data.PixelDataBuffer;
-import apainter.data.PixelDataByteBuffer;
-import apainter.data.PixelDataIntBuffer;
+import apainter.data.PixelData15BitColor;
+import apainter.data.PixelData;
+import apainter.data.PixelDataByte;
+import apainter.data.PixelDataContainer;
+import apainter.data.PixelDataInt;
 import apainter.drawer.DrawPoint;
 import apainter.drawer.DrawTarget;
 import apainter.rendering.Renderer;
 import apainter.rendering.RenderingOption;
-import static apainter.data.PixelData15BitBuffer.*;
+import static apainter.data.PixelData15BitColor.*;
 //TODO mask対応
 public class Eraser extends BasicDrawer{
 
@@ -54,49 +55,49 @@ class EraserCPURendering implements Renderer{
 	private static PenCPUDefaultRendering pcdr = new PenCPUDefaultRendering();
 
 	@Override
-	final public void rendering(PixelDataBuffer base, PixelDataBuffer over, Point p,
+	final public void rendering(PixelData base, PixelDataContainer over, Point p,
 			Rectangle clip, RenderingOption option) {
-		if(base instanceof PixelData15BitBuffer){
-			do15bitlayer((PixelData15BitBuffer)base, (PixelDataByteBuffer)over, p, clip, option);
-		}else if(base instanceof PixelDataIntBuffer){
-			dolayer((PixelDataIntBuffer)base, over, p, clip, option);
-		}else if(base instanceof PixelDataByteBuffer){
-			domask((PixelDataByteBuffer)base,over,p,clip,option);
+		if(base instanceof PixelData15BitColor){
+			do15bitlayer((PixelData15BitColor)base, (PixelDataByte)over, p, clip, option);
+		}else if(base instanceof PixelDataInt){
+			dolayer((PixelDataInt)base, over.getPixelData(), p, clip, option);
+		}else if(base instanceof PixelDataByte){
+			domask((PixelDataByte)base,over.getPixelData(),p,clip,option);
 		}
 	}
 
-	final private static void dolayer(PixelDataIntBuffer base, PixelDataBuffer over, Point p,
+	final private static void dolayer(PixelDataInt base, PixelData over, Point p,
 			Rectangle clip, RenderingOption option) {
 		if(option.alphaFixed){
 			if(option.hasDestinationMask()){
-				if(over instanceof PixelDataByteBuffer)
-					renderint_alphfix_dmask(base, (PixelDataByteBuffer)over, p, clip, option,(PixelDataByteBuffer)option.destinationmask);
+				if(over instanceof PixelDataByte)
+					renderint_alphfix_dmask(base, (PixelDataByte)over, p, clip, option,(PixelDataByte)option.destinationmask);
 			}else{
-				if(over instanceof PixelDataByteBuffer)
-					renderint_alphfix(base, (PixelDataByteBuffer)over, p, clip, option);
+				if(over instanceof PixelDataByte)
+					renderint_alphfix(base, (PixelDataByte)over, p, clip, option);
 			}
 		}
 		else{
 			if(option.hasDestinationMask()){
-				renderint_dmask(base, (PixelDataByteBuffer)over, p, clip, option,(PixelDataByteBuffer)option.destinationmask);
+				renderint_dmask(base, (PixelDataByte)over, p, clip, option,(PixelDataByte)option.destinationmask);
 			}else{
-				renderint(base, (PixelDataByteBuffer)over, p, clip, option);
+				renderint(base, (PixelDataByte)over, p, clip, option);
 			}
 		}
 	}
 
-	final void do15bitlayer(PixelData15BitBuffer base,PixelDataByteBuffer over,Point p,
+	final void do15bitlayer(PixelData15BitColor base,PixelDataByte over,Point p,
 			Rectangle clip,RenderingOption option){
 		if(option.alphaFixed){
 			if(option.hasDestinationMask()){
-					render15bit_alphfix_dmask(base,over, p, clip, option,(PixelDataByteBuffer)option.destinationmask);
+					render15bit_alphfix_dmask(base,over, p, clip, option,(PixelDataByte)option.destinationmask);
 			}else{
 					render15bit_alphfix(base, over, p, clip, option);
 			}
 		}
 		else{
 			if(option.hasDestinationMask()){
-					render15bit_dmask(base, over, p, clip, option,(PixelDataByteBuffer)option.destinationmask);
+					render15bit_dmask(base, over, p, clip, option,(PixelDataByte)option.destinationmask);
 			}else{
 					render15bit(base, over, p, clip, option);
 			}
@@ -104,7 +105,7 @@ class EraserCPURendering implements Renderer{
 	}
 
 
-	final private static void domask(PixelDataByteBuffer base, PixelDataBuffer over, Point p,
+	final private static void domask(PixelDataByte base, PixelData over, Point p,
 			Rectangle clip, RenderingOption option){
 		//TODO draw mask
 		if(option.hasDestinationMask()){
@@ -115,7 +116,7 @@ class EraserCPURendering implements Renderer{
 
 	}
 
-	final static void renderint(PixelDataIntBuffer base,PixelDataByteBuffer over,Point p,Rectangle clip,RenderingOption option){
+	final static void renderint(PixelDataInt base,PixelDataByte over,Point p,Rectangle clip,RenderingOption option){
 		final int[] basep = base.getData();
 		final int basew = base.width;
 		final byte[] overp = over.getData();
@@ -144,8 +145,8 @@ class EraserCPURendering implements Renderer{
 		}
 	}
 
-	private void render15bit(PixelData15BitBuffer base,
-			PixelDataByteBuffer over, Point p, Rectangle clip,
+	private void render15bit(PixelData15BitColor base,
+			PixelDataByte over, Point p, Rectangle clip,
 			RenderingOption option) {
 		final int[] baseintp = base.getInteger();
 		final int[] basedecp = base.getDecimal();
@@ -183,8 +184,8 @@ class EraserCPURendering implements Renderer{
 
 
 
-	final static void renderint_dmask(PixelDataIntBuffer base,PixelDataByteBuffer over,Point p,Rectangle clip,RenderingOption option,
-			PixelDataByteBuffer dmask){
+	final static void renderint_dmask(PixelDataInt base,PixelDataByte over,Point p,Rectangle clip,RenderingOption option,
+			PixelDataByte dmask){
 		final int[] basep = base.getData();
 		final int basew = base.width;
 		final byte[] dmaskp = dmask.getData();
@@ -218,9 +219,9 @@ class EraserCPURendering implements Renderer{
 		}
 	}
 
-	private void render15bit_dmask(PixelData15BitBuffer base,
-			PixelDataByteBuffer over, Point p, Rectangle clip,
-			RenderingOption option, PixelDataByteBuffer dmask) {
+	private void render15bit_dmask(PixelData15BitColor base,
+			PixelDataByte over, Point p, Rectangle clip,
+			RenderingOption option, PixelDataByte dmask) {
 		final int[] baseintp = base.getInteger();
 		final int[] basedecp = base.getDecimal();
 		final int basew = base.width;
@@ -259,28 +260,28 @@ class EraserCPURendering implements Renderer{
 		}
 	}
 
-	final static void renderint_alphfix(PixelDataIntBuffer base,PixelDataByteBuffer over,Point p,Rectangle clip,RenderingOption option){
+	final static void renderint_alphfix(PixelDataInt base,PixelDataByte over,Point p,Rectangle clip,RenderingOption option){
 		option.frontColor=option.backColor;
 		pcdr.renderint_alphfix(base, over, p, clip, option);
 	}
 
-	private static void render15bit_alphfix(PixelData15BitBuffer base,
-			PixelDataByteBuffer over, Point p, Rectangle clip,
+	private static void render15bit_alphfix(PixelData15BitColor base,
+			PixelDataByte over, Point p, Rectangle clip,
 			RenderingOption option) {
 		option.frontColor=option.backColor;
 		pcdr.render15bit_alphfix(base, over, p, clip, option);
 
 	}
 
-	final static void renderint_alphfix_dmask(PixelDataIntBuffer base,PixelDataByteBuffer over,Point p,Rectangle clip,RenderingOption option,
-			PixelDataByteBuffer mask){
+	final static void renderint_alphfix_dmask(PixelDataInt base,PixelDataByte over,Point p,Rectangle clip,RenderingOption option,
+			PixelDataByte mask){
 		option.frontColor=option.backColor;
 		pcdr.renderint_alphfix_dmask(base, over, p, clip, option, mask);
 	}
 
-	private static void render15bit_alphfix_dmask(PixelData15BitBuffer base,
-			PixelDataByteBuffer over, Point p, Rectangle clip,
-			RenderingOption option, PixelDataByteBuffer mask) {
+	private static void render15bit_alphfix_dmask(PixelData15BitColor base,
+			PixelDataByte over, Point p, Rectangle clip,
+			RenderingOption option, PixelDataByte mask) {
 		option.frontColor=option.backColor;
 		pcdr.render15bit_alphfix_dmask(base, over, p, clip, option, mask);
 	}

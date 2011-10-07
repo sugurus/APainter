@@ -3,9 +3,7 @@ package apainter.rendering.impl.cpu;
 import java.awt.Point;
 import java.awt.Rectangle;
 
-import apainter.data.PixelDataBuffer;
-import apainter.data.PixelDataByteBuffer;
-import apainter.data.PixelDataIntBuffer;
+import apainter.data.*;
 import apainter.rendering.Renderer;
 import apainter.rendering.RenderingOption;
 
@@ -14,12 +12,12 @@ import static apainter.misc.Utility_PixelFunction.*;
 public class HardlightRenderer implements Renderer{
 
 	@Override
-	public void rendering(PixelDataBuffer base, PixelDataBuffer over, Point p,
+	public void rendering(PixelData base, PixelDataContainer over, Point p,
 			Rectangle clip, RenderingOption option) {
-		if (base instanceof PixelDataIntBuffer) {
-			PixelDataIntBuffer intb = (PixelDataIntBuffer) base;
-			if (over instanceof PixelDataIntBuffer) {
-				PixelDataIntBuffer into = (PixelDataIntBuffer) over;
+		if (base instanceof PixelDataInt) {
+			PixelDataInt intb = (PixelDataInt) base;
+			if (over.getPixelData() instanceof PixelDataInt) {
+				PixelDataInt into = (PixelDataInt) over.getPixelData();
 				if(option.hasSourceMask()){
 					rendering_mask(intb, into, p, clip, option);
 				}else
@@ -30,13 +28,13 @@ public class HardlightRenderer implements Renderer{
 
 	}
 
-	private void rendering_mask(PixelDataIntBuffer base, PixelDataIntBuffer over, Point p,
+	private void rendering_mask(PixelDataInt base, PixelDataInt over, Point p,
 			Rectangle clip, RenderingOption option) {
 
 		final int base_width = base.width;
 		final int over_width = over.width;
 		final int[] basepixel = base.getData(),overpixel = over.getData();
-		final byte[] maskpixel = ((PixelDataByteBuffer)option.sourcemask).getData();
+		final byte[] maskpixel = ((PixelDataByte)option.sourcemask).getData();
 		final int px = p.x,py=p.y;
 		final int layer = option.overlayeralph;
 		final int clipx = clip.x;
@@ -68,7 +66,7 @@ public class HardlightRenderer implements Renderer{
 	}
 
 
-	private void rendering(PixelDataIntBuffer base, PixelDataIntBuffer over, Point p,
+	private void rendering(PixelDataInt base, PixelDataInt over, Point p,
 			Rectangle clip, RenderingOption option) {
 		final int base_width = base.width;
 		final int over_width = over.width;

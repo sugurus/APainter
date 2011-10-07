@@ -14,8 +14,8 @@ import java.beans.PropertyChangeListener;
 
 import javax.swing.event.EventListenerList;
 
-import nodamushi.pentablet.PenTabletMouseEvent;
-import nodamushi.pentablet.PenTabletMouseEvent.CursorDevice;
+import nodamushi.pentablet.TabletMouseEvent;
+import nodamushi.pentablet.TabletMouseEvent.CursorDevice;
 import apainter.APainter;
 import apainter.CreateHandler;
 import apainter.Device;
@@ -29,8 +29,8 @@ import apainter.canvas.layerdata.CPULayerData;
 import apainter.canvas.layerdata.InnerLayerHandler;
 import apainter.canvas.layerdata.LayerData;
 import apainter.canvas.layerdata.LayerHandler;
-import apainter.data.PixelDataByteBuffer;
-import apainter.data.PixelDataIntBuffer;
+import apainter.data.PixelDataByte;
+import apainter.data.PixelDataInt;
 import apainter.drawer.DrawTarget;
 import apainter.gui.CPUCanvasPanel;
 import apainter.gui.CanvasMouseListener;
@@ -64,8 +64,8 @@ public class Canvas implements CreateHandler{
 
 	private CPUCanvasPanel cpucanvas;
 
-	private final LimitedResource<PixelDataIntBuffer> intbuffer;
-	private final LimitedResource<PixelDataByteBuffer> bytebuffer;
+	private final LimitedResource<PixelDataInt> intbuffer;
+	private final LimitedResource<PixelDataByte> bytebuffer;
 
 
 	public Canvas(int width,int height,Device device,GlobalValue globalvalue,int canvasid,APainter ap){
@@ -99,14 +99,14 @@ public class Canvas implements CreateHandler{
 		this.workTime  = workTime;
 		this.actionCount = actionCount;
 		this.apainter = nullCheack(ap, "apainter is null");
-		this.intbuffer=new LimitedResource<PixelDataIntBuffer>(5,new LimitedResource.ResourceFactory<PixelDataIntBuffer>(){
-			public PixelDataIntBuffer create() {
-				return PixelDataIntBuffer.create(Canvas.this.width, Canvas.this.height);
+		this.intbuffer=new LimitedResource<PixelDataInt>(5,new LimitedResource.ResourceFactory<PixelDataInt>(){
+			public PixelDataInt create() {
+				return PixelDataInt.create(Canvas.this.width, Canvas.this.height);
 			}
 		});
-		this.bytebuffer=new LimitedResource<PixelDataByteBuffer>(5,new LimitedResource.ResourceFactory<PixelDataByteBuffer>(){
-			public PixelDataByteBuffer create() {
-				return PixelDataByteBuffer.create(Canvas.this.width, Canvas.this.height);
+		this.bytebuffer=new LimitedResource<PixelDataByte>(5,new LimitedResource.ResourceFactory<PixelDataByte>(){
+			public PixelDataByte create() {
+				return PixelDataByte.create(Canvas.this.width, Canvas.this.height);
 			}
 		});
 		id = canvasid;
@@ -220,10 +220,10 @@ public class Canvas implements CreateHandler{
 		return layerdata.createImage();
 	}
 
-	public LimitedResource<PixelDataIntBuffer> getPixelDataIntBufferResource(){
+	public LimitedResource<PixelDataInt> getPixelDataIntBufferResource(){
 		return intbuffer;
 	}
-	public LimitedResource<PixelDataByteBuffer> getPixelDataByteBuffereResource(){
+	public LimitedResource<PixelDataByte> getPixelDataByteBuffereResource(){
 		return bytebuffer;
 	}
 
@@ -343,7 +343,7 @@ public class Canvas implements CreateHandler{
 			}
 		});
 	}
-	public void dispatchEvent(final PenTabletMouseEvent e){
+	public void dispatchEvent(final TabletMouseEvent e){
 		if(e==null)return;
 		ceaccepter.runInAnyThread(new Runnable() {
 			public void run() {
@@ -367,7 +367,7 @@ public class Canvas implements CreateHandler{
 				case MouseEvent.MOUSE_EXITED:
 					onExit(e);
 					break;
-				case PenTabletMouseEvent.MOUSE_CURSORTYPECHANGE:
+				case TabletMouseEvent.MOUSE_CURSORTYPECHANGE:
 					Object source =e.getSource();
 					CursorDevice dev = e.getCursorDevice();
 					String newvalue;
@@ -382,7 +382,7 @@ public class Canvas implements CreateHandler{
 							if(head!=tail)
 								tail.unselected();
 						}
-					}else if(e.isPen()){
+					}else if(e.isPenPressed()){
 						newvalue="head";
 						CanvasMouseListener head =
 								global.get(CanvasHeadAction, CanvasMouseListener.class);
@@ -419,21 +419,21 @@ public class Canvas implements CreateHandler{
 			scroll.scroll(e, this);
 		}
 	}
-	private void onPressed(PenTabletMouseEvent e) {
+	private void onPressed(TabletMouseEvent e) {
 		headaction=tailacton=null;
-		if(e.isPen()){
+		if(e.isPenPressed()){
 			Object head = global.get(GlobalKey.CanvasHeadAction);
 			if(head!=null && head instanceof CanvasMouseListener)(headaction=(CanvasMouseListener)head).press(e,this);
-		}else if(e.isTail()){
+		}else if(e.isTailPressed()){
 			Object tail = global.get(GlobalKey.CanvasTailAction);
 			if(tail!=null && tail instanceof CanvasMouseListener)(tailacton=(CanvasMouseListener)tail).press(e,this);
 		}
 	}
 
-	private void onReleased(PenTabletMouseEvent e) {
-		if(e.isPen()){
+	private void onReleased(TabletMouseEvent e) {
+		if(e.isPenPressed()){
 			if(headaction!=null)headaction.release(e,this);
-		}else if(e.isTail()){
+		}else if(e.isTailPressed()){
 			if(tailacton!=null)tailacton.release(e,this);
 		}else if(e.isPopupTrigger()){
 			Component c = e.getComponent();
@@ -448,33 +448,33 @@ public class Canvas implements CreateHandler{
 		headaction=tailacton=null;
 	}
 
-	private void onDragged(PenTabletMouseEvent e) {
-		if(e.isPen()){
+	private void onDragged(TabletMouseEvent e) {
+		if(e.isPenPressed()){
 			if(headaction!=null)headaction.drag(e,this);
-		}else if(e.isTail()){
+		}else if(e.isTailPressed()){
 			if(tailacton!=null)tailacton.drag(e,this);
 		}
 	}
-	private void onMove(PenTabletMouseEvent e) {
-		if(e.isPen()){
+	private void onMove(TabletMouseEvent e) {
+		if(e.isPenPressed()){
 			if(headaction!=null)headaction.move(e,this);
-		}else if(e.isTail()){
+		}else if(e.isTailPressed()){
 			if(tailacton!=null)tailacton.move(e,this);
 		}
 	}
 
-	private void onExit(PenTabletMouseEvent e) {
-		if(e.isPen()){
+	private void onExit(TabletMouseEvent e) {
+		if(e.isPenPressed()){
 			if(headaction!=null)headaction.exit(e,this);
-		}else if(e.isTail()){
+		}else if(e.isTailPressed()){
 			if(tailacton!=null)tailacton.exit(e,this);
 		}
 	}
 
-	private void onEnter(PenTabletMouseEvent e) {
-		if(e.isPen()){
+	private void onEnter(TabletMouseEvent e) {
+		if(e.isPenPressed()){
 			if(headaction!=null)headaction.enter(e,this);
-		}else if(e.isTail()){
+		}else if(e.isTailPressed()){
 			if(tailacton!=null)tailacton.enter(e,this);
 		}
 	}

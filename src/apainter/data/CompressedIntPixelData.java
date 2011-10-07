@@ -9,11 +9,11 @@ import apainter.io.SeekOutPutStream;
 public class CompressedIntPixelData extends CompressedPixelData{
 	private int size;
 
-	public CompressedIntPixelData(PixelDataIntBuffer p) {
+	public CompressedIntPixelData(PixelDataInt p) {
 		compress(p.getData(), p.width, p.height, 0, 0, p.width, p.height);
 	}
 
-	public CompressedIntPixelData(PixelDataIntBuffer p,int x,int y,int subw,int subh){
+	public CompressedIntPixelData(PixelDataInt p,int x,int y,int subw,int subh){
 		compress(p.getData(), p.width, p.height, x, y, subw, subh);
 	}
 
@@ -106,7 +106,7 @@ public class CompressedIntPixelData extends CompressedPixelData{
 
 
 	@Override
-	public synchronized PixelDataIntBuffer inflate() {
+	public synchronized PixelDataInt inflate() {
 		if(flushed)throw new RuntimeException("flushed");
 		try{
 			Inflater inf = new Inflater();
@@ -147,7 +147,7 @@ public class CompressedIntPixelData extends CompressedPixelData{
 			}
 
 			inf.end();
-			PixelDataIntBuffer p = new PixelDataIntBuffer(width, height, data);
+			PixelDataInt p = new PixelDataInt(width, height, data);
 			return p;
 		}catch (Exception e) {
 			throw new Error();

@@ -10,11 +10,11 @@ public class CompressedBytePixelData extends CompressedPixelData{
 
 	private int size;
 
-	public CompressedBytePixelData(PixelDataByteBuffer p) {
+	public CompressedBytePixelData(PixelDataByte p) {
 		compress(p.getData(), p.width, p.height, 0, 0, p.width, p.height);
 	}
 
-	public CompressedBytePixelData(PixelDataByteBuffer p,int x,int y,int subw,int subh){
+	public CompressedBytePixelData(PixelDataByte p,int x,int y,int subw,int subh){
 		compress(p.getData(), p.width, p.height, x, y, subw, subh);
 	}
 
@@ -70,7 +70,7 @@ public class CompressedBytePixelData extends CompressedPixelData{
 //	}
 
 	@Override
-	public PixelDataByteBuffer inflate() {
+	public PixelDataByte inflate() {
 		if(flushed)throw new RuntimeException("flushed");
 		try{
 			Inflater inf = new Inflater();
@@ -104,7 +104,7 @@ public class CompressedBytePixelData extends CompressedPixelData{
 				}
 			}
 			inf.end();
-			PixelDataByteBuffer p = new PixelDataByteBuffer(width, height, data);
+			PixelDataByte p = new PixelDataByte(width, height, data);
 			return p;
 		}catch (DataFormatException e) {
 			throw new Error();

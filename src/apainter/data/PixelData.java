@@ -11,9 +11,7 @@ import java.awt.geom.Point2D;
  * @author nodamushi
  *
  */
-public abstract class PixelDataBuffer implements Cloneable{
-	private static Class<?> intarr = (new int[1]).getClass(),bytearr = (new byte[1]).getClass();
-
+public abstract class PixelData implements Cloneable{
 
 	/**
 	 * 渡されたオブジェクトを保持するバッファーを作成します。
@@ -22,12 +20,12 @@ public abstract class PixelDataBuffer implements Cloneable{
 	 * @param o
 	 * @return
 	 */
-	public static PixelDataBuffer createBuffer(int w,int h,Object o){
+	public static PixelData createBuffer(int w,int h,Object o){
 		if(o.getClass().isArray()){
-			if(o.getClass().equals(intarr)){
-				return new PixelDataIntBuffer(w, h, (int[])o);
-			}else if(o.getClass().equals(bytearr)){
-				return new PixelDataByteBuffer(w, h, (byte[])o);
+			if(o.getClass().equals(int[].class)){
+				return new PixelDataInt(w, h, (int[])o);
+			}else if(o.getClass().equals(byte[].class)){
+				return new PixelDataByte(w, h, (byte[])o);
 			}
 		}
 		throw new RuntimeException("このオブジェクトに対応していません。"+o);
@@ -42,12 +40,12 @@ public abstract class PixelDataBuffer implements Cloneable{
 	 * @param o
 	 * @return
 	 */
-	public static PixelDataBuffer createCopyBuffer(int w,int h,Object o){
+	public static PixelData createCopyBuffer(int w,int h,Object o){
 		if(o.getClass().isArray()){
-			if(o.getClass().equals(intarr)){
-				return new PixelDataIntBuffer(w, h, ((int[])o).clone());
-			}else if(o.getClass().equals(bytearr)){
-				return new PixelDataByteBuffer(w, h, ((byte[])o).clone());
+			if(o.getClass().equals(int[].class)){
+				return new PixelDataInt(w, h, ((int[])o).clone());
+			}else if(o.getClass().equals(byte[].class)){
+				return new PixelDataByte(w, h, ((byte[])o).clone());
 			}
 		}
 		throw new RuntimeException("このオブジェクトに対応していません。"+o);
@@ -57,7 +55,7 @@ public abstract class PixelDataBuffer implements Cloneable{
 	public final int width,height;
 	private final Rectangle r = new Rectangle();
 
-	public PixelDataBuffer(int w,int h) {
+	public PixelData(int w,int h) {
 		if(w <=0 || h <= 0)throw new RuntimeException(String.format("size error w:%d,h%d",w,h));
 		width = w;
 		height =h;
@@ -115,6 +113,7 @@ public abstract class PixelDataBuffer implements Cloneable{
 
 	public abstract void dispose();
 	abstract Object getData();
-	public abstract PixelDataBuffer clone();
-	public abstract PixelDataBuffer copy(Rectangle r);
+	public abstract PixelData clone();
+	public abstract PixelData copy(Rectangle r);
+	public abstract ColorType getColorType();
 }

@@ -4,7 +4,8 @@ import java.awt.Point;
 import java.awt.Rectangle;
 
 import apainter.Color;
-import apainter.data.PixelDataBuffer;
+import apainter.data.PixelData;
+import apainter.data.PixelDataContainer;
 
 public interface Renderer {
 	/**
@@ -20,13 +21,13 @@ public interface Renderer {
 	 * RenderingUtilities#getEnableClipBoundsが利用できます。<br><br>
 	 * Rendererが受け付けることのできるPixelDataBufferは決まっていることがあります。<br>
 	 * 受け付けることができるタイプ以外を受け付けた場合の挙動は定義していません。
-	 * @see RenderingUtilities#getEnableClipBounds(PixelDataBuffer,PixelDataBuffer,Point,Rectangle) getEnableClipBounds
+	 * @see RenderingUtilities#getEnableClipBounds(PixelData,PixelData,Point,Rectangle) getEnableClipBounds
 	 * @param base 描き込まれる画像
 	 * @param over 描き込む画像
 	 * @param p overの左上の点のbase上での位置
 	 * @param clip baseのどの範囲をレンダリングするか
 	 * @param option レンダリングオプション　使い方はRenderの実装によります。
 	 */
-	public void rendering(PixelDataBuffer base,PixelDataBuffer over,
+	public void rendering(PixelData base,PixelDataContainer over,
 			Point p,Rectangle clip,RenderingOption option);
 }

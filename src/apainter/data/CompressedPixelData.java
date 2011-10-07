@@ -8,15 +8,15 @@ public abstract class CompressedPixelData {
 	 * @param p
 	 * @return
 	 */
-	public static CompressedPixelData compress(PixelDataBuffer p){
+	public static CompressedPixelData compress(PixelData p){
 		if(p==null)throw new NullPointerException("p");
-		if(p instanceof PixelDataIntBuffer){
-			return new CompressedIntPixelData((PixelDataIntBuffer)p);
+		if(p instanceof PixelDataInt){
+			return new CompressedIntPixelData((PixelDataInt)p);
 		}
-		else if(p instanceof PixelDataByteBuffer){
-			return new CompressedBytePixelData((PixelDataByteBuffer)p);
-		}else if(p instanceof PixelData15BitBuffer){
-			return new Compressed15BitPixelData((PixelData15BitBuffer) p);
+		else if(p instanceof PixelDataByte){
+			return new CompressedBytePixelData((PixelDataByte)p);
+		}else if(p instanceof PixelData15BitColor){
+			return new Compressed15BitPixelData((PixelData15BitColor) p);
 		}
 
 		throw new RuntimeException(String.format("この形式に対応していません:class %d",p.getClass().getName()));
@@ -31,14 +31,14 @@ public abstract class CompressedPixelData {
 	 * @param height
 	 * @return
 	 */
-	public static CompressedPixelData compress(PixelDataBuffer p,
+	public static CompressedPixelData compress(PixelData p,
 			int x,int y,int width,int height){
 		if(p==null)throw new NullPointerException("p");
-		if(p instanceof PixelDataIntBuffer){
-			return new CompressedIntPixelData((PixelDataIntBuffer)p,x,y,width,height);
+		if(p instanceof PixelDataInt){
+			return new CompressedIntPixelData((PixelDataInt)p,x,y,width,height);
 		}
-		else if(p instanceof PixelDataByteBuffer){
-			return new CompressedBytePixelData((PixelDataByteBuffer)p,x,y,width,height);
+		else if(p instanceof PixelDataByte){
+			return new CompressedBytePixelData((PixelDataByte)p,x,y,width,height);
 		}
 
 		throw new RuntimeException(String.format("この形式に対応していません:class %d",p.getClass().getName()));
@@ -65,7 +65,7 @@ public abstract class CompressedPixelData {
 	 * 解凍します。
 	 * @return
 	 */
-	abstract public PixelDataBuffer inflate();
+	abstract public PixelData inflate();
 
 	/**
 	 * 保持しているデータを解放します。

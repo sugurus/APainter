@@ -21,7 +21,7 @@ public class CompressedBytePixelDataTest {
 	public static void setUpBeforeClass() throws Exception {
 		Random r = new Random();
 		r.nextBytes(data);
-		PixelDataByteBuffer d = new PixelDataByteBuffer(w, h, data);
+		PixelDataByte d = new PixelDataByte(w, h, data);
 		p = new CompressedBytePixelData(d);
 	}
 
@@ -39,7 +39,7 @@ public class CompressedBytePixelDataTest {
 
 	@Test
 	public void testInflate() {
-		PixelDataByteBuffer d = p.inflate();
+		PixelDataByte d = p.inflate();
 		assertTrue(Arrays.equals(d.getData(), data));
 	}
 

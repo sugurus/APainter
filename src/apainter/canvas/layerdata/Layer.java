@@ -1,7 +1,7 @@
 package apainter.canvas.layerdata;
 
 import apainter.CreateHandler;
-import apainter.data.PixelDataBuffer;
+import apainter.data.PixelData;
 import apainter.rendering.RenderingOption;
 
 /**
@@ -18,5 +18,5 @@ interface Layer extends LayerHandle,Renderable,CreateHandler{
 	public InnerLayerHandler getHandler();
 
 	public RenderingOption getRenderingOption();
-	public PixelDataBuffer getDataBuffer();
+	public PixelData getDataBuffer();
 }

@@ -12,7 +12,8 @@ import javax.swing.event.EventListenerList;
 
 import apainter.Color;
 import apainter.Device;
-import apainter.data.PixelDataBuffer;
+import apainter.data.PixelData;
+import apainter.data.PixelDataContainer;
 import apainter.drawer.event.DrawEvent;
 import apainter.drawer.event.DrawLastEvent;
 import apainter.drawer.event.DrawStartEvent;
@@ -107,12 +108,13 @@ abstract public class Drawer {
 		plotpoint = plot.getPlotPoint();
 		plot.move(length);
 		double x = plotpoint.getX(),y=plotpoint.getY();
-		PixelDataBuffer map = pen.getFootPrint(x, y, pensize);
+		PixelDataContainer map = pen.getFootPrint(x, y, pensize);
 		Point center = pen.getCenterPoint(pensize);
 
 
 
-		Rectangle bounds = new Rectangle((int)floor(x) -center.x, (int)floor(y)-center.y, map.width, map.height);
+		Rectangle bounds = new Rectangle((int)floor(x) -center.x, (int)floor(y)-center.y,
+				map.getWidth(), map.getHeight());
 		Color front =getFrontColor(e, pen),back = getBackColor(e, pen);
 		int dens =(int) ((((256-density_min)*pressure)+density_min)*density);
 		RenderingOption option = new RenderingOption(front, back, null, dens);
@@ -141,10 +143,10 @@ abstract public class Drawer {
 				plot.move(1/16d);
 				continue;
 			}
-			PixelDataBuffer map = pen.getFootPrint(x, y, size);
+			PixelDataContainer map = pen.getFootPrint(x, y, size);
 			Point center = pen.getCenterPoint(size);
 			Rectangle bounds = new Rectangle((int)x-center.x, (int)y-center.y,
-					map.width, map.height);
+					map.getWidth(), map.getHeight());
 			Color front =getFrontColor(e, pen),back = getBackColor(e, pen);
 			int dens =(int) ((((256-density_min)*pres)+density_min)*density);
 			RenderingOption option = new RenderingOption(front, back, null, dens);

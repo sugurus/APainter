@@ -5,7 +5,7 @@ import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 
-public final class PenTabletMouseEvent extends MouseEvent{
+public final class TabletMouseEvent extends MouseEvent{
 
 
 
@@ -20,7 +20,7 @@ public final class PenTabletMouseEvent extends MouseEvent{
 		rotation=0;//回転角度
 
 	//Mouse用
-	private PenTabletMouseEvent(Component source,int id,long when,int modifiers,
+	private TabletMouseEvent(Component source,int id,long when,int modifiers,
             int x,int y,int clickCount,boolean popupTrigger,int button,
             CursorDevice ctype,State state)
 	{
@@ -32,7 +32,7 @@ public final class PenTabletMouseEvent extends MouseEvent{
 	}
 
 
-	private PenTabletMouseEvent(Component source,int id,long when,int modifiers,
+	private TabletMouseEvent(Component source,int id,long when,int modifiers,
             double x,double y,int clickCount,boolean popupTrigger,
             CursorDevice ctype,State state,
             double pres,double rot,double tx,double ty)
@@ -125,21 +125,17 @@ public final class PenTabletMouseEvent extends MouseEvent{
 	public Point getPoint() {return new Point(x,y);}
 
 	/**
-	 * <p>マウス座標を配列で返します。</p>
-	 * @return {x,y}
-	 */
-	public int[] getXY(){return new int[] {x,y};}
-	/**
-	 * <p>マウス座標をdouble型配列で返します。</p>
-	 * @return {x,y}
-	 */
-	public double[] getXYDouble() {	return new double[] {dx,dy};}
-
-	/**
 	 * <p>マウス座標をPoint2D.Doubleで返します。</p>
 	 */
-	public Point2D.Double getPointDouble() {
+	public Point2D.Double getPoint2D() {
 		return new Point2D.Double(dx, dy);
+	}
+
+	public double getDoubleX(){
+		return dx;
+	}
+	public double getDoubleY(){
+		return dy;
 	}
 
 
@@ -181,22 +177,36 @@ public final class PenTabletMouseEvent extends MouseEvent{
 		return String.format("(x:%f,y:%f),pressure %f,tit(x %f,y %f),rotation %f,CursorType %s,State %s",dx,dy,pressure,titx,tity,rotation,cursorDevice.toString(),state.toString());
 	}
 
-	public void setState(State s){ state = s; }
-
 
 	/**
 	 * ペン（先端）でクリックされたかどうか。
-	 * @return ペンでクリックされた場合true。マウスでもtrueが返ります。
+	 * @return ペンでクリックされた場合true。マウスのBUTTON1がクリックされていてもtrueが返ります。
+	 * ペンデバイスでも、RIGHTやCENTERの時はtrueが返りません。
 	 */
-	public boolean isPen(){
+	public boolean isPenPressed(){
 		int m = getModifiers()|getModifiersEx();
-		return b(m,HEAD_MASK)||
+		return b(m,HEAD_DOWN_MASK)||
 				((b(m,BUTTON1_DOWN_MASK)||b(m,BUTTON1_MASK)) &&!b(m,TAIL_MASK));
 	}
-	public boolean isTail(){
+
+	public boolean isPenDevice(){
+		int m = getModifiersEx();
+		return b(m,HEAD_MASK);
+	}
+
+	/**
+	 * ペンの後ろでクリックされたかどうか。
+	 * @return
+	 */
+	public boolean isTailPressed(){
+		int m = getModifiersEx();
+		return b(m,TAIL_DOWN_MASK);
+	}
+	public boolean isTailDevice(){
 		int m = getModifiersEx();
 		return b(m,TAIL_MASK);
 	}
+
 	private static boolean b(int m,int mask){
 		return (m&mask) == mask;
 	}
@@ -225,23 +235,16 @@ public final class PenTabletMouseEvent extends MouseEvent{
 	 * @param nex リストの後方
 	 * @return ラップしたAPainterMouseEvent
 	 */
-	static public PenTabletMouseEvent wrapEvent(MouseEvent e)
+	static public TabletMouseEvent wrapEvent(MouseEvent e)
 	{
 		State state;
 		int id = e.getID();
 		state = State.getState(id);
-		return new PenTabletMouseEvent((Component)e.getSource(), id, e.getWhen(),
+		return new TabletMouseEvent((Component)e.getSource(), id, e.getWhen(),
 				e.getModifiers(), e.getX(), e.getY(),
 				e.getClickCount(), e.isPopupTrigger(), e.getButton(),  CursorDevice.MOUSE, state);
 	}
 
-	static public PenTabletMouseEvent createEvent(Component source,long when,int modifiers,double x,double y,
-			int clickCount,
-			CursorDevice ctype,State state,double pres,double rot,double tx,double ty)
-	{
-		return createEvent(source, when, modifiers, x, y, clickCount,
-				 ctype, state, pres, rot, tx, ty, null, null);
-	}
 
 
 	/**
@@ -259,23 +262,21 @@ public final class PenTabletMouseEvent extends MouseEvent{
 	 * @param rot
 	 * @param tx
 	 * @param ty
-	 * @param befo
-	 * @param nex
 	 * @return
 	 */
-	static PenTabletMouseEvent createEvent(Component source,long when,int modifiers,double x,double y,
+	static TabletMouseEvent createEvent(Component source,long when,int modifiers,double x,double y,
 			int clickCount,CursorDevice ctype,State state,
-			double pres,double rot,double tx,double ty,PenTabletMouseEvent befo,PenTabletMouseEvent nex)
+			double pres,double rot,double tx,double ty)
 	{
 		boolean popupTrigger=b(modifiers,BUTTON3_DOWN_MASK)||b(modifiers,BUTTON3_MASK);
 		if(pres <0)pres = 0;
 		else if(pres >1)pres = 1;
 		int id=state.getID();
-		return new PenTabletMouseEvent(source, id, when, modifiers, x, y,
+		return new TabletMouseEvent(source, id, when, modifiers, x, y,
 				clickCount, popupTrigger, ctype, state, pres, rot, tx, ty);
 	}
 
-	static public PenTabletMouseEvent createEvent(Component source,long when,int modifiers,double x,double y,
+	static public TabletMouseEvent createEvent(Component source,long when,int modifiers,double x,double y,
 			int clickCount,CursorDevice ctype,State state)
 	{
 		return createEvent(source, when, modifiers, x, y, clickCount, ctype, state, 1, 0, 0, 0);
@@ -293,7 +294,7 @@ public final class PenTabletMouseEvent extends MouseEvent{
 	 * ボタンの状態
 	 */
 	static public enum State{
-		PRESSED,DRAGGED,RELEASED,ENTERED,EXITED,MOVE,
+		PRESSED,DRAGGED,RELEASED,ENTERED,EXITED,MOVED,
 		/**カーソルを動かしているデバイスが変わった*/CURSORTYPECHANGE,
 		/**判別不能の時（nullの代用）*/NULL,
 		/**非推奨。マウスイベントとの整合性を保つ為にあります。今後もタブレットでこのイベントは発生させません*/CLICKED;
@@ -317,7 +318,7 @@ public final class PenTabletMouseEvent extends MouseEvent{
 			case RELEASED:
 				id = MOUSE_RELEASED;
 				break;
-			case MOVE:
+			case MOVED:
 				id = MOUSE_MOVED;
 				break;
 			case CURSORTYPECHANGE:
@@ -358,7 +359,7 @@ public final class PenTabletMouseEvent extends MouseEvent{
 				state = State.EXITED;
 				break;
 			case MOUSE_MOVED:
-				state = State.MOVE;
+				state = State.MOVED;
 				break;
 			case MOUSE_PRESSED:
 				state = State.PRESSED;

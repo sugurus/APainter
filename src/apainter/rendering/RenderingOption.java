@@ -4,8 +4,8 @@ import java.awt.Point;
 import java.util.HashMap;
 
 import apainter.Color;
-import apainter.data.PixelDataBuffer;
-import apainter.data.PixelDataByteBuffer;
+import apainter.data.PixelData;
+import apainter.data.PixelDataByte;
 
 public class RenderingOption {
 	static final Color white = new Color(0xffffffff),black = new Color(0xff000000);
@@ -16,7 +16,7 @@ public class RenderingOption {
 
 	public boolean alphaFixed=false;
 
-	public PixelDataBuffer
+	public PixelData
 		sourcemask,
 		/**
 		 * destinationのマスクとして使われる。それ以外の意味を持たせても良い。<br>
@@ -48,7 +48,7 @@ public class RenderingOption {
 	public RenderingOption(int overalph) {
 		this(null,overalph);
 	}
-	public RenderingOption(PixelDataByteBuffer mask,int overalph) {
+	public RenderingOption(PixelDataByte mask,int overalph) {
 		this(white,black,mask,overalph);
 	}
 	/**
@@ -58,7 +58,7 @@ public class RenderingOption {
 	 * @param mask マスクデータ
 	 * @param overalph 透明度 0～256
 	 */
-	public RenderingOption(Color front,Color back,PixelDataBuffer mask,int overalph) {
+	public RenderingOption(Color front,Color back,PixelData mask,int overalph) {
 		if(front!=null)frontColor = front.clone();
 		else frontColor = null;
 		if(back !=null)backColor = back.clone();

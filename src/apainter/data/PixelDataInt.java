@@ -12,11 +12,11 @@ import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.util.Arrays;
 
-public class PixelDataIntBuffer extends PixelDataBuffer{
+public class PixelDataInt extends PixelData{
 
-	public static PixelDataIntBuffer create(int w,int h){
+	public static PixelDataInt create(int w,int h){
 		if(w<=0||h<=0)throw new IllegalArgumentException(String.format("w:%d,h:%d",w,h));
-		return new PixelDataIntBuffer(w, h, new int[w*h]);
+		return new PixelDataInt(w, h, new int[w*h]);
 	}
 
 
@@ -31,7 +31,7 @@ public class PixelDataIntBuffer extends PixelDataBuffer{
 	 * @param subh
 	 * @return
 	 */
-	public static PixelDataIntBuffer create(int w,int h,int[] data,
+	public static PixelDataInt create(int w,int h,int[] data,
 			int x,int y,int subw,int subh){
 		if(w<=0||h<=0 || data.length != w*h || x<0||y<0||subw<=0||subh<=0||
 				x+subw>w|y+subh>h)
@@ -42,25 +42,29 @@ public class PixelDataIntBuffer extends PixelDataBuffer{
 		for(int yy=y,e=y+subh;yy<e;yy++){
 			System.arraycopy(data, yy*w+x, t, (yy-y)*subw, subw);
 		}
-		return new PixelDataIntBuffer(subw, subh, t);
+		return new PixelDataInt(subw, subh, t);
 	}
 
 	private int[] pixel;
+	@Override
+	public ColorType getColorType() {
+		return ColorType.ARGB;
+	}
 
-	public PixelDataIntBuffer(int w,int h,int[] pixel) {
+	public PixelDataInt(int w,int h,int[] pixel) {
 		super(w,h);
 		if(pixel.length!=w*h)throw new RuntimeException(String.format("pixel length(%d) != w(%d)*h(%d)",pixel.length,w,h));
 		this.pixel = pixel;
 	}
 
 	@Override
-	public PixelDataBuffer clone() {
-		return new PixelDataIntBuffer(width, height, pixel.clone());
+	public PixelData clone() {
+		return new PixelDataInt(width, height, pixel.clone());
 	}
 
 	@Override
-	public PixelDataIntBuffer copy(Rectangle r){
-		return new PixelDataIntBuffer(r.width, r.height, copy(null, r));
+	public PixelDataInt copy(Rectangle r){
+		return new PixelDataInt(r.width, r.height, copy(null, r));
 	}
 
 	@Override
@@ -112,7 +116,7 @@ public class PixelDataIntBuffer extends PixelDataBuffer{
 		return pixel[x+y*width];
 	}
 
-	public void draw(PixelDataIntBuffer p){
+	public void draw(PixelDataInt p){
 		int w = p.getWidth(),h=p.getHeight();
 		int rw,rh;
 		if(getWidth()<w)rw=getWidth();

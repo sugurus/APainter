@@ -3,8 +3,9 @@ package apainter.rendering.impl.cpu;
 import java.awt.Point;
 import java.awt.Rectangle;
 
-import apainter.data.PixelDataBuffer;
-import apainter.data.PixelDataIntBuffer;
+import apainter.data.PixelData;
+import apainter.data.PixelDataContainer;
+import apainter.data.PixelDataInt;
 import apainter.rendering.Renderer;
 import apainter.rendering.RenderingOption;
 import static apainter.misc.Utility_PixelFunction.*;
@@ -16,14 +17,14 @@ import static apainter.misc.Utility_PixelFunction.*;
 public class ClearRender implements Renderer{
 
 	@Override
-	public void rendering(PixelDataBuffer base, PixelDataBuffer over, Point p,
+	public void rendering(PixelData base, PixelDataContainer over, Point p,
 			Rectangle clip, RenderingOption option) {
-		if (base instanceof PixelDataIntBuffer) {
-			rendering((PixelDataIntBuffer)base, over, p, clip, option);
+		if (base instanceof PixelDataInt) {
+			rendering((PixelDataInt)base, (PixelData)null, p, clip, option);
 		}
 	}
 
-	public void rendering(PixelDataIntBuffer base, PixelDataBuffer over, Point p,
+	public void rendering(PixelDataInt base, PixelData over, Point p,
 			Rectangle clip, RenderingOption option) {
 		final int basew = base.width;
 		final int w = clip.width+clip.x,h=clip.height+clip.y;

@@ -7,84 +7,85 @@ import java.awt.Rectangle;
 
 
 import apainter.Color;
-import apainter.data.PixelData15BitBuffer;
-import apainter.data.PixelDataBuffer;
-import apainter.data.PixelDataByteBuffer;
-import apainter.data.PixelDataIntBuffer;
+import apainter.data.PixelData15BitColor;
+import apainter.data.PixelData;
+import apainter.data.PixelDataByte;
+import apainter.data.PixelDataContainer;
+import apainter.data.PixelDataInt;
 import apainter.rendering.Renderer;
 import apainter.rendering.RenderingOption;
 
 abstract class PenCPURendering implements Renderer{
 
 	@Override
-	final public void rendering(PixelDataBuffer base, PixelDataBuffer over, Point p,
+	final public void rendering(PixelData base, PixelDataContainer over, Point p,
 			Rectangle clip, RenderingOption option) {
-		if(base instanceof PixelData15BitBuffer){
-			do15bitlayer((PixelData15BitBuffer)base, (PixelDataByteBuffer)over, p, clip, option);
-		}else if(base instanceof PixelDataIntBuffer){
-			dolayer((PixelDataIntBuffer)base, over, p, clip, option);
-		}else if(base instanceof PixelDataByteBuffer){
-			domask((PixelDataByteBuffer)base,over,p,clip,option);
+		if(base instanceof PixelData15BitColor){
+			do15bitlayer((PixelData15BitColor)base, (PixelDataByte)over.getPixelData(), p, clip, option);
+		}else if(base instanceof PixelDataInt){
+			dolayer((PixelDataInt)base, over.getPixelData(), p, clip, option);
+		}else if(base instanceof PixelDataByte){
+			domask((PixelDataByte)base,over.getPixelData(),p,clip,option);
 		}
 	}
 
-	final void do15bitlayer(PixelData15BitBuffer base,PixelDataByteBuffer over,Point p,
+	final void do15bitlayer(PixelData15BitColor base,PixelDataByte over,Point p,
 			Rectangle clip,RenderingOption option){
 		if(option.alphaFixed){
 			if(option.hasDestinationMask()){
-					render15bit_alphfix_dmask(base,over, p, clip, option,(PixelDataByteBuffer)option.destinationmask);
+					render15bit_alphfix_dmask(base,over, p, clip, option,(PixelDataByte)option.destinationmask);
 			}else{
 					render15bit_alphfix(base, over, p, clip, option);
 			}
 		}
 		else{
 			if(option.hasDestinationMask()){
-					render15bit_dmask(base, over, p, clip, option,(PixelDataByteBuffer)option.destinationmask);
+					render15bit_dmask(base, over, p, clip, option,(PixelDataByte)option.destinationmask);
 			}else{
 					render15bit(base, over, p, clip, option);
 			}
 		}
 	}
 
-	final void dolayer(PixelDataIntBuffer base, PixelDataBuffer over, Point p,
+	final void dolayer(PixelDataInt base, PixelData over, Point p,
 			Rectangle clip, RenderingOption option) {
 		if(option.alphaFixed){
 			if(option.hasDestinationMask()){
-				if(over instanceof PixelDataByteBuffer){
-					renderint_alphfix_dmask(base, (PixelDataByteBuffer)over, p, clip, option,(PixelDataByteBuffer)option.destinationmask);
+				if(over instanceof PixelDataByte){
+					renderint_alphfix_dmask(base, (PixelDataByte)over, p, clip, option,(PixelDataByte)option.destinationmask);
 				}
 			}else{
-				if(over instanceof PixelDataByteBuffer)
-					renderint_alphfix(base, (PixelDataByteBuffer)over, p, clip, option);
+				if(over instanceof PixelDataByte)
+					renderint_alphfix(base, (PixelDataByte)over, p, clip, option);
 			}
 		}
 		else{
 			if(option.hasDestinationMask()){
-				if(over instanceof PixelDataByteBuffer)
-					renderint_dmask(base, (PixelDataByteBuffer)over, p, clip, option,(PixelDataByteBuffer)option.destinationmask);
+				if(over instanceof PixelDataByte)
+					renderint_dmask(base, (PixelDataByte)over, p, clip, option,(PixelDataByte)option.destinationmask);
 			}else{
-				if(over instanceof PixelDataByteBuffer)
-					renderint(base, (PixelDataByteBuffer)over, p, clip, option);
+				if(over instanceof PixelDataByte)
+					renderint(base, (PixelDataByte)over, p, clip, option);
 			}
 		}
 	}
 
 	//TODO mask
-	final void domask(PixelDataByteBuffer base, PixelDataBuffer over, Point p,
+	final void domask(PixelDataByte base, PixelData over, Point p,
 			Rectangle clip, RenderingOption option){
 		//TODO draw mask
 		if(option.hasDestinationMask()){
-			renderbyte_dmask(base, (PixelDataByteBuffer)over, p, clip, option,
-					(PixelDataByteBuffer)option.destinationmask);
+			renderbyte_dmask(base, (PixelDataByte)over, p, clip, option,
+					(PixelDataByte)option.destinationmask);
 		}else{
-			renderbyte(base, (PixelDataByteBuffer)over, p,
+			renderbyte(base, (PixelDataByte)over, p,
 					clip, option);
 		}
 	}
 
 
-	protected void renderbyte(PixelDataByteBuffer base,
-			PixelDataByteBuffer over,Point p,Rectangle clip,
+	protected void renderbyte(PixelDataByte base,
+			PixelDataByte over,Point p,Rectangle clip,
 			RenderingOption option){
 		byte[] basep = base.getData();
 		int basew = base.width;
@@ -109,9 +110,9 @@ abstract class PenCPURendering implements Renderer{
 		}//for y
 	}
 
-	protected void renderbyte_dmask(PixelDataByteBuffer base,
-			PixelDataByteBuffer over,Point p,Rectangle clip,
-			RenderingOption option,PixelDataByteBuffer dmask){
+	protected void renderbyte_dmask(PixelDataByte base,
+			PixelDataByte over,Point p,Rectangle clip,
+			RenderingOption option,PixelDataByte dmask){
 		byte[] basep = base.getData();
 		int basew = base.width;
 		byte[] dmaskp = dmask.getData();
@@ -140,16 +141,16 @@ abstract class PenCPURendering implements Renderer{
 		}//for y
 	}
 
-	abstract protected void renderint(PixelDataIntBuffer base,PixelDataByteBuffer over,Point p,Rectangle clip,RenderingOption option);
-	abstract protected void renderint_dmask(PixelDataIntBuffer base,PixelDataByteBuffer over,
-			Point p,Rectangle clip,RenderingOption option,PixelDataByteBuffer dmask);
-	abstract protected void renderint_alphfix(PixelDataIntBuffer base,PixelDataByteBuffer over,Point p,Rectangle clip,RenderingOption option);
-	abstract protected void renderint_alphfix_dmask(PixelDataIntBuffer base,PixelDataByteBuffer over,Point p,Rectangle clip,RenderingOption option,PixelDataByteBuffer mask);
+	abstract protected void renderint(PixelDataInt base,PixelDataByte over,Point p,Rectangle clip,RenderingOption option);
+	abstract protected void renderint_dmask(PixelDataInt base,PixelDataByte over,
+			Point p,Rectangle clip,RenderingOption option,PixelDataByte dmask);
+	abstract protected void renderint_alphfix(PixelDataInt base,PixelDataByte over,Point p,Rectangle clip,RenderingOption option);
+	abstract protected void renderint_alphfix_dmask(PixelDataInt base,PixelDataByte over,Point p,Rectangle clip,RenderingOption option,PixelDataByte mask);
 
 
-	abstract protected void render15bit(PixelData15BitBuffer base,PixelDataByteBuffer over,Point p,Rectangle clip,RenderingOption option);
-	abstract protected void render15bit_dmask(PixelData15BitBuffer base,PixelDataByteBuffer over,
-			Point p,Rectangle clip,RenderingOption option,PixelDataByteBuffer dmask);
-	abstract protected void render15bit_alphfix(PixelData15BitBuffer base,PixelDataByteBuffer over,Point p,Rectangle clip,RenderingOption option);
-	abstract protected void render15bit_alphfix_dmask(PixelData15BitBuffer base,PixelDataByteBuffer over,Point p,Rectangle clip,RenderingOption option,PixelDataByteBuffer mask);
+	abstract protected void render15bit(PixelData15BitColor base,PixelDataByte over,Point p,Rectangle clip,RenderingOption option);
+	abstract protected void render15bit_dmask(PixelData15BitColor base,PixelDataByte over,
+			Point p,Rectangle clip,RenderingOption option,PixelDataByte dmask);
+	abstract protected void render15bit_alphfix(PixelData15BitColor base,PixelDataByte over,Point p,Rectangle clip,RenderingOption option);
+	abstract protected void render15bit_alphfix_dmask(PixelData15BitColor base,PixelDataByte over,Point p,Rectangle clip,RenderingOption option,PixelDataByte mask);
 }

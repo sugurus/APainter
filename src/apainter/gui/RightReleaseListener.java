@@ -1,8 +1,8 @@
 package apainter.gui;
 
 import apainter.canvas.Canvas;
-import nodamushi.pentablet.PenTabletMouseEvent;
+import nodamushi.pentablet.TabletMouseEvent;
 
 public interface RightReleaseListener {
-	public void mouseRightReleased(PenTabletMouseEvent e,Canvas c);
+	public void mouseRightReleased(TabletMouseEvent e,Canvas c);
 }

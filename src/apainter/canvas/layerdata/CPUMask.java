@@ -11,7 +11,7 @@ import apainter.canvas.event.PaintEvent;
 import apainter.canvas.event.PaintEventAccepter;
 import apainter.canvas.event.PaintLastEvent;
 import apainter.canvas.event.PaintStartEvent;
-import apainter.data.PixelDataByteBuffer;
+import apainter.data.PixelDataByte;
 import apainter.drawer.event.DrawEvent;
 import apainter.drawer.event.DrawLastEvent;
 import apainter.drawer.event.DrawStartEvent;
@@ -21,13 +21,13 @@ import apainter.rendering.Renderer;
 class CPUMask extends Mask {
 
 
-	private PixelDataByteBuffer buffer;
+	private PixelDataByte buffer;
 	private byte[] pixel;
 	private CPUMauseHandler handler = new CPUMauseHandler();
 
 	public CPUMask(int width,int height,Canvas canvas) {
 		super(canvas);
-		buffer = PixelDataByteBuffer.create(width, height);
+		buffer = PixelDataByte.create(width, height);
 		pixel = buffer.getData();
 	}
 
@@ -40,7 +40,7 @@ class CPUMask extends Mask {
 		return pixel;
 	}
 
-	PixelDataByteBuffer getPixelDataBuffer(){
+	PixelDataByte getPixelDataBuffer(){
 		return buffer;
 	}
 
@@ -73,7 +73,7 @@ class CPUMask extends Mask {
 	}
 
 	@Override
-	PixelDataByteBuffer getDataBuffer() {
+	PixelDataByte getDataBuffer() {
 		return buffer;
 	}
 

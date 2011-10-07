@@ -6,15 +6,15 @@ import static apainter.rendering.ColorOperations.*;
 import java.awt.Point;
 import java.awt.Rectangle;
 
-import apainter.data.PixelData15BitBuffer;
-import apainter.data.PixelDataByteBuffer;
-import apainter.data.PixelDataIntBuffer;
+import apainter.data.PixelData15BitColor;
+import apainter.data.PixelDataByte;
+import apainter.data.PixelDataInt;
 import apainter.rendering.RenderingOption;
-import static apainter.data.PixelData15BitBuffer.*;
+import static apainter.data.PixelData15BitColor.*;
 
 class PenCPUDefaultRendering extends PenCPURendering{
 	@Override
-	final protected void renderint(PixelDataIntBuffer base,PixelDataByteBuffer over,Point p,Rectangle clip,RenderingOption option){
+	final protected void renderint(PixelDataInt base,PixelDataByte over,Point p,Rectangle clip,RenderingOption option){
 		int[] basep = base.getData();
 		int basew = base.width;
 		byte[] overp = over.getData();
@@ -50,8 +50,8 @@ class PenCPUDefaultRendering extends PenCPURendering{
 	}
 
 	@Override
-	protected void render15bit(PixelData15BitBuffer base,
-			PixelDataByteBuffer over, Point p, Rectangle clip,
+	protected void render15bit(PixelData15BitColor base,
+			PixelDataByte over, Point p, Rectangle clip,
 			RenderingOption option) {
 		int[] baseintp = base.getInteger();
 		int[] basedecp = base.getDecimal();
@@ -87,9 +87,9 @@ class PenCPUDefaultRendering extends PenCPURendering{
 	}
 
 	@Override
-	protected void render15bit_dmask(PixelData15BitBuffer base,
-			PixelDataByteBuffer over, Point p, Rectangle clip,
-			RenderingOption option, PixelDataByteBuffer dmask) {
+	protected void render15bit_dmask(PixelData15BitColor base,
+			PixelDataByte over, Point p, Rectangle clip,
+			RenderingOption option, PixelDataByte dmask) {
 		int[] baseintp = base.getInteger();
 		int[] basedecp = base.getDecimal();
 		byte[] dmaskp = dmask.getData();
@@ -139,8 +139,8 @@ class PenCPUDefaultRendering extends PenCPURendering{
 	}
 
 	@Override
-	final protected void renderint_dmask(PixelDataIntBuffer base,PixelDataByteBuffer over,Point p,Rectangle clip,RenderingOption option,
-			PixelDataByteBuffer dmask){
+	final protected void renderint_dmask(PixelDataInt base,PixelDataByte over,Point p,Rectangle clip,RenderingOption option,
+			PixelDataByte dmask){
 		int[] basep = base.getData();
 		int basew = base.width;
 		byte[] dmaskp = dmask.getData();
@@ -190,8 +190,8 @@ class PenCPUDefaultRendering extends PenCPURendering{
 	}
 
 	@Override
-	protected void render15bit_alphfix(PixelData15BitBuffer base,
-			PixelDataByteBuffer over, Point p, Rectangle clip,
+	protected void render15bit_alphfix(PixelData15BitColor base,
+			PixelDataByte over, Point p, Rectangle clip,
 			RenderingOption option) {
 		int[] baseintp = base.getInteger();
 		int[] basedecp = base.getDecimal();
@@ -230,7 +230,7 @@ class PenCPUDefaultRendering extends PenCPURendering{
 	}
 
 	@Override
-	final protected void renderint_alphfix(PixelDataIntBuffer base,PixelDataByteBuffer over,Point p,Rectangle clip,RenderingOption option){
+	final protected void renderint_alphfix(PixelDataInt base,PixelDataByte over,Point p,Rectangle clip,RenderingOption option){
 		int[] basep = base.getData();
 		int basew = base.width;
 		byte[] overp = over.getData();
@@ -257,8 +257,8 @@ class PenCPUDefaultRendering extends PenCPURendering{
 	}
 
 	@Override
-	final protected void renderint_alphfix_dmask(PixelDataIntBuffer base,PixelDataByteBuffer over,Point p,Rectangle clip,RenderingOption option,
-			PixelDataByteBuffer mask){
+	final protected void renderint_alphfix_dmask(PixelDataInt base,PixelDataByte over,Point p,Rectangle clip,RenderingOption option,
+			PixelDataByte mask){
 		int[] basep = base.getData();
 		int basew = base.width;
 		byte[] dmaskp = mask.getData();
@@ -302,9 +302,9 @@ class PenCPUDefaultRendering extends PenCPURendering{
 	}
 
 	@Override
-	protected void render15bit_alphfix_dmask(PixelData15BitBuffer base,
-			PixelDataByteBuffer over, Point p, Rectangle clip,
-			RenderingOption option, PixelDataByteBuffer mask) {
+	protected void render15bit_alphfix_dmask(PixelData15BitColor base,
+			PixelDataByte over, Point p, Rectangle clip,
+			RenderingOption option, PixelDataByte mask) {
 		int[] baseintp = base.getInteger();
 		int[] basedecp = base.getDecimal();
 		int basew = base.width;

@@ -1,6 +1,6 @@
 package apainter.pen;
 
-import apainter.data.PixelDataBuffer;
+import apainter.data.PixelData;
 
 public abstract class PenData {
 	protected final int width ,height,x,y;
@@ -13,7 +13,7 @@ public abstract class PenData {
 	}
 
 	public abstract Object getMapData();
-	public abstract PixelDataBuffer getDataBuffer();
+	public abstract PixelData getDataBuffer();
 
 	public int getWidth(){
 		return width;

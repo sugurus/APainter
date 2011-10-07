@@ -2,7 +2,7 @@ package apainter.drawer;
 
 import java.awt.geom.Point2D;
 
-import nodamushi.pentablet.PenTabletMouseEvent;
+import nodamushi.pentablet.TabletMouseEvent;
 
 /**
  * Drawerが描画する線を定義するためのクラスです。<br>
@@ -118,8 +118,8 @@ public class DrawPoint {
 	 * @param e
 	 * @return
 	 */
-	public static DrawPoint convert(PenTabletMouseEvent e){
-		Point2D.Double d =e.getPointDouble();
+	public static DrawPoint convert(TabletMouseEvent e){
+		Point2D.Double d =e.getPoint2D();
 		return new DrawPoint(d.x, d.y, e.getPressure(),
 				e.getAlititudeX(), e.getAlititudeY(), e.getRotation());
 	}

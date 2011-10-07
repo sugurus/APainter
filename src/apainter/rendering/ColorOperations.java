@@ -2,7 +2,7 @@ package apainter.rendering;
 
 import static apainter.misc.Utility_PixelFunction.*;
 import static java.lang.Math.*;
-import static apainter.data.PixelData15BitBuffer.*;
+import static apainter.data.PixelData15BitColor.*;
 
 /**
  * 色の合算をする関数群です。

@@ -2,7 +2,7 @@ package apainter.canvas.layerdata;
 
 import java.awt.Rectangle;
 
-import apainter.data.PixelDataBuffer;
+import apainter.data.PixelData;
 import apainter.rendering.ColorMode;
 
 interface Renderable {
@@ -11,7 +11,7 @@ interface Renderable {
 	 * @param destination
 	 * @param r
 	 */
-	public void render(PixelDataBuffer destination,Rectangle r);
+	public void render(PixelData destination,Rectangle r);
 
 	/**
 	 * 現在のレンダリングモードに使っているColorModeを返します

@@ -8,14 +8,14 @@ import java.util.ArrayList;
 import apainter.GlobalValue;
 import apainter.canvas.Canvas;
 import apainter.canvas.cedt.cpu.CPUParallelWorkThread;
-import apainter.data.PixelDataIntBuffer;
+import apainter.data.PixelDataInt;
 import apainter.hierarchy.Element;
 import apainter.hierarchy.Unit;
 import apainter.misc.Util;
 
 public class CPULayerData extends LayerData{
 
-	private PixelDataIntBuffer renderingbuffer;
+	private PixelDataInt renderingbuffer;
 	private BufferedImage renderingimage;
 	private int core = Runtime.getRuntime().availableProcessors();
 
@@ -36,7 +36,7 @@ public class CPULayerData extends LayerData{
 		int w = getWidth(),h=getHeight();
 		renderingimage = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
 		int[] pixel =((DataBufferInt)renderingimage.getRaster().getDataBuffer()).getData();
-		renderingbuffer = new PixelDataIntBuffer(w, h, pixel);
+		renderingbuffer = new PixelDataInt(w, h, pixel);
 		renderingbuffer.setData(0xffffffff, rect());
 		rendering();
 	}
@@ -79,7 +79,7 @@ public class CPULayerData extends LayerData{
 
 	private class _Rendering implements Runnable{
 		Rectangle clip;
-		PixelDataIntBuffer renderingbuffer;
+		PixelDataInt renderingbuffer;
 		int fill;
 		_Rendering(Rectangle clip,int filldata) {
 			this.clip = clip;
@@ -87,7 +87,7 @@ public class CPULayerData extends LayerData{
 			this.renderingbuffer = CPULayerData.this.renderingbuffer;
 		}
 
-		_Rendering(Rectangle clip,int filldata,PixelDataIntBuffer buffer) {
+		_Rendering(Rectangle clip,int filldata,PixelDataInt buffer) {
 			this.clip = clip;
 			fill = filldata;
 			this.renderingbuffer = buffer;
@@ -113,7 +113,7 @@ public class CPULayerData extends LayerData{
 		Rectangle clip = rect();
 		BufferedImage buf = new BufferedImage(clip.width, clip.height, BufferedImage.TYPE_INT_ARGB);
 		int[] data = ((DataBufferInt)buf.getRaster().getDataBuffer()).getData();
-		PixelDataIntBuffer ibuf = new PixelDataIntBuffer(clip.width, clip.height, data);
+		PixelDataInt ibuf = new PixelDataInt(clip.width, clip.height, data);
 		Rectangle[] rects;
 		if(clip.width*clip.height<core*10){
 			rects = new Rectangle[]{clip};

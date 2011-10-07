@@ -1,6 +1,6 @@
 package apainter.pen;
 
-import apainter.data.PixelDataByteBuffer;
+import apainter.data.PixelDataByte;
 
 public class Pen8bitGray extends PenData{
 	byte[] mapdata;
@@ -21,8 +21,8 @@ public class Pen8bitGray extends PenData{
 	}
 
 	@Override
-	public PixelDataByteBuffer getDataBuffer() {
-		PixelDataByteBuffer b = new PixelDataByteBuffer(width, height, mapdata);
+	public PixelDataByte getDataBuffer() {
+		PixelDataByte b = new PixelDataByte(width, height, mapdata);
 		return b;
 	}
 }
