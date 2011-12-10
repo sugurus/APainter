@@ -109,8 +109,7 @@ abstract public class Drawer {
 		plot.move(length);
 		double x = plotpoint.getX(),y=plotpoint.getY();
 		PixelDataContainer map = pen.getFootPrint(x, y);
-		Point center = pen.getCenterPoint();
-
+		Point center = pen.getCenterPoint(x,y);
 
 
 		Rectangle bounds = new Rectangle((int)floor(x) -center.x, (int)floor(y)-center.y,
@@ -144,7 +143,7 @@ abstract public class Drawer {
 			}
 			PenShape pen = penfactory.getPenShape(size, dv);
 			PixelDataContainer map = pen.getFootPrint(x, y);
-			Point center = pen.getCenterPoint();
+			Point center = pen.getCenterPoint(x,y);
 			Rectangle bounds = new Rectangle((int)x-center.x, (int)y-center.y,
 					map.getWidth(), map.getHeight());
 			Color front =getFrontColor(e, pen),back = getBackColor(e, pen);
@@ -156,6 +155,7 @@ abstract public class Drawer {
 						bounds, bounds.getLocation(),renderer,  map, option);
 			es.add(de);
 			double d = pen.getMoveDistance();
+			if(d<=1/16d)d=1/16d;
 			plot.move(d);
 		}
 		return es;
@@ -260,7 +260,7 @@ abstract public class Drawer {
 	private final int id;
 	private double smin=0;// 筆圧最小時の筆の大きさの割合
 	private int density_min=256;// 筆圧最小時の筆の濃度（0~256）
-	private double density = 0.5;// ペン濃度 0～1
+	private double density = 1;// ペン濃度 0～1
 	private boolean nowDrawing=false;
 	private DrawTarget drawTarget=null;
 	private Plot plot=new LinerPlot();

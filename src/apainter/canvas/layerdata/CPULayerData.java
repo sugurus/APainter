@@ -19,8 +19,6 @@ public class CPULayerData extends LayerData{
 	private BufferedImage renderingimage;
 	private int core = Runtime.getRuntime().availableProcessors();
 
-	//////////////////////////////FIXME debug
-
 	public CPULayerData(Canvas canvas,GlobalValue globalvalue) {
 		super(canvas,globalvalue);
 		init();
@@ -34,9 +32,8 @@ public class CPULayerData extends LayerData{
 
 	private void init(){
 		int w = getWidth(),h=getHeight();
-		renderingimage = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
-		int[] pixel =((DataBufferInt)renderingimage.getRaster().getDataBuffer()).getData();
-		renderingbuffer = new PixelDataInt(w, h, pixel);
+		renderingbuffer = PixelDataInt.create(w, h);
+		renderingimage = renderingbuffer.getDirectImage();
 		renderingbuffer.setData(0xffffffff, rect());
 		rendering();
 	}
@@ -94,6 +91,7 @@ public class CPULayerData extends LayerData{
 		}
 
 		public void run(){
+			if(renderingbuffer==null)return;
 			renderingbuffer.setData(fill, clip);
 			Unit<InnerLayerHandler> unit =layerlist.getTopLevelUnit();
 

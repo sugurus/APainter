@@ -177,7 +177,7 @@ public class URLPenFactory implements PenShapeFactory{
 		@Override
 		public PenShape getPenShape(int size,Device d) {
 			Group g = findGroup(size);
-			PenShape p= new URLPenShape(g);
+			URLPenShape p= new URLPenShape(g);
 			p.setIntervalLengthPercent(this.p);
 			return p;
 		}
@@ -205,7 +205,7 @@ public class URLPenFactory implements PenShapeFactory{
 		}
 
 		@Override
-		public Point getCenterPoint() {
+		public Point getCenterPoint(double x,double y) {
 			return new Point(g.getCenterX(),g.getCenterY());
 		}
 
@@ -232,13 +232,14 @@ public class URLPenFactory implements PenShapeFactory{
 				public int getHeight() {
 					return p.getHeight();
 				}
+				
+				@Override
+				public void restore() {
+					// TODO 自動生成されたメソッド・スタブ
+					
+				}
 			};
 			return pdc;
-		}
-
-		@Override
-		public Dimension getMapSize() {
-			return new Dimension(g.getWidth(), g.getHeight());
 		}
 
 		@Override
@@ -251,7 +252,6 @@ public class URLPenFactory implements PenShapeFactory{
 			return URLPenFactory.this.getIntervalLength(g.getSize(), intervalpercent);
 		}
 
-		@Override
 		public void setIntervalLengthPercent(double percent) {
 			if(percent <0)percent=0;
 			intervalpercent = percent;

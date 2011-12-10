@@ -5,7 +5,6 @@ import static apainter.GlobalKey.*;
 import static apainter.PropertyChangeNames.*;
 import static apainter.misc.Util.*;
 
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.PrintStream;
 import java.util.HashMap;
@@ -18,7 +17,10 @@ import apainter.canvas.Canvas;
 import apainter.misc.PropertyChangeUtility;
 /**
  *初期化スレッド以外（AWTスレッドなど）からのインスタンスの取得はできないので、<br>
- *必要ならば、mainスレッドから呼ばれる初期化時に取得しておくこと。
+ *必要ならば、mainスレッドから呼ばれる初期化時に取得しておくこと。<br>
+ *staticなインスタンスというわけではないので、
+ *異なるAPainterインスタンスが保持するGlobalValueインスタンスは
+ *別物である。
  *
  */
 public class GlobalValue extends HashMap<Object, Object>{

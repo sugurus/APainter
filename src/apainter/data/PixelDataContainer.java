@@ -1,5 +1,7 @@
 package apainter.data;
 
+import java.io.Serializable;
+
 /**
  * チャット形式でペイントしたいな～、という願望を実現するために、
  * 実際にデーターを送るのではなくて、それのコンテナーを送って復元しようと考えている。<br>
@@ -7,8 +9,12 @@ package apainter.data;
  * @author nodamushi
  *
  */
-public interface PixelDataContainer {
+public interface PixelDataContainer extends Serializable{
 	public PixelData getPixelData();
 	public int getWidth();
 	public int getHeight();
+	/**
+	 * データの復元をします
+	 */
+	public void restore();
 }

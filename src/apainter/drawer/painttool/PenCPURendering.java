@@ -9,6 +9,7 @@ import java.awt.Rectangle;
 import apainter.Color;
 import apainter.data.PixelData15BitColor;
 import apainter.data.PixelData;
+import apainter.data.PixelData15BitGray;
 import apainter.data.PixelDataByte;
 import apainter.data.PixelDataContainer;
 import apainter.data.PixelDataInt;
@@ -21,7 +22,7 @@ abstract class PenCPURendering implements Renderer{
 	final public void rendering(PixelData base, PixelDataContainer over, Point p,
 			Rectangle clip, RenderingOption option) {
 		if(base instanceof PixelData15BitColor){
-			do15bitlayer((PixelData15BitColor)base, (PixelDataByte)over.getPixelData(), p, clip, option);
+			do15bitlayer((PixelData15BitColor)base, over.getPixelData(), p, clip, option);
 		}else if(base instanceof PixelDataInt){
 			dolayer((PixelDataInt)base, over.getPixelData(), p, clip, option);
 		}else if(base instanceof PixelDataByte){
@@ -29,20 +30,26 @@ abstract class PenCPURendering implements Renderer{
 		}
 	}
 
-	final void do15bitlayer(PixelData15BitColor base,PixelDataByte over,Point p,
+	final void do15bitlayer(PixelData15BitColor base,PixelData over,Point p,
 			Rectangle clip,RenderingOption option){
 		if(option.alphaFixed){
 			if(option.hasDestinationMask()){
-					render15bit_alphfix_dmask(base,over, p, clip, option,(PixelDataByte)option.destinationmask);
+				if(over instanceof PixelDataByte)
+					render15bit_alphfix_dmask(base,(PixelDataByte)over, p, clip, option,(PixelDataByte)option.destinationmask);
 			}else{
-					render15bit_alphfix(base, over, p, clip, option);
+				if(over instanceof PixelDataByte)
+					render15bit_alphfix(base, (PixelDataByte)over, p, clip, option);
 			}
 		}
 		else{
 			if(option.hasDestinationMask()){
-					render15bit_dmask(base, over, p, clip, option,(PixelDataByte)option.destinationmask);
+				if(over instanceof PixelDataByte)
+					render15bit_dmask(base,  (PixelDataByte)over, p, clip, option,(PixelDataByte)option.destinationmask);
 			}else{
-					render15bit(base, over, p, clip, option);
+				if(over instanceof PixelDataByte)
+					render15bit(base,  (PixelDataByte)over, p, clip, option);
+				else if(over instanceof PixelData15BitGray)
+					render15bit(base, (PixelData15BitGray)over, p, clip, option);
 			}
 		}
 	}
@@ -153,4 +160,8 @@ abstract class PenCPURendering implements Renderer{
 			Point p,Rectangle clip,RenderingOption option,PixelDataByte dmask);
 	abstract protected void render15bit_alphfix(PixelData15BitColor base,PixelDataByte over,Point p,Rectangle clip,RenderingOption option);
 	abstract protected void render15bit_alphfix_dmask(PixelData15BitColor base,PixelDataByte over,Point p,Rectangle clip,RenderingOption option,PixelDataByte mask);
+
+	abstract protected void render15bit(PixelData15BitColor base,
+			PixelData15BitGray over, Point p, Rectangle clip,
+			RenderingOption option) ;
 }

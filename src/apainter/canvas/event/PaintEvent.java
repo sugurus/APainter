@@ -44,7 +44,7 @@ public class PaintEvent extends CanvasEvent{
 
 	public PaintEvent subsetEvent(Rectangle r){
 	if(!rect.contains(r)){
-	throw new RuntimeException("r isn't subset");
+	throw new RuntimeException("r isn't subset"+r);
 	}
 	return new PaintEvent(id, getSource(), target, r,setPoint, renderer, mapdata, option);
 	}

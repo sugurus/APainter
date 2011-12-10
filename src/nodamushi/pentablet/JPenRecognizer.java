@@ -190,6 +190,13 @@ final class JPenRecognizer implements PenListener,Listener{
 		int modify = keymodify;
 		CursorDevice ctype;
 		State state;
+		float x,y,p,r,tx,ty;
+		x = pen.getLevelValue(PLevel.Type.X);//x取得
+		y = pen.getLevelValue(PLevel.Type.Y);//y取得
+		p = pen.getLevelValue(PLevel.Type.PRESSURE);//筆圧取得
+		r = pen.getLevelValue(PLevel.Type.ROTATION);//rotation
+		tx= pen.getLevelValue(PLevel.Type.TILT_X);//x傾き
+		ty= pen.getLevelValue(PLevel.Type.TILT_Y);//y傾き
 		isPress = isMousePressed(pen);
 		switch(pkind.getType()){
 		case STYLUS:
@@ -236,6 +243,8 @@ final class JPenRecognizer implements PenListener,Listener{
 		case CURSOR:
 			state =isPress? State.PRESSED:State.RELEASED;
 			ctype = CursorDevice.MOUSE;
+			x+=0.5;
+			y+=0.5;
 			switch(e.button.getType()){
 			case LEFT:
 				modify |=BUTTON1_MASK|BUTTON1_DOWN_MASK;break;
@@ -251,13 +260,6 @@ final class JPenRecognizer implements PenListener,Listener{
 			return;
 		}
 		time=0;
-		float x,y,p,r,tx,ty;
-		x = pen.getLevelValue(PLevel.Type.X);//x取得
-		y = pen.getLevelValue(PLevel.Type.Y);//y取得
-		p = pen.getLevelValue(PLevel.Type.PRESSURE);//筆圧取得
-		r = pen.getLevelValue(PLevel.Type.ROTATION);//rotation
-		tx= pen.getLevelValue(PLevel.Type.TILT_X);//x傾き
-		ty= pen.getLevelValue(PLevel.Type.TILT_Y);//y傾き
 		TabletMouseEvent ev= TabletMouseEvent.createEvent(
 				c, e.getTime(), modify, x, y, pen.getPressedButtonsCount(),
 				ctype, state, p, r, tx, ty);
@@ -322,6 +324,13 @@ final class JPenRecognizer implements PenListener,Listener{
 		PKind k = pen.getKind();
 		CursorDevice ctype;
 		State state;
+		float x,y,p,r,tx,ty;
+		x = pen.getLevelValue(PLevel.Type.X);//x取得
+		y = pen.getLevelValue(PLevel.Type.Y);//y取得
+		p = pen.getLevelValue(PLevel.Type.PRESSURE);//筆圧取得
+		r = pen.getLevelValue(PLevel.Type.ROTATION);//rotation
+		tx= pen.getLevelValue(PLevel.Type.TILT_X);//x傾き
+		ty= pen.getLevelValue(PLevel.Type.TILT_Y);//y傾き
 		int modify = keymodify;
 		switch(k.getType()){
 		case STYLUS:
@@ -363,6 +372,8 @@ final class JPenRecognizer implements PenListener,Listener{
 		case CURSOR:
 			ctype = CursorDevice.MOUSE;
 			state = isMousePressed(pen)?State.DRAGGED:State.MOVED;
+			x+=0.5;
+			y+=0.5;
 			if(pen.getButtonValue(Type.LEFT)){
 				modify |=BUTTON1_DOWN_MASK|BUTTON1_MASK;
 			}
@@ -378,14 +389,6 @@ final class JPenRecognizer implements PenListener,Listener{
 		}
 
 
-		float x,y,p,r,tx,ty;
-
-		x = pen.getLevelValue(PLevel.Type.X);//x取得
-		y = pen.getLevelValue(PLevel.Type.Y);//y取得
-		p = pen.getLevelValue(PLevel.Type.PRESSURE);//筆圧取得
-		r = pen.getLevelValue(PLevel.Type.ROTATION);//rotation
-		tx= pen.getLevelValue(PLevel.Type.TILT_X);//x傾き
-		ty= pen.getLevelValue(PLevel.Type.TILT_Y);//y傾き
 		TabletMouseEvent ev= TabletMouseEvent.createEvent(
 				c, e.getTime(), modify, x, y, pen.getPressedButtonsCount(),
 				ctype, state, p, r, tx, ty);

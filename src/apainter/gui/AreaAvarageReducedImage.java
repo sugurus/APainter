@@ -9,12 +9,13 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 
-import apainter.canvas.cedt.cpu.CPUParallelWorkThread;
+import apainter.canvas.cedt.cpu.CPUParallelWorker;
 
 /**
  * 面積平均法により画像を縮小します。<br>
  * このクラスが扱える画像は、TYPE_INT_RGBのBufferedImageのみです。<br>
- * このインスタンスは一度生成すると、画像の縮小率を変更しても新たなメモリーを取得する必要がありません。<br>
+ * このインスタンスは一度生成すると、画像の縮小率を変更しても
+ * 新たなメモリーを取得する必要がありません。<br>
  * また、部分的なレンダリングが可能です。
  * @author nodamushi
  *
@@ -44,9 +45,6 @@ public class AreaAvarageReducedImage {
 	 * @see {@link BufferedImage#TYPE_INT_RGB}
 	 */
 	public AreaAvarageReducedImage(BufferedImage img) throws IllegalArgumentException{
-		if(img.getType()!= BufferedImage.TYPE_INT_RGB){
-			throw new IllegalArgumentException("image type is not TYPE INT RGB");
-		}
 		zoom =1f;
 		pixelSize =1024;
 		sourceimage = img;
@@ -78,6 +76,11 @@ public class AreaAvarageReducedImage {
 	 */
 	public void drawImage(Graphics g,int x,int y){
 		g.drawImage(smallimage,x,y,x+dw,y+dh,0,0,dw,dh,null);
+	}
+	
+	public void drawImage(Graphics g,int dx,int dy,int dx2,int dy2,
+			int sx,int sy,int sx2,int sy2){
+		g.drawImage(smallimage,dx,dy,dx2,dy2,sx,sy,sx2,sy2,null);
 	}
 
 	/**
@@ -186,135 +189,123 @@ public class AreaAvarageReducedImage {
 		final int ex = temp>sw?sw:temp;
 
 
-		int tsize = CPUParallelWorkThread.getThreadSize();
-		Runnable[] runs = new Runnable[tsize];
 		final int ll = (int) ((1f- (sxfloat -sx))*pixelSize);
 
+		boolean single = (ex-sx)*(ey-sy)<100;
 		//x軸方向に縮小
-		for(int i=0;i<tsize;i++){
+		new CPUParallelWorker(single){protected void task(int i, int tsize) {
 			final int ssy = sy+(ey-sy)*i/tsize;
 			final int eey = sy+(ey-sy)*(i+1)/tsize;
-			runs[i] = new Runnable() {
-				public void run() {
-					LOOP:for(int y=ssy;y<eey;y++) {
-						int xpos = dstStartx;
-						int rgb = pixel(source, sx, y, sw);
-						int r=r(rgb)*ll,g=g(rgb)*ll,b=b(rgb)*ll,l=length-ll;
-						int x =sx+1;
-						for(;x<ex;x++){
-							rgb = pixel(source, x, y, sw);
-							if(l<=pixelSize){
-								set(xreduce, argb(255,
-										(r+r(rgb)*l)>>SHIFT,
-										(g+g(rgb)*l)>>SHIFT,
-										(b+b(rgb)*l)>>SHIFT),
-									xpos++, y, sw);
-								r=r(rgb)*(pixelSize-l);
-								g=g(rgb)*(pixelSize-l);
-								b=b(rgb)*(pixelSize-l);
-								l=length-pixelSize+l;
-							}else{
-								r+=r(rgb)*pixelSize;
-								g+=g(rgb)*pixelSize;
-								b+=b(rgb)*pixelSize;
-								l-=pixelSize;
-							}
+			LOOP:for(int y=ssy;y<eey;y++) {
+				int xpos = dstStartx;
+				int rgb = pixel(source, sx, y, sw);
+				int r=r(rgb)*ll,g=g(rgb)*ll,b=b(rgb)*ll,l=length-ll;
+				int x =sx+1;
+				for(;x<ex;x++){
+					rgb = pixel(source, x, y, sw);
+					if(l<=pixelSize){
+						set(xreduce, argb(255,
+								(r+r(rgb)*l)>>SHIFT,
+								(g+g(rgb)*l)>>SHIFT,
+								(b+b(rgb)*l)>>SHIFT),
+								xpos++, y, sw);
+						r=r(rgb)*(pixelSize-l);
+						g=g(rgb)*(pixelSize-l);
+						b=b(rgb)*(pixelSize-l);
+						l=length-pixelSize+l;
+					}else{
+						r+=r(rgb)*pixelSize;
+						g+=g(rgb)*pixelSize;
+						b+=b(rgb)*pixelSize;
+						l-=pixelSize;
+					}
+				}
+				if(xpos<dstEndx){
+					while(x<sw){
+						rgb = pixel(source, x, y, sw);
+						if(l<=pixelSize){
+							set(xreduce,argb(255,
+									(r+r(rgb)*l)>>SHIFT,
+									(g+g(rgb)*l)>>SHIFT,
+									(b+b(rgb)*l)>>SHIFT),
+									xpos, y, sw);
+							continue LOOP;
+						}else{
+							r+=r(rgb)*pixelSize;
+							g+=g(rgb)*pixelSize;
+							b+=b(rgb)*pixelSize;
+							l-=pixelSize;
 						}
-						if(xpos<dstEndx){
-							while(x<sw){
-								rgb = pixel(source, x, y, sw);
-								if(l<=pixelSize){
-									set(xreduce,argb(255,
-											(r+r(rgb)*l)>>SHIFT,
-											(g+g(rgb)*l)>>SHIFT,
-											(b+b(rgb)*l)>>SHIFT),
-										xpos, y, sw);
-									continue LOOP;
-								}else{
-									r+=r(rgb)*pixelSize;
-									g+=g(rgb)*pixelSize;
-									b+=b(rgb)*pixelSize;
-									l-=pixelSize;
-								}
-								x++;
-							}
-							set(xreduce,argb(
-									l*255>>SHIFT,
-									r/(length-l),
-									g/(length-l),
-									b/(length-l)),
-								xpos,y,sw);
-						}
-					}//end for y
-				}//end run method
-			};//end runnable
-		}//end for i
-
-		CPUParallelWorkThread.exec(runs);
+						x++;
+					}
+					set(xreduce,argb(
+							l*255>>SHIFT,
+							r/(length-l),
+							g/(length-l),
+							b/(length-l)),
+							xpos,y,sw);
+				}
+			}//end for y
+		}/*end task*/}.start();
+		
 
 		//y軸方向に縮小
 		final int ll2 = (int) ((1f-(syfloat-sy))*pixelSize);
-
-		for(int i=0;i<tsize;i++){
+		new CPUParallelWorker(single) {protected void task(int i, int tsize) {
 			final int ssx = dstStartx+(dstEndx-dstStartx)*i/tsize;
 			final int eex = dstStartx+(dstEndx-dstStartx)*(i+1)/tsize;
-			runs[i] = new Runnable() {
-				public void run() {
-					LOOP:for(int x=ssx;x<eex;x++){
-						int ypos=dstStarty;
-						int rgb = pixel(xreduce, x, sy, sw);
-						int r=r(rgb)*ll2,g=g(rgb)*ll2,b=b(rgb)*ll2,l=length-ll2;
-						int y = sy+1;
-						for(;y<ey;y++){
-							rgb = pixel(xreduce, x, y, sw);
-							if(l<=pixelSize){
-								set(dst, argb(255,
-										(r+r(rgb)*l)>>SHIFT,
-										(g+g(rgb)*l)>>SHIFT,
-										(b+b(rgb)*l)>>SHIFT),
-									x, ypos++, sw);
-								r=r(rgb)*(pixelSize-l);
-								g=g(rgb)*(pixelSize-l);
-								b=b(rgb)*(pixelSize-l);
-								l=length-pixelSize+l;
-							}else{
-								r+=r(rgb)*pixelSize;
-								g+=g(rgb)*pixelSize;
-								b+=b(rgb)*pixelSize;
-								l-=pixelSize;
-							}
+			LOOP:for(int x=ssx;x<eex;x++){
+				int ypos=dstStarty;
+				int rgb = pixel(xreduce, x, sy, sw);
+				int r=r(rgb)*ll2,g=g(rgb)*ll2,b=b(rgb)*ll2,l=length-ll2;
+				int y = sy+1;
+				for(;y<ey;y++){
+					rgb = pixel(xreduce, x, y, sw);
+					if(l<=pixelSize){
+						set(dst, argb(255,
+								(r+r(rgb)*l)>>SHIFT,
+								(g+g(rgb)*l)>>SHIFT,
+								(b+b(rgb)*l)>>SHIFT),
+								x, ypos++, sw);
+						r=r(rgb)*(pixelSize-l);
+						g=g(rgb)*(pixelSize-l);
+						b=b(rgb)*(pixelSize-l);
+						l=length-pixelSize+l;
+					}else{
+						r+=r(rgb)*pixelSize;
+						g+=g(rgb)*pixelSize;
+						b+=b(rgb)*pixelSize;
+						l-=pixelSize;
+					}
+				}
+				if(ypos<dstEndy){
+					while(y<sh){
+						rgb = pixel(xreduce, x, y, sw);
+						if(l<=pixelSize){
+							set(dst, argb(255,
+									(r+r(rgb)*l)>>SHIFT,
+									(g+g(rgb)*l)>>SHIFT,
+									(b+b(rgb)*l)>>SHIFT),
+									x, ypos, sw);
+							continue LOOP;
+						}else{
+							r+=r(rgb)*pixelSize;
+							g+=g(rgb)*pixelSize;
+							b+=b(rgb)*pixelSize;
+							l-=pixelSize;
 						}
-						if(ypos<dstEndy){
-							while(y<sh){
-								rgb = pixel(xreduce, x, y, sw);
-								if(l<=pixelSize){
-									set(dst, argb(255,
-											(r+r(rgb)*l)>>SHIFT,
-											(g+g(rgb)*l)>>SHIFT,
-											(b+b(rgb)*l)>>SHIFT),
-										x, ypos, sw);
-									continue LOOP;
-								}else{
-									r+=r(rgb)*pixelSize;
-									g+=g(rgb)*pixelSize;
-									b+=b(rgb)*pixelSize;
-									l-=pixelSize;
-								}
-								y++;
-							}
-							set(dst,argb(
-									l*255>>>SHIFT,
-									r/(length-l),
-									g/(length-l),
-									b/(length-l)),
-								x,ypos,sw);
-						}
-					}//end for x
-				}//end run method
-			};//end runnable
-		}//end for i
+						y++;
+					}
+					set(dst,argb(
+							l*255>>>SHIFT,
+							r/(length-l),
+							g/(length-l),
+							b/(length-l)),
+							x,ypos,sw);
+				}
+			}//end for x
+		}/*end task*/}.start();
 
-		CPUParallelWorkThread.exec(runs);
 
 		return true;
 	}

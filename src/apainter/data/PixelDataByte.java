@@ -52,7 +52,7 @@ public class PixelDataByte extends PixelData{
 	}
 
 	@Override
-	public PixelData clone() {
+	public PixelDataByte clone() {
 		return new PixelDataByte(width, height, pixel.clone());
 	}
 

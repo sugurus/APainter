@@ -152,37 +152,36 @@ public class CPUCEDT implements CanvasEventDispatchThread{
 	}
 
 	private void draw(final PaintEvent de){
-		PaintEvent e = de.canvas.subsetEvent(de);
+		final PaintEvent e = de.canvas.subsetEvent(de);
 		if(e ==null)return;
 
-		Rectangle r = e.getBounds();
+		final Rectangle r = e.getBounds();
 		int s = CPUParallelWorkThread.getThreadSize();
-		if(s==1|| r.width*r.height < 100){
+		if(s==1|| r.width*r.height < 100){//ある程度小さい場合は分割しない方が速い
 			canvas.paint(e);
 		}else{
-			Runnable[] runs = new Runnable[s];
 			if(r.width%s==0 || !(r.height%s==0 || r.width < r.height)){
-				for(int i=0;i<s;i++){
-					Rectangle rect = new Rectangle(r.x+(r.width*i/s),r.y,r.width*(i+1)/s-(r.width*i/s),r.height);
-					final PaintEvent e2 = e.subsetEvent(rect);
-					runs[i]=new Runnable() {
-						public void run() {
-							canvas.paint(e2);
-						}
-					};
-				}
+				new CPUParallelWorker() {
+					protected void task(int id, int size) {
+						Rectangle rect = new Rectangle(r.x+(r.width*id/size),r.y,
+								r.width*(id+1)/size-(r.width*id/size),
+								r.height);
+						if(rect.isEmpty())return;
+						PaintEvent e2 = e.subsetEvent(rect);
+						canvas.paint(e2);
+					}
+				}.start();
+				
 			}else{
-				for(int i=0;i<s;i++){
-					Rectangle rect = new Rectangle(r.x,r.y+r.height*i/s,r.width,r.height*(i+1)/s-r.height*i/s);
-					final PaintEvent e2 = e.subsetEvent(rect);
-					runs[i]=new Runnable() {
-						public void run() {
-							canvas.paint(e2);
-						}
-					};
-				}
+				new CPUParallelWorker() {
+					protected void task(int id, int size) {
+						Rectangle rect = new Rectangle(r.x,r.y+r.height*id/size,
+								r.width,r.height*(id+1)/size-r.height*id/size);
+						PaintEvent e2 = e.subsetEvent(rect);
+						canvas.paint(e2);
+					}
+				}.start();
 			}
-			CPUParallelWorkThread.exec(runs);
 		}
 		RepaintThread.addRepaintJob(r, canvas);
 	}

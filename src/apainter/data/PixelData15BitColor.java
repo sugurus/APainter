@@ -10,6 +10,7 @@ import java.awt.Rectangle;
  */
 public class PixelData15BitColor extends PixelData{
 
+	public static final int max15bitValue=0x7FFF;
 	private PixelDataInt integer,decimal;
 
 

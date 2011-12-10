@@ -7,6 +7,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 
 import apainter.data.PixelData15BitColor;
+import apainter.data.PixelData15BitGray;
 import apainter.data.PixelDataByte;
 import apainter.data.PixelDataInt;
 import apainter.rendering.RenderingOption;
@@ -49,6 +50,8 @@ class PenCPUDefaultRendering extends PenCPURendering{
 		}
 	}
 
+	//0b111111111111111 (15bit最大値)
+	final static int max15bitValue=PixelData15BitColor.max15bitValue;
 	@Override
 	protected void render15bit(PixelData15BitColor base,
 			PixelDataByte over, Point p, Rectangle clip,
@@ -58,9 +61,9 @@ class PenCPUDefaultRendering extends PenCPURendering{
 		int basew = base.width;
 		byte[] overp = over.getData();
 		int overw = over.width;
-		int or=option.frontColor.getR( 32767 );//<=(1<<16)-1  15bitで値を取得。
-		int og=option.frontColor.getG( 32767 );
-		int ob=option.frontColor.getB( 32767 );
+		int or=option.frontColor.getR( max15bitValue );
+		int og=option.frontColor.getG( max15bitValue );
+		int ob=option.frontColor.getB( max15bitValue );
 		int overalph = option.overlayeralph;
 		int endy = clip.height+clip.y,endx=clip.width+clip.x;
 		int px=p.x,py=p.y;
@@ -85,6 +88,46 @@ class PenCPUDefaultRendering extends PenCPURendering{
 			}
 		}
 	}
+	
+	@Override
+	protected void render15bit(PixelData15BitColor base,
+			PixelData15BitGray over, Point p, Rectangle clip,
+			RenderingOption option) {
+		int[] baseintp = base.getInteger();
+		int[] basedecp = base.getDecimal();
+		int basew = base.width;
+		byte[] overintp = over.getInteger();
+		byte[] overdecp =over.getDecimal();
+		int overw = over.width;
+		int or=option.frontColor.getR( max15bitValue );
+		int og=option.frontColor.getG( max15bitValue );
+		int ob=option.frontColor.getB( max15bitValue );
+		int overalph = option.overlayeralph;
+		int endy = clip.height+clip.y,endx=clip.width+clip.x;
+		int px=p.x,py=p.y;
+		for(int x,y = clip.y;y<endy;y++){
+			for(x = clip.x;x<endx;x++){
+				int ci = pixel(baseintp,x,y,basew);
+				int cd = pixel(basedecp,x,y,basew);
+				int a = convine(a(ci), a(cd));
+				int r = convine(r(ci), r(cd));
+				int g = convine(g(ci), g(cd));
+				int b = convine(b(ci), b(cd));
+				int oi = pixel(overintp,x-px,y-py,overw);
+				int od = pixel(overdecp,x-px,y-py,overw);
+				int oc = convine(oi,od);
+				int oa = layeralph(oc,overalph);
+				if(a!=0){
+					default15bitOp(a, r, g, b, oa, or, og, ob, baseintp, basedecp, x+y*basew);
+					continue;
+				}else{
+					set(baseintp,argb(integer(oa),integer(or),integer(og),integer(ob)), x, y, basew);
+					set(basedecp,argb(decimal(oa),decimal(or),decimal(og),decimal(ob)),x,y,basew);
+					continue;
+				}
+			}
+		}
+	}
 
 	@Override
 	protected void render15bit_dmask(PixelData15BitColor base,
@@ -96,9 +139,9 @@ class PenCPUDefaultRendering extends PenCPURendering{
 		int basew = base.width;
 		byte[] overp = over.getData();
 		int overw = over.width;
-		int or=option.frontColor.getR( 32767 );//<=(1<<16)-1  15bitで値を取得。
-		int og=option.frontColor.getG( 32767 );
-		int ob=option.frontColor.getB( 32767 );
+		int or=option.frontColor.getR( max15bitValue );
+		int og=option.frontColor.getG( max15bitValue );
+		int ob=option.frontColor.getB( max15bitValue );
 		int overalph = option.overlayeralph;
 		int endy = clip.height+clip.y,endx=clip.width+clip.x;
 		int px=p.x,py=p.y;
@@ -198,9 +241,9 @@ class PenCPUDefaultRendering extends PenCPURendering{
 		int basew = base.width;
 		byte[] overp = over.getData();
 		int overw = over.width;
-		int or=option.frontColor.getR( 32767 );//<=(1<<16)-1  15bitで値を取得。
-		int og=option.frontColor.getG( 32767 );
-		int ob=option.frontColor.getB( 32767 );
+		int or=option.frontColor.getR( max15bitValue );
+		int og=option.frontColor.getG( max15bitValue );
+		int ob=option.frontColor.getB( max15bitValue );
 		int overalph = option.overlayeralph;
 		int endy = clip.height+clip.y,endx=clip.width+clip.x;
 		int px=p.x,py=p.y;
@@ -311,9 +354,9 @@ class PenCPUDefaultRendering extends PenCPURendering{
 		byte[] dmaskp = mask.getData();
 		byte[] overp = over.getData();
 		int overw = over.width;
-		int or=option.frontColor.getR( 32767 );//<=(1<<16)-1  15bitで値を取得。
-		int og=option.frontColor.getG( 32767 );
-		int ob=option.frontColor.getB( 32767 );
+		int or=option.frontColor.getR( max15bitValue );
+		int og=option.frontColor.getG( max15bitValue );
+		int ob=option.frontColor.getB( max15bitValue );
 		int overalph = option.overlayeralph;
 		int endy = clip.height+clip.y,endx=clip.width+clip.x;
 		int px=p.x,py=p.y;

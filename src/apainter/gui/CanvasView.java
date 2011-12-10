@@ -236,6 +236,10 @@ public final class CanvasView extends JPanel{
 	public void renderingFlug(Rectangle r){
 		canvasRendering.rendering(r);
 	}
+	
+	public void renderingFlug(Rectangle[] r){
+		canvasRendering.rendering(r);
+	}
 
 	public double getZoom() {
 		return zoom;
@@ -553,6 +557,11 @@ public final class CanvasView extends JPanel{
 
 		@Override
 		public void setValue(Object value) throws Exception {
+			if(!canvasRendering.isEnableRotation()){
+				if(!angle.isZero())
+					angle=new Angle();
+				return;
+			}
 			angle = (Angle)value;
 			setAffinTransform();
 			posset  = false;
@@ -576,6 +585,10 @@ public final class CanvasView extends JPanel{
 	private final BindObject zoomBindObject = new BindObject() {
 		@Override
 		public void setValue(Object value) throws Exception {
+			if(!canvasRendering.isEnableZoom()){
+				zoom=1;
+				return;
+			}
 			double d = (java.lang.Double)value;
 			double old = zoom;
 			zoom = d;

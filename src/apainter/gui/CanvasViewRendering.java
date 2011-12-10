@@ -13,6 +13,7 @@ public interface CanvasViewRendering {
 	 * @param r
 	 */
 	public void rendering(Rectangle r);
+	public void rendering(Rectangle[] rect);
 	public void repaintMove();
 
 	public void rotation();
@@ -24,5 +25,16 @@ public interface CanvasViewRendering {
 	 * 使用されなくなったので、使用しているメモリを解放します。
 	 */
 	public void dispose();
+	
+	/**
+	 * 拡大機能が使えるかどうかを返します
+	 * @return
+	 */
+	public boolean isEnableZoom();
+	/**
+	 * 回転機能が使えるかどうかを返します。
+	 * @return
+	 */
+	public boolean isEnableRotation();
 
 }

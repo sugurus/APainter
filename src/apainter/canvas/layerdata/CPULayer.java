@@ -42,6 +42,10 @@ class CPULayer extends DefaultLayer{
 		public int getHeight() {
 			return integerbuffer.height;
 		}
+		@Override
+		public void restore() {
+			// TODO 特にすること無いんじゃね
+		}
 	};
 	private PixelData15BitColor buffer;
 	private CPUMask mask;

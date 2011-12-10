@@ -235,17 +235,20 @@ public class Canvas implements CreateHandler{
 
 	public void rendering(Rectangle[] rects){
 		if(rects==null || rects.length==0)return;
-		Rectangle union=rects[0];
+		Rectangle union=new Rectangle(rects[0]);
 		for(int i=1;i<rects.length;i++){
 			union = union.union(rects[i]);
 		}
 		if(union.isEmpty())return;
 		if(union.width*union.height < 100){
 			layerdata.rendering(union);
+			view.renderingFlug(union);
 		}else{
-			for(Rectangle r:rects)layerdata.rendering(r);
+			for(Rectangle r:rects){
+				layerdata.rendering(r);
+			}
+			view.renderingFlug(rects);
 		}
-		view.renderingFlug(union);
 	}
 
 	@Override

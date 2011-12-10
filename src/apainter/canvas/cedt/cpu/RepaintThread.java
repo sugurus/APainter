@@ -2,9 +2,11 @@ package apainter.canvas.cedt.cpu;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import apainter.canvas.Canvas;
 import apainter.misc.UnionRectangle;
@@ -15,7 +17,7 @@ public class RepaintThread{
 	private TimerTask t;
 
 
-	private HashMap<Canvas, ArrayList<Rectangle>> map = new HashMap<Canvas, ArrayList<Rectangle>>();
+	private HashMap<Canvas, Collection<Rectangle>> map = new HashMap<Canvas, Collection<Rectangle>>();
 
 	private static RepaintThread thread;
 
@@ -31,7 +33,7 @@ public class RepaintThread{
 		if(rt.map.get(canvas)!=null){
 			return;
 		}else{
-			rt.map.put(canvas, new ArrayList<Rectangle>());
+			rt.map.put(canvas, new ConcurrentLinkedQueue<Rectangle>());
 			if(!rt.isRunning())rt.start();
 		}
 	}
@@ -50,7 +52,7 @@ public class RepaintThread{
 
 	private void addJob(Rectangle r,Canvas canvas){
 		if(r==null||r.isEmpty())return;
-		ArrayList<Rectangle> bounds=map.get(canvas);
+		Collection<Rectangle> bounds=map.get(canvas);
 		if(bounds==null){
 			return;
 		}
@@ -67,9 +69,7 @@ public class RepaintThread{
 
 			@Override
 			public void run() {
-				if(haveJob()){
 					exec();
-				}
 			}
 		};
 		timer.scheduleAtFixedRate(t, 0, 1000/60);
@@ -91,7 +91,7 @@ public class RepaintThread{
 	private boolean haveJob(){
 		if(map.isEmpty())return false;
 		for(Canvas canvas:map.keySet()){
-			ArrayList<Rectangle> bounds = map.get(canvas);
+			Collection<Rectangle> bounds = map.get(canvas);
 			if(!bounds.isEmpty())return true;
 		}
 		return false;
@@ -99,15 +99,17 @@ public class RepaintThread{
 
 	private void exec(){
 		for(Canvas canvas:map.keySet()){
-			ArrayList<Rectangle> bounds = map.get(canvas);
+			Collection<Rectangle> bounds = map.get(canvas);
 			exec(bounds,canvas);
 		}
 	}
 
-	private void exec(ArrayList<Rectangle> bounds,Canvas canvas){
+	private void exec(Collection<Rectangle> bounds,Canvas canvas){
 		Rectangle[] k;
 		synchronized (bounds) {
-			if(bounds.isEmpty())return;
+			if(bounds.isEmpty()){
+				return;
+			}
 			k = bounds.toArray(new Rectangle[bounds.size()]);
 			bounds.clear();
 		}

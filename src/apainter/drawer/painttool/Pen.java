@@ -32,7 +32,7 @@ public class Pen extends BasicDrawer{
 
 	public Pen(GlobalValue global,int id) {
 		super(global,id);
-		setDensity(0.4);
+		setDensity(0.5);
 //		Device d = getDevice();
 //		if(d==Device.GPU){
 //			//GPU

@@ -1,6 +1,5 @@
 package apainter.data;
 
-import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -151,7 +150,7 @@ public class PixelDataInt extends PixelData{
 	 * 保持するデータを直接画像データに変換します。
 	 * @return
 	 */
-	public synchronized Image getDirectImage(){
+	public synchronized BufferedImage getDirectImage(){
 		if(img == null)
 			img =createImage(pixel, width, height, 0xff000000, 0xff0000, 0xff00, 0xff);
 		return img;
