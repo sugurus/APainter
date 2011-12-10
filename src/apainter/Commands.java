@@ -438,62 +438,6 @@ class _LayerColorMode implements CommandDecoder {
 	}
 }
 
-class _PenColorMode implements CommandDecoder {
-	private static final String name = "pencolormode";
-	private static final String help = "pencolormode [modename]:::set a color mode of pen.(default,add,overlay...,see ColorMode.txt).if set no option,show pen color mode.";
-
-	private static class Com extends Command {
-		String parameta;
-
-		Com(String parameta) {
-			this.parameta = parameta;
-		}
-
-		@Override
-		public ColorMode execution(GlobalValue global) {
-			Pen p=null;
-			ArrayList<?> a = global.get(CanvasActionList,ArrayList.class);
-			if(a==null)return null;
-			for(Object o:a){
-				if (o instanceof Pen) {
-					p = (Pen) o;
-				}
-			}
-			if(p==null)return null;
-
-			if(parameta==null){
-
-				ColorMode m=p.getColorMode();
-				global.commandPrintln(m);
-				return m;
-			}
-			p.setColorMode(parameta);
-			return null;
-
-
-		}
-	}
-
-	@Override
-	public String getCommandName() {
-		return name;
-	}
-
-	@Override
-	public String help() {
-		return help;
-	}
-
-	@Override
-	public Command decode(String[] param) {
-
-		if (param.length == 0) {
-			return new Com(null);
-		} else {
-			return new Com(param[0]);
-		}
-	}
-}
 
 class _FrontColor implements CommandDecoder {
 	private static final String name = "frontcolor";

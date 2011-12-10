@@ -36,15 +36,23 @@ abstract class PenCPURendering implements Renderer{
 			if(option.hasDestinationMask()){
 				if(over instanceof PixelDataByte)
 					render15bit_alphfix_dmask(base,(PixelDataByte)over, p, clip, option,(PixelDataByte)option.destinationmask);
+				else if(over instanceof PixelData15BitGray)
+					render15bit_alphfix_dmask(base,(PixelData15BitGray)over, p, clip, option,(PixelDataByte)option.destinationmask);
+
 			}else{
 				if(over instanceof PixelDataByte)
 					render15bit_alphfix(base, (PixelDataByte)over, p, clip, option);
+				else if(over instanceof PixelData15BitGray)
+					render15bit_alphfix(base, (PixelData15BitGray)over, p, clip, option);
 			}
 		}
 		else{
 			if(option.hasDestinationMask()){
 				if(over instanceof PixelDataByte)
 					render15bit_dmask(base,  (PixelDataByte)over, p, clip, option,(PixelDataByte)option.destinationmask);
+				else if(over instanceof PixelData15BitGray){
+					render15bit_dmask(base,  (PixelData15BitGray)over, p, clip, option,(PixelDataByte)option.destinationmask);
+				}
 			}else{
 				if(over instanceof PixelDataByte)
 					render15bit(base,  (PixelDataByte)over, p, clip, option);
@@ -56,6 +64,10 @@ abstract class PenCPURendering implements Renderer{
 
 	final void dolayer(PixelDataInt base, PixelData over, Point p,
 			Rectangle clip, RenderingOption option) {
+		//15bit分のデータは不要
+		if(over instanceof PixelData15BitGray){
+			over = ((PixelData15BitGray) over).getIntegerBuffer();
+		}
 		if(option.alphaFixed){
 			if(option.hasDestinationMask()){
 				if(over instanceof PixelDataByte){
@@ -81,6 +93,9 @@ abstract class PenCPURendering implements Renderer{
 	final void domask(PixelDataByte base, PixelData over, Point p,
 			Rectangle clip, RenderingOption option){
 		//TODO draw mask
+		if(over instanceof PixelData15BitGray){
+			over = ((PixelData15BitGray) over).getIntegerBuffer();
+		}
 		if(option.hasDestinationMask()){
 			renderbyte_dmask(base, (PixelDataByte)over, p, clip, option,
 					(PixelDataByte)option.destinationmask);
@@ -149,19 +164,29 @@ abstract class PenCPURendering implements Renderer{
 	}
 
 	abstract protected void renderint(PixelDataInt base,PixelDataByte over,Point p,Rectangle clip,RenderingOption option);
+	
 	abstract protected void renderint_dmask(PixelDataInt base,PixelDataByte over,
 			Point p,Rectangle clip,RenderingOption option,PixelDataByte dmask);
+	
 	abstract protected void renderint_alphfix(PixelDataInt base,PixelDataByte over,Point p,Rectangle clip,RenderingOption option);
+	
 	abstract protected void renderint_alphfix_dmask(PixelDataInt base,PixelDataByte over,Point p,Rectangle clip,RenderingOption option,PixelDataByte mask);
 
 
 	abstract protected void render15bit(PixelData15BitColor base,PixelDataByte over,Point p,Rectangle clip,RenderingOption option);
-	abstract protected void render15bit_dmask(PixelData15BitColor base,PixelDataByte over,
-			Point p,Rectangle clip,RenderingOption option,PixelDataByte dmask);
-	abstract protected void render15bit_alphfix(PixelData15BitColor base,PixelDataByte over,Point p,Rectangle clip,RenderingOption option);
-	abstract protected void render15bit_alphfix_dmask(PixelData15BitColor base,PixelDataByte over,Point p,Rectangle clip,RenderingOption option,PixelDataByte mask);
-
 	abstract protected void render15bit(PixelData15BitColor base,
 			PixelData15BitGray over, Point p, Rectangle clip,
 			RenderingOption option) ;
+	abstract protected void render15bit_dmask(PixelData15BitColor base,PixelDataByte over,
+			Point p,Rectangle clip,RenderingOption option,PixelDataByte dmask);
+	abstract protected void render15bit_dmask(PixelData15BitColor base,PixelData15BitGray over,
+			Point p,Rectangle clip,RenderingOption option,PixelDataByte dmask);
+
+	abstract protected void render15bit_alphfix(PixelData15BitColor base,PixelDataByte over,Point p,Rectangle clip,RenderingOption option);
+	abstract protected void render15bit_alphfix(PixelData15BitColor base,PixelData15BitGray over,Point p,Rectangle clip,RenderingOption option);
+	
+	abstract protected void render15bit_alphfix_dmask(PixelData15BitColor base,PixelDataByte over,Point p,Rectangle clip,RenderingOption option,PixelDataByte mask);
+	abstract protected void render15bit_alphfix_dmask(PixelData15BitColor base,PixelData15BitGray over,Point p,Rectangle clip,RenderingOption option,PixelDataByte mask);
+
+	
 }

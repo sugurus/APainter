@@ -257,7 +257,6 @@ public class APainter {
 			addCommand(new _FrontColor());
 			addCommand(new _LayerColorMode());
 			addCommand(new _LayerLine());
-			addCommand(new _PenColorMode());
 			addCommand(new _Rotation());
 			addCommand(new _Selectedlayer());
 			addCommand(new _Zoom());
